@@ -1,0 +1,34 @@
+<!-- confirm-modal.component.html -->
+<div class="modal-overlay" *ngIf="show">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5>{{ title }}</h5>
+      <button class="close-button" (click)="onCancel()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="message" class="modal-message">
+        <i class="fas fa-exclamation-circle text-danger"></i>
+        <p>{{ message }}</p>
+      </div>
+      <ng-content></ng-content>
+    </div>
+    <div class="modal-footer">
+      <button 
+        *ngIf="showCancelButton"
+        class="btn btn-secondary" 
+        (click)="onCancel()">
+        Cancelar
+      </button>
+      <button 
+        class="btn" 
+        [class]="confirmButtonClass" 
+        (click)="onConfirm()"
+        [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Procesando...' : confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

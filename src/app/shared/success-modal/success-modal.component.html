@@ -1,0 +1,11 @@
+<!-- success-modal.component.html -->
+<div class="modal-overlay" *ngIf="show">
+    <div class="modal-content" [class]="type">
+      <div class="modal-icon">
+        <i class="fas" [class.fa-check-circle]="type === 'success'" [class.fa-times-circle]="type === 'error'"></i>
+      </div>
+      <h3>{{ title }}</h3>
+      <p>{{ message }}</p>
+      <button class="btn" [class]="'btn-' + type" (click)="onClose()">Aceptar</button>
+    </div>
+  </div>

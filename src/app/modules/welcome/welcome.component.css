@@ -1,0 +1,22 @@
+.welcome-content {
+    padding-top: 64px; /* Altura del header */
+    min-height: calc(100vh - 64px);
+    background-color: #f8fafc;
+  }
+
+  .yellow-button {
+    background-color: #FDD835 !important; /* Amarillo */
+    color: #000000 !important; /* Texto negro para contraste */
+  }
+  
+  .yellow-button:hover {
+    background-color: #FBC02D !important; /* Amarillo ligeramente más oscuro al pasar el mouse */
+  }
+  
+  .yellow-button:active {
+    background-color: #F9A825 !important; /* Amarillo aún más oscuro al hacer clic */
+  }
+  
+  .yellow-button .mat-ripple-element {
+    background-color: rgba(0, 0, 0, 0.1); /* Color del efecto ripple */
+  }

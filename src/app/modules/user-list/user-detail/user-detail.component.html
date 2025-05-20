@@ -1,0 +1,129 @@
+<!-- user-detail.component.html -->
+<div *ngIf="userDetail" class="card-body">
+  <!-- Información Personal -->
+  <div class="info-section">
+    <h3><i class="fas fa-id-card"></i> Información Personal</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Nombre Completo</label>
+        <span>{{ userDetail.nombres }} {{ userDetail.apellidos }}</span>
+      </div>
+      <div class="info-item">
+        <label>Username</label>
+        <span>{{ userDetail.username }}</span>
+      </div>
+      <div class="info-item">
+        <label>Correo Electrónico</label>
+        <span>{{ userDetail.email || 'N/A' }}</span>
+      </div>
+      <div class="info-item">
+        <label>Rol</label>
+        <span class="badge">{{ userDetail.rol }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información Organizacional -->
+  <div class="info-section">
+    <h3><i class="fas fa-building"></i> Información Organizacional</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Empresa</label>
+        <span>{{ userDetail.nombreEmpresa }}</span>
+      </div>
+      <div class="info-item">
+        <label>Dirección</label>
+        <span>{{ userDetail.nombreDireccion }}</span>
+      </div>
+      <div class="info-item">
+        <label>Área</label>
+        <span>{{ userDetail.nombreArea }}</span>
+      </div>
+      <div class="info-item">
+        <label>Territorial</label>
+        <span>{{ userDetail.nombreTerritorial }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado y Fechas -->
+  <div class="info-section">
+    <h3><i class="fas fa-clock"></i> Estado y Fechas</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Estado Usuario</label>
+        <span class="badge" [class.badge-active]="userDetail.estado" [class.badge-inactive]="!userDetail.estado">
+          {{ userDetail.estado ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
+      <div class="info-item">
+        <label>Estado Persona</label>
+        <span class="badge" [class.badge-active]="userDetail.estadoPersona" [class.badge-inactive]="!userDetail.estadoPersona">
+          {{ userDetail.estadoPersona ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
+      <div class="info-item">
+        <label>Fecha de Creación Usuario</label>
+        <span>{{ userDetail.fechaCreacion | date: 'medium' }}</span>
+      </div>
+      <div class="info-item">
+        <label>Fecha de Creación Persona</label>
+        <span>{{ userDetail.fechaCreacionPersona | date: 'medium' }}</span>
+      </div>
+    </div>
+  </div>
+
+<!-- botones para editar y eliminar -->
+<div class="actions-section">
+  <div class="button-group">
+    <!-- Botones de acción -->
+    <button *ngIf="!isEditing" (click)="startEditing()" class="btn btn-primary">
+      <i class="fas fa-edit"></i> Editar Usuario
+    </button>
+    <button (click)="onDelete()" class="btn btn-danger">
+      <i class="fas fa-trash"></i> Eliminar Usuario
+    </button>
+  </div>
+
+  <!-- Formulario de edición -->
+  <div *ngIf="isEditing" class="edit-form">
+    <div class="card">
+      <div class="card-header">
+        <h3>Editar Usuario</h3>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="onUpdate()">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input 
+              type="text" 
+              id="username" 
+              [(ngModel)]="updateForm.username" 
+              name="username" 
+              class="form-control" 
+              required>
+          </div>
+          <div class="form-group">
+            <label for="password">Nueva Contraseña</label>
+            <input 
+              type="password" 
+              id="password" 
+              [(ngModel)]="updateForm.password" 
+              name="password" 
+              class="form-control" 
+              required>
+          </div>
+          <div class="button-group">
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+            <button type="button" (click)="cancelEditing()" class="btn btn-secondary">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

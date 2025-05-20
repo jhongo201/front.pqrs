@@ -1,0 +1,50 @@
+<app-public-header></app-public-header>
+<!-- activate-user.component.html -->
+<div class="activation-container">
+  <div class="activation-card">
+    <div class="card-header">
+      <i class="fas fa-key header-icon"></i>
+      <h2>Activación de Usuario</h2>
+      <p class="header-description">
+        Ingrese el token que recibió en su correo electrónico para activar su cuenta
+      </p>
+    </div>
+
+    <form [formGroup]="activationForm" (ngSubmit)="onSubmit()" class="activation-form">
+      <div class="form-group">
+        <label for="token">Token de Activación</label>
+        <div class="input-container">
+          <i class="fas fa-lock input-icon"></i>
+          <input
+            type="text"
+            id="token"
+            formControlName="token"
+            placeholder="Ingrese su token"
+            [class.is-invalid]="activationForm.get('token')?.invalid && activationForm.get('token')?.touched"
+          />
+        </div>
+        <div class="error-message" *ngIf="activationForm.get('token')?.invalid && activationForm.get('token')?.touched">
+          {{ getTokenError() }}
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-activate"
+        [disabled]="activationForm.invalid || loading"
+      >
+        <span *ngIf="!loading">Activar Usuario</span>
+        <div *ngIf="loading" class="spinner"></div>
+      </button>
+    </form>
+
+    <!-- Mensaje de respuesta -->
+    <div class="response-message" *ngIf="showResponse" [@fadeInOut]>
+      <div class="message-content" [class.success]="isSuccess" [class.error]="!isSuccess">
+        <i class="fas" [class.fa-check-circle]="isSuccess" [class.fa-times-circle]="!isSuccess"></i>
+        <span>{{ responseMessage }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<app-public-footer></app-public-footer>

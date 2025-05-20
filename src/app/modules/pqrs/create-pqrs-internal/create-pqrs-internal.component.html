@@ -1,0 +1,209 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h2><i class="fas fa-file-alt"></i> Crear Nueva PQRS Interna</h2>
+      <p class="subtitle">Complete el formulario para crear una nueva solicitud interna</p>
+    </div>
+    <button (click)="router.navigate(['/pqrs'])" class="btn-volver">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </div>
+
+  <!-- Main Form -->
+  <div class="card">
+    <form [formGroup]="pqrsForm" (ngSubmit)="onSubmit()" class="pqrs-form">
+      <!-- Error Messages -->
+      <!-- Mensajes de estado -->
+<div *ngIf="error" class="alert alert-error">
+  <i class="fas fa-exclamation-circle"></i>
+  {{ error }}
+</div>
+
+<div *ngIf="successMessage" class="alert alert-success">
+  <i class="fas fa-check-circle"></i>
+  {{ successMessage }}
+</div>
+
+      <div class="form-section">
+        <div class="form-row">
+          <!-- Tema -->
+          <div class="form-group">
+            <label for="idTema">
+              <i class="fas fa-folder"></i> Tema *
+            </label>
+            <div class="select-wrapper">
+              <select 
+                id="idTema" 
+                formControlName="idTema"
+                [class.invalid]="pqrsForm.get('idTema')?.invalid && 
+                               pqrsForm.get('idTema')?.touched">
+                <option value="">Seleccione un tema</option>
+                <option *ngFor="let tema of temas" [value]="tema.idTema">
+                  {{tema.nombre}} - {{tema.area.nombre}}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down select-icon"></i>
+            </div>
+            <div *ngIf="pqrsForm.get('idTema')?.invalid && 
+                        pqrsForm.get('idTema')?.touched" 
+                class="error-message">
+              <i class="fas fa-exclamation-circle"></i>
+              El tema es requerido
+            </div>
+          </div>
+
+          <!-- Prioridad -->
+          <div class="form-group">
+            <label for="prioridad">
+              <i class="fas fa-flag"></i> Prioridad *
+            </label>
+            <div class="select-wrapper">
+              <select 
+                id="prioridad" 
+                formControlName="prioridad">
+                <option value="">Seleccione prioridad</option>
+                <option *ngFor="let prioridad of prioridades" [value]="prioridad">
+                  {{prioridad}}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down select-icon"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Título -->
+        <div class="form-group">
+          <label for="titulo">
+            <i class="fas fa-heading"></i> Título *
+          </label>
+          <input 
+            type="text" 
+            id="titulo" 
+            formControlName="titulo"
+            placeholder="Ingrese un título descriptivo"
+            [class.invalid]="pqrsForm.get('titulo')?.invalid && 
+                           pqrsForm.get('titulo')?.touched">
+          <div *ngIf="pqrsForm.get('titulo')?.invalid && 
+                      pqrsForm.get('titulo')?.touched" 
+               class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            El título es requerido
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-group">
+          <label for="descripcion">Descripción *</label>
+          <div class="textarea-container">
+            <textarea
+              id="descripcion"
+              formControlName="descripcion"
+              [maxLength]="MAX_DESCRIPCION_LENGTH"
+              rows="4"
+              placeholder="Describa su solicitud"
+              class="form-control"
+            ></textarea>
+            <div class="character-count" [ngClass]="{'warning': caracteresRestantes < 100}">
+              {{ caracteresRestantes }} caracteres restantes
+            </div>
+          </div>
+          <div *ngIf="pqrsForm.get('descripcion')?.touched && pqrsForm.get('descripcion')?.errors" class="error-message">
+            <span *ngIf="pqrsForm.get('descripcion')?.errors?.['required']">
+              La descripción es requerida
+            </span>
+            <span *ngIf="pqrsForm.get('descripcion')?.errors?.['maxlength']">
+              La descripción no puede exceder {{ MAX_DESCRIPCION_LENGTH }} caracteres
+            </span>
+          </div>
+        </div>
+
+        <!-- File Upload -->
+        <div class="form-group">
+          <label for="archivo">Archivo Adjunto</label>
+          <div class="file-upload-container">
+            <!-- Input de archivo oculto -->
+            <input 
+              #fileInput
+              type="file" 
+              id="archivo" 
+              (change)="onFileChange($event)"
+              [accept]="ALLOWED_FILE_TYPES.join(',')"
+              class="file-input-hidden">
+            
+            <!-- Botón personalizado para seleccionar archivo -->
+            <button 
+              type="button" 
+              class="btn-select-file" 
+              (click)="fileInput.click()" 
+              [disabled]="filePreview">
+              <i class="fas fa-cloud-upload-alt"></i> Seleccionar Archivo
+            </button>
+        
+            <!-- Información de tipos permitidos -->
+            <small class="file-info">
+              <i class="fas fa-info-circle"></i>
+              Tipos permitidos: {{ALLOWED_FILE_TYPES.join(', ')}} | 
+              Tamaño máximo: {{MAX_FILE_SIZE / (1024 * 1024)}}MB
+            </small>
+        
+            <!-- Mensaje de error -->
+            <div *ngIf="fileError" class="error-message">
+              <i class="fas fa-exclamation-circle"></i>
+              {{ fileError }}
+            </div>
+        
+            <!-- Preview del archivo -->
+            <div *ngIf="filePreview" class="file-preview">
+              <!-- Preview de imagen -->
+              <img 
+                *ngIf="filePreview.url" 
+                [src]="filePreview.url" 
+                alt="Preview" 
+                class="image-preview">
+              
+              <!-- Información del archivo -->
+              <div class="file-info-container">
+                <i [class]="'fas ' + getFileIcon(filePreview.type)"></i>
+                <div class="file-details">
+                  <span class="file-name">{{ filePreview.name }}</span>
+                  <span class="file-size">{{ filePreview.size }}</span>
+                </div>
+                <button type="button" class="btn-remove-file" (click)="removeFile()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+        
+            <!-- Barra de progreso -->
+            <div *ngIf="uploadProgress > 0" class="progress-container">
+              <div class="progress-bar" [style.width.%]="uploadProgress">
+                {{ uploadProgress }}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn-cancelar"
+          (click)="router.navigate(['/pqrs'])">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="btn-crear"
+          [disabled]="pqrsForm.invalid || isLoading">
+          <i class="fas" 
+             [class.fa-spinner]="isLoading" 
+             [class.fa-spin]="isLoading" 
+             [class.fa-save]="!isLoading"></i>
+          {{ isLoading ? 'Creando...' : 'Crear PQRS' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

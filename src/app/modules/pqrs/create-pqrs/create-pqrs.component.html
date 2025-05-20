@@ -1,0 +1,235 @@
+<app-public-header></app-public-header>
+<div class="page-header">
+  <div class="header-content">
+    <div class="title-section">
+      <div class="icon-container">
+        <i class="fas fa-comment-alt"></i>
+      </div>
+      <div class="text-content">
+        <h1>Sistema de PQRS</h1>
+        <p class="subtitle">Peticiones, Quejas, Reclamos y Sugerencias</p>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-card">
+        <i class="fas fa-file-signature"></i>
+        <div class="info-text">
+          <h3>¿Qué es una PQRS?</h3>
+          <p>Mecanismo para presentar peticiones, quejas, reclamos o sugerencias.</p>
+        </div>
+      </div>
+      <div class="info-card">
+        <i class="fas fa-clock"></i>
+        <div class="info-text">
+          <h3>Tiempo de Respuesta</h3>
+          <p>Respondemos a su solicitud en un máximo de 15 días hábiles.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="create-pqrs-container">
+  <div class="header-section">
+    <h2>
+      <i class="fas fa-file-alt"></i>
+      Crear Nueva PQRS
+    </h2>
+    <button (click)="volver()" class="btn-volver">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </div>
+
+  <div class="form-card">
+    <form [formGroup]="pqrsForm" (ngSubmit)="onSubmit()" class="pqrs-form">
+      <!-- Mensajes de error -->
+      <div *ngIf="error" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+      </div>
+
+      <!-- Información del Solicitante -->
+      <div class="form-section">
+        <h3><i class="fas fa-user"></i> Información del Solicitante</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nombreSolicitante">Nombre Completo *</label>
+            <input 
+              type="text" 
+              id="nombreSolicitante" 
+              formControlName="nombreSolicitante"
+              class="form-control"
+              [class.invalid]="pqrsForm.get('nombreSolicitante')?.invalid && 
+                             pqrsForm.get('nombreSolicitante')?.touched">
+            <div class="error-hint" *ngIf="pqrsForm.get('nombreSolicitante')?.touched && 
+                                         pqrsForm.get('nombreSolicitante')?.invalid">
+              Campo requerido
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="emailSolicitante">Correo Electrónico *</label>
+            <input 
+              type="email" 
+              id="emailSolicitante" 
+              formControlName="emailSolicitante"
+              class="form-control"
+              [class.invalid]="pqrsForm.get('emailSolicitante')?.invalid && 
+                             pqrsForm.get('emailSolicitante')?.touched">
+            <div class="error-hint" *ngIf="pqrsForm.get('emailSolicitante')?.touched && 
+                                         pqrsForm.get('emailSolicitante')?.invalid">
+              Correo electrónico inválido
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="telefonoSolicitante">Teléfono *</label>
+            <input 
+              type="tel" 
+              id="telefonoSolicitante" 
+              formControlName="telefonoSolicitante"
+              class="form-control"
+              [class.invalid]="pqrsForm.get('telefonoSolicitante')?.invalid && 
+                             pqrsForm.get('telefonoSolicitante')?.touched">
+            <div class="error-hint" *ngIf="pqrsForm.get('telefonoSolicitante')?.touched && 
+                                         pqrsForm.get('telefonoSolicitante')?.invalid">
+              Teléfono requerido
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="tipoDocumentoSolicitante">Tipo de Documento *</label>
+            <select 
+              id="tipoDocumentoSolicitante" 
+              formControlName="tipoDocumentoSolicitante"
+              class="form-control">
+              <option *ngFor="let tipo of tiposDocumento" [value]="tipo">
+                {{tipo}}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="numeroDocumentoSolicitante">Número de Documento *</label>
+            <input 
+              type="text" 
+              id="numeroDocumentoSolicitante" 
+              formControlName="numeroDocumentoSolicitante"
+              class="form-control"
+              [class.invalid]="pqrsForm.get('numeroDocumentoSolicitante')?.invalid && 
+                             pqrsForm.get('numeroDocumentoSolicitante')?.touched">
+            <div class="error-hint" *ngIf="pqrsForm.get('numeroDocumentoSolicitante')?.touched && 
+                                         pqrsForm.get('numeroDocumentoSolicitante')?.invalid">
+              Documento requerido
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de la PQRS -->
+      <div class="form-section">
+        <h3><i class="fas fa-clipboard-list"></i> Información de la PQRS</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="idTema">Tema *</label>
+            <select 
+              id="idTema" 
+              formControlName="idTema"
+              class="form-control"
+              [class.invalid]="pqrsForm.get('idTema')?.invalid && 
+                             pqrsForm.get('idTema')?.touched">
+              <option value="">Seleccione un tema</option>
+              <option *ngFor="let tema of temas" [value]="tema.idTema">
+                {{tema.nombre}} - {{tema.area.nombre}}
+              </option>
+            </select>
+            <div class="error-hint" *ngIf="pqrsForm.get('idTema')?.touched && 
+                                         pqrsForm.get('idTema')?.invalid">
+              Seleccione un tema
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prioridad">Prioridad *</label>
+            <select 
+              id="prioridad" 
+              formControlName="prioridad"
+              class="form-control">
+              <option *ngFor="let prioridad of prioridades" [value]="prioridad">
+                {{prioridad}}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="titulo">Título *</label>
+          <input 
+            type="text" 
+            id="titulo" 
+            formControlName="titulo"
+            class="form-control"
+            [class.invalid]="pqrsForm.get('titulo')?.invalid && 
+                           pqrsForm.get('titulo')?.touched">
+          <div class="error-hint" *ngIf="pqrsForm.get('titulo')?.touched && 
+                                       pqrsForm.get('titulo')?.invalid">
+            Título requerido
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción *</label>
+          <textarea 
+            id="descripcion" 
+            formControlName="descripcion"
+            class="form-control"
+            rows="4"
+            [class.invalid]="pqrsForm.get('descripcion')?.invalid && 
+                           pqrsForm.get('descripcion')?.touched"></textarea>
+          <div class="error-hint" *ngIf="pqrsForm.get('descripcion')?.touched && 
+                                       pqrsForm.get('descripcion')?.invalid">
+            Descripción requerida
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="archivo">Archivo Adjunto</label>
+          <div class="file-input-container">
+            <input 
+              type="file" 
+              id="archivo" 
+              (change)="onFileChange($event)"
+              class="file-input"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+            <label for="archivo" class="file-label">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>{{ archivoSeleccionado?.name || 'Seleccionar archivo' }}</span>
+            </label>
+          </div>
+          <small class="file-help">
+            <i class="fas fa-info-circle"></i>
+            Formatos permitidos: PDF, DOC, DOCX, JPG, PNG. Máximo 5MB.
+          </small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancelar" (click)="router.navigate(['/pqrs'])">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="btn-crear"
+          [disabled]="pqrsForm.invalid || isLoading">
+          <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+          {{ isLoading ? 'Creando...' : 'Crear PQRS' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<app-public-footer></app-public-footer>

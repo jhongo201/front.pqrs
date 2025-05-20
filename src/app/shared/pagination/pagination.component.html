@@ -1,0 +1,64 @@
+<!-- shared/pagination/pagination.component.html -->
+<div class="pagination-wrapper">
+    <nav aria-label="Navegación de páginas" class="d-flex justify-content-between align-items-center">
+      <!-- Información de paginación -->
+      <div class="pagination-info text-muted">
+        Mostrando {{ (currentPage - 1) * pageSize + 1 }} a 
+        {{ Math.min(currentPage * pageSize, totalItems) }} 
+        de {{ totalItems }} registros
+      </div>
+  
+      <!-- Controles de paginación -->
+      <ul class="pagination mb-0">
+        <!-- Botón Primera página -->
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <button class="page-link" 
+                  (click)="changePage(1)" 
+                  [disabled]="currentPage === 1"
+                  aria-label="Primera página">
+            <span aria-hidden="true">&laquo;</span>
+          </button>
+        </li>
+  
+        <!-- Botón Anterior -->
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <button class="page-link" 
+                  (click)="changePage(currentPage - 1)"
+                  [disabled]="currentPage === 1"
+                  aria-label="Anterior">
+            <span aria-hidden="true">‹</span>
+          </button>
+        </li>
+  
+        <!-- Números de página -->
+        <li class="page-item" 
+            *ngFor="let page of visiblePages" 
+            [class.active]="page === currentPage">
+          <button class="page-link" 
+                  (click)="changePage(page)">
+            {{ page }}
+          </button>
+        </li>
+  
+        <!-- Botón Siguiente -->
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link" 
+                  (click)="changePage(currentPage + 1)"
+                  [disabled]="currentPage === totalPages"
+                  aria-label="Siguiente">
+            <span aria-hidden="true">›</span>
+          </button>
+        </li>
+  
+        <!-- Botón Última página -->
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link" 
+                  (click)="changePage(totalPages)"
+                  [disabled]="currentPage === totalPages"
+                  aria-label="Última página">
+            <span aria-hidden="true">&raquo;</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>

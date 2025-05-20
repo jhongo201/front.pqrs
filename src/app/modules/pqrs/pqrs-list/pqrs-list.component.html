@@ -1,0 +1,274 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h2><i class="fas fa-list-alt"></i> Gestión de PQRS</h2>
+      <p class="subtitle">Administración general de solicitudes</p>
+    </div>
+    <div class="header-actions">
+      <!-- Filtro -->
+      <div class="filter-wrapper">
+        <div class="filter-group">
+          <label for="estadoFilter">Estado:</label>
+          <div class="select-wrapper">
+            <select 
+              id="estadoFilter" 
+              [(ngModel)]="filtroEstado" 
+              (change)="onFiltroChange()"
+              class="form-control">
+              <option value="">Todos los estados</option>
+              <option *ngFor="let estado of estados" [value]="estado">
+                {{estado}}
+              </option>
+            </select>
+            <i class="fas fa-chevron-down select-icon"></i>
+          </div>
+        </div>
+      </div>
+      <!-- Botón Crear -->
+      <button [routerLink]="['/pqrs/nuevo']" class="btn-primary">
+        <i class="fas fa-plus"></i>
+        Nueva PQRS
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading y Error messages -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando PQRS...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Main Content -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="pqrs-table">
+        <thead>
+          <tr>
+            <th>Radicado</th>
+            <th>Título</th>
+            <th>Solicitante</th>
+            <th>Tema</th>
+            <th>Área</th>
+            <th>Responsable</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pqrs of pqrsList">
+            <td>
+              <span class="radicado-badge">{{ pqrs.numeroRadicado }}</span>
+            </td>
+            <td>{{ pqrs.titulo }}</td>
+            <td>
+              <div class="solicitante-info">
+                <span>{{ pqrs.nombreSolicitante }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="tema-badge">{{ pqrs.tema.nombre }}</span>
+            </td>
+            <td>
+              <span class="area-badge">{{ pqrs.tema.area.nombre }}</span>
+            </td>
+            <td>
+              <div class="responsable-info">
+                <span *ngIf="pqrs.usuarioAsignado" class="asignado-badge">
+                  <i class="fas fa-user"></i>
+                  {{ pqrs.usuarioAsignado.nombreCompleto }}
+                </span>
+                <span *ngIf="!pqrs.usuarioAsignado" class="sin-asignar-badge">
+                  <i class="fas fa-user-slash"></i>
+                  Sin asignar
+                </span>
+              </div>
+            </td>
+            <td>
+              <span [class]="'status-badge ' + getEstadoClass(pqrs.estadoPqrs)">
+                {{ pqrs.estadoPqrs }}
+              </span>
+            </td>
+            <td>
+              <span [class]="'priority-badge ' + getPrioridadClass(pqrs.prioridad)">
+                {{ pqrs.prioridad }}
+              </span>
+            </td>
+            <td>{{ pqrs.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+            <td class="actions-column">
+              <div class="action-buttons">
+                <button [routerLink]="['/pqrs', pqrs.idPqrs]" 
+                        class="btn-icon" 
+                        title="Ver detalles">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <!--button class="btn-icon" 
+                        title="Asignar responsable"
+                        (click)="openAsignacionModal(pqrs)">
+                  <i class="fas fa-user-plus"></i>
+                </!--button-->
+                <button class="btn-icon" 
+                        [title]="!pqrs.usuarioAsignado ? 'Asignar responsable' : 'Reasignar responsable'"
+                        (click)="openAsignacionModal(pqrs)">
+                    <i class="fas" [ngClass]="{
+                        'fa-user-plus': !pqrs.usuarioAsignado,
+                        'fa-exchange-alt': pqrs.usuarioAsignado
+                    }"></i>
+                </button>
+                <button [routerLink]="['/pqrs', pqrs.idPqrs, 'seguimiento']" 
+                        class="btn-icon"
+                        title="Agregar seguimiento">
+                  <i class="fas fa-clipboard-list"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="pqrsList.length === 0">
+            <td colspan="10" class="no-data">
+              <i class="fas fa-inbox"></i>
+              <span>No se encontraron PQRS</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de asignación -->
+<div *ngIf="selectedPqrs" class="modal-overlay">
+  <div class="modal-container" [class.processing]="isLoading">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header">
+        <h3>
+          <i class="fas" 
+             [class.fa-user-plus]="!isLoading"
+             [class.fa-spinner]="isLoading"
+             [class.fa-spin]="isLoading"></i>
+          {{ isLoading ? 'Procesando asignación...' : 'Asignar PQRS' }}
+        </h3>
+        <button (click)="cerrarModal()" class="btn-close" [disabled]="isLoading">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Mensajes de estado -->
+      <!-- Mensajes de estado -->
+<div *ngIf="successMessage" class="alert alert-success fade-in">
+  <i class="fas fa-check-circle text-success"></i>
+  <span class="text-success font-semibold">{{ successMessage }}</span>
+</div>
+
+<div *ngIf="modalError" class="alert alert-error fade-in">
+  <i class="fas fa-exclamation-circle"></i>
+  {{ modalError }}
+</div>
+
+<!-- Overlay de carga -->
+<div *ngIf="isLoading" class="modal-overlay-loading">
+  <div class="loading-spinner">
+    <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+    <p class="text-primary font-semibold mt-4">Procesando asignación...</p>
+  </div>
+</div>
+
+      <div class="modal-body" [class.blur]="isLoading">
+        <form [formGroup]="asignacionForm" (ngSubmit)="onSubmitAsignacion()" class="form-grid">
+          <!-- Área -->
+          <div class="form-group">
+            <label for="area">Área *</label>
+            <div class="select-wrapper">
+              <select 
+                id="area" 
+                formControlName="area"
+                (change)="onAreaChange()"
+                class="form-control">
+                <option value="">Seleccione un área</option>
+                <option *ngFor="let area of areas" [value]="area.idArea">
+                  {{ area.nombre }}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down select-icon"></i>
+            </div>
+            <div *ngIf="asignacionForm.get('area')?.touched && asignacionForm.get('area')?.invalid" 
+                 class="form-error">
+              <i class="fas fa-exclamation-circle"></i>
+              El área es requerida
+            </div>
+          </div>
+
+          <!-- Usuario -->
+          <div class="form-group">
+            <label for="usuario">Usuario Asignado *</label>
+            <div class="select-wrapper">
+              <select 
+                id="usuario" 
+                formControlName="usuario"
+                class="form-control"
+                (change)="onUsuarioChange()"
+                [disabled]="!asignacionForm.get('area')?.value">
+                <option value="">Seleccione un usuario</option>
+                <option *ngFor="let usuario of usuariosFiltrados" [value]="usuario.idUsuario">
+                  {{ usuario.nombreCompleto }}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down select-icon"></i>
+            </div>
+            <div *ngIf="asignacionForm.get('usuario')?.touched && asignacionForm.get('usuario')?.invalid" 
+                class="form-error">
+              <i class="fas fa-exclamation-circle"></i>
+              El usuario es requerido
+            </div>
+            <div *ngIf="asignacionForm.get('usuario')?.errors?.['usuarioRepetido']" 
+                class="form-error">
+              <i class="fas fa-exclamation-circle"></i>
+              Este usuario ya está asignado al PQRS
+            </div>
+          </div>
+
+          <!-- Motivo del cambio -->
+          <div class="form-group">
+            <label for="motivo">Motivo del Cambio *</label>
+            <textarea 
+              id="motivo" 
+              formControlName="motivo"
+              rows="3"
+              class="form-control"
+              placeholder="Explique el motivo de la asignación/reasignación"></textarea>
+            <div *ngIf="asignacionForm.get('motivo')?.touched && asignacionForm.get('motivo')?.invalid" 
+                class="form-error">
+              <i class="fas fa-exclamation-circle"></i>
+              El motivo es requerido (mínimo 10 caracteres)
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" 
+                    class="btn btn-secondary" 
+                    (click)="cerrarModal()"
+                    [disabled]="isLoading">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="submit" 
+                    class="btn btn-primary"
+                    [disabled]="asignacionForm.invalid || isLoading">
+              <i class="fas" 
+                 [class.fa-spinner]="isLoading" 
+                 [class.fa-spin]="isLoading" 
+                 [class.fa-save]="!isLoading"></i>
+              {{ isLoading ? 'Procesando...' : 'Confirmar Asignación' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,494 @@
+<div class="pqrs-detail-container">
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h2><i class="fas fa-file-alt"></i> Detalle de PQRS</h2>
+      <p class="subtitle">Información detallada de la solicitud</p>
+    </div>
+    <button (click)="volver()" class="btn-volver">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </div>
+
+  <!-- Loading y Error messages -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Cargando información...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="pqrs && !isLoading" class="card">
+    <div class="main-info">
+      <!-- Header con Radicado y Estados -->
+      <!-- Sección del encabezado -->
+<div class="pqrs-header">
+  <div class="header-content">
+    <div class="radicado-section">
+      <div class="radicado-info">
+        <div class="radicado-header">
+          <i class="fas fa-file-alt"></i>
+          Número de Radicado
+        </div>
+        <div class="radicado-numero">
+          {{ pqrs.numeroRadicado }}
+        </div>
+        <div class="radicado-metadata">
+          <div class="radicado-fecha">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Fecha de radicación: {{ pqrs.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="radicado-fecha">
+            <i class="fas fa-clock"></i>
+            <span>Última actualización: {{ pqrs.fechaUltimaActualizacion | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-controls">
+      <div class="control-group">
+        <label for="estadoPqrs">
+          <i class="fas fa-tasks"></i>
+          Estado:
+        </label>
+        <select 
+          id="estadoPqrs"
+          (change)="cambiarEstado($event)"
+          [disabled]="pqrs.estadoPqrs === 'CERRADO'"
+          class="select-control">
+          <option 
+            *ngFor="let estado of estados" 
+            [value]="estado"
+            [selected]="estado === pqrs.estadoPqrs">
+            {{ estado }}
+          </option>
+        </select>
+        <span [class]="'status-badge ' + getEstadoClass(pqrs.estadoPqrs)">
+          {{ pqrs.estadoPqrs }}
+        </span>
+      </div>
+
+      <div class="control-group">
+        <label for="prioridadPqrs">
+          <i class="fas fa-flag"></i>
+          Prioridad:
+        </label>
+        <select 
+          id="prioridadPqrs"
+          (change)="cambiarPrioridad($event)"
+          [disabled]="pqrs.estadoPqrs === 'CERRADO'"
+          class="select-control">
+          <option 
+            *ngFor="let prioridad of prioridades" 
+            [value]="prioridad"
+            [selected]="prioridad === pqrs.prioridad">
+            {{ prioridad }}
+          </option>
+        </select>
+        <span [class]="'priority-badge ' + getPrioridadClass(pqrs.prioridad)">
+          {{ pqrs.prioridad }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <!-- Información del Solicitante -->
+      <div class="info-section">
+        <h4><i class="fas fa-user"></i> Información del Solicitante</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nombre:</label>
+            <span>{{ pqrs.nombreSolicitante }}</span>
+          </div>
+          <div class="info-item">
+            <label>Email:</label>
+            <span>{{ pqrs.emailSolicitante }}</span>
+          </div>
+          <div class="info-item">
+            <label>Teléfono:</label>
+            <span>{{ pqrs.telefonoSolicitante }}</span>
+          </div>
+          <div class="info-item">
+            <label>Tipo Documento:</label>
+            <span>{{ pqrs.tipoDocumentoSolicitante }}</span>
+          </div>
+          <div class="info-item">
+            <label>Número Documento:</label>
+            <span>{{ pqrs.numeroDocumentoSolicitante }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalles de la Solicitud -->
+      <div class="info-section">
+        <h4><i class="fas fa-info-circle"></i> Detalles de la Solicitud</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Tema:</label>
+            <span class="tema-badge">{{ pqrs.tema.nombre }}</span>
+          </div>
+          <div class="info-item">
+            <label>Área:</label>
+            <span class="area-badge">{{ pqrs.tema.area.nombre }}</span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de Creación:</label>
+            <span>{{ pqrs.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Última Actualización:</label>
+            <span>{{ pqrs.fechaUltimaActualizacion | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <div class="content-item">
+            <label>Título</label>
+            <p>{{ pqrs.titulo }}</p>
+          </div>
+          <div class="content-item">
+            <label>Descripción</label>
+            <p>{{ pqrs.descripcion }}</p>
+          </div>
+          <!-- Documentos adjuntos en la creacion del pqrsd -->
+          <div class="content-item" *ngIf="tieneAdjuntosIniciales()">
+            <label>Documento Adjunto</label>
+            <div class="archivos-container">
+              <ng-container *ngFor="let adjunto of getAdjuntosIniciales()">
+                <div class="archivo-card">
+                  <div class="archivo-icon">
+                    <i class="fas fa-file-alt"></i>
+                  </div>
+                  <div class="archivo-info">
+                    <span class="archivo-label">Documento adjunto a la solicitud</span>
+                    <span class="archivo-fecha">{{ adjunto.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                  <a [href]="getFileUrl(adjunto.archivoAdjunto)" 
+                     target="_blank" 
+                     class="archivo-link-principal">
+                    <i class="fas fa-download"></i>
+                    Descargar
+                  </a>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del Usuario Asignado -->
+      <div class="info-section" *ngIf="pqrs.usuarioAsignado">
+        <h4><i class="fas fa-user-check"></i> Usuario Asignado</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Nombre:</label>
+            <span>{{ pqrs.usuarioAsignado.nombreCompleto }}</span>
+          </div>
+          <div class="info-item">
+            <label>Usuario:</label>
+            <span>{{ pqrs.usuarioAsignado.username }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del usuario asignado -->
+      <div class="info-section historial-section" *ngIf="historialAsignaciones.length > 0">
+        <div class="accordion-header" (click)="toggleHistorial()">
+          <div class="header-content">
+            <h4>
+              <i class="fas fa-history"></i> 
+              Historial de Asignaciones
+            </h4>
+            <span class="badge-count">{{historialAsignaciones.length}}</span>
+          </div>
+          <button class="btn-toggle">
+            <i class="fas" [class.fa-chevron-down]="!isHistorialExpanded" [class.fa-chevron-up]="isHistorialExpanded"></i>
+          </button>
+        </div>
+        
+        <div class="accordion-content" [class.expanded]="isHistorialExpanded">
+          <div class="historial-timeline">
+            <div *ngFor="let asignacion of historialAsignaciones" class="historial-item">
+              <div class="historial-marker">
+                <i class="fas fa-user-clock"></i>
+              </div>
+              <div class="historial-content">
+                <div class="historial-header">
+                  <span class="fecha">{{ asignacion.fechaAsignacion | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <div class="historial-body">
+                  <div class="cambio-usuarios">
+                    <div class="usuario-info">
+                      <span class="usuario-anterior" [class.sin-asignar]="asignacion.usuarioAnterior === 'Sin asignar'">
+                        {{ asignacion.usuarioAnterior }}
+                      </span>
+                      <span class="area-badge" [class.sin-area]="asignacion.areaAnterior === 'Sin área'">
+                        {{ asignacion.areaAnterior }}
+                      </span>
+                    </div>
+                    <i class="fas fa-arrow-right"></i>
+                    <div class="usuario-info">
+                      <span class="usuario-nuevo" [class.sin-asignar]="asignacion.usuarioNuevo === 'Sin asignar'">
+                        {{ asignacion.usuarioNuevo }}
+                      </span>
+                      <span class="area-badge" [class.sin-area]="asignacion.areaNueva === 'Sin área'">
+                        {{ asignacion.areaNueva }}
+                      </span>
+                    </div>
+                  </div>
+                  <p class="motivo">{{ asignacion.motivoCambio }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+        <!-- Sección de Seguimientos -->
+        <div class="seguimientos-section">
+          <div class="section-header">
+            <h4>
+              <i class="fas fa-comments"></i>
+              Seguimientos y Respuestas
+              <span class="total-count" *ngIf="contarSeguimientosSinIniciales() > 0">
+                ({{contarSeguimientosSinIniciales()}})
+              </span>
+            </h4>
+            <button 
+              *ngIf="pqrs.estadoPqrs !== 'CERRADO'"
+              (click)="toggleSeguimientoForm()" 
+              class="btn-agregar">
+              <i class="fas" [class.fa-plus]="!showSeguimientoForm" [class.fa-minus]="showSeguimientoForm"></i>
+              {{ showSeguimientoForm ? 'Cancelar' : 'Agregar Seguimiento' }}
+            </button>
+            <!-- Solo mostrar el botón si la PQRS no está cerrada y el usuario actual es el creador -->
+          <!-- Botón de respuesta -->
+          <button 
+            *ngIf="pqrs?.estadoPqrs !== 'CERRADO'"
+            (click)="toggleRespuestaForm()" 
+            class="btn-responder">
+            <i class="fas" [class.fa-plus]="!showRespuestaForm" [class.fa-minus]="showRespuestaForm"></i>
+            {{ showRespuestaForm ? 'Cancelar' : 'Responder PQRS' }}
+          </button>
+          </div>
+
+
+
+          
+  
+          <!-- Formulario de nuevo seguimiento -->
+          <form *ngIf="showSeguimientoForm" [formGroup]="seguimientoForm" (ngSubmit)="agregarSeguimiento()" class="seguimiento-form">
+            <div class="form-group">
+              <label for="comentario">Comentario *</label>
+              <textarea 
+                id="comentario" 
+                formControlName="comentario" 
+                rows="4"></textarea>
+            </div>
+  
+            <!-- Archivo Adjunto -->
+            <div class="form-group">
+              <label for="archivo">Archivo Adjunto</label>
+              <div class="file-upload-container">
+                <!-- Input de archivo oculto -->
+                <input 
+                #fileInput
+                type="file" 
+                id="archivo" 
+                (change)="onFileChange($event)"
+                [accept]="ALLOWED_FILE_TYPES.join(',')"
+                class="file-input-hidden">
+                
+                <!-- Botón personalizado para seleccionar archivo -->
+                <button type="button" class="btn-select-file" (click)="fileInput.click()" [disabled]="filePreview">
+                  <i class="fas fa-cloud-upload-alt"></i> Seleccionar Archivo
+                </button>
+          
+                <!-- Información de tipos permitidos -->
+                <small class="file-info">
+                  Tipos permitidos: {{ALLOWED_FILE_TYPES.join(', ')}} | 
+                  Tamaño máximo: {{MAX_FILE_SIZE / (1024 * 1024)}}MB
+                </small>
+          
+                <!-- Mensaje de error -->
+                <div *ngIf="fileError" class="error-message">
+                  {{ fileError }}
+                </div>
+          
+                <!-- Preview del archivo -->
+                <div *ngIf="filePreview" class="file-preview">
+                  <!-- Preview de imagen -->
+                  <img *ngIf="filePreview.url" [src]="filePreview.url" alt="Preview" class="image-preview">
+                  
+                  <!-- Información del archivo -->
+                  <div class="file-info-container">
+                    <i [class]="'fas ' + getFileIcon(filePreview.type)"></i>
+                    <div class="file-details">
+                      <span class="file-name">{{ filePreview.name }}</span>
+                      <span class="file-size">{{ filePreview.size }}</span>
+                    </div>
+                    <button type="button" class="btn-remove-file" (click)="removeFile()">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+          
+                <!-- Barra de progreso -->
+                <div *ngIf="uploadProgress > 0" class="progress-container">
+                  <div class="progress-bar" [style.width.%]="uploadProgress">
+                    {{ uploadProgress }}%
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+            <div class="form-group checkbox-group">
+              <input 
+                type="checkbox" 
+                id="esRespuestaFinal" 
+                formControlName="esRespuestaFinal">
+              <label for="esRespuestaFinal">Marcar como respuesta final</label>
+            </div>
+  
+            <div class="form-actions">
+              <button 
+                type="submit" 
+                [disabled]="!seguimientoForm.valid || fileError || isLoading" 
+                class="btn-guardar">
+                <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+                {{ isLoading ? 'Guardando...' : 'Guardar Seguimiento' }}
+              </button>
+            </div>
+          </form>
+
+          <!-- Formulario de respuesta -->
+          <form *ngIf="showRespuestaForm" [formGroup]="respuestaForm" (ngSubmit)="enviarRespuesta()" class="respuesta-form">
+            <div class="form-group">
+              <label for="comentarioRespuesta">Tu Respuesta *</label>
+              <textarea 
+                id="comentarioRespuesta" 
+                formControlName="comentario" 
+                rows="4"
+                placeholder="Escribe tu respuesta aquí..."
+                required></textarea>
+              <div *ngIf="respuestaForm.get('comentario')?.invalid && respuestaForm.get('comentario')?.touched" 
+                  class="error-message">
+                El comentario es requerido
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="archivoRespuesta">Archivo Adjunto (opcional)</label>
+              <div class="file-upload-container">
+                <input 
+                  #fileInput
+                  type="file" 
+                  id="archivoRespuesta" 
+                  (change)="onFileChange($event)"
+                  [accept]="ALLOWED_FILE_TYPES.join(',')"
+                  class="file-input-hidden">
+                
+                <button type="button" class="btn-select-file" (click)="fileInput.click()" [disabled]="filePreview">
+                  <i class="fas fa-cloud-upload-alt"></i> Seleccionar Archivo
+                </button>
+
+                <!-- Información de tipos permitidos -->
+                <small class="file-info">
+                  Tipos permitidos: {{ALLOWED_FILE_TYPES.join(', ')}} | 
+                  Tamaño máximo: {{MAX_FILE_SIZE / (1024 * 1024)}}MB
+                </small>
+
+                <!-- Mensaje de error -->
+                <div *ngIf="fileError" class="error-message">
+                  {{ fileError }}
+                </div>
+
+                <!-- Preview del archivo -->
+                <div *ngIf="filePreview" class="file-preview">
+                  <img *ngIf="filePreview.url" [src]="filePreview.url" alt="Preview" class="image-preview">
+                  <div class="file-info-container">
+                    <i [class]="'fas ' + getFileIcon(filePreview.type)"></i>
+                    <div class="file-details">
+                      <span class="file-name">{{ filePreview.name }}</span>
+                      <span class="file-size">{{ filePreview.size }}</span>
+                    </div>
+                    <button type="button" class="btn-remove-file" (click)="removeFile()">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Barra de progreso -->
+                <div *ngIf="uploadProgress > 0" class="progress-container">
+                  <div class="progress-bar" [style.width.%]="uploadProgress">
+                    {{ uploadProgress }}%
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button 
+                type="submit" 
+                [disabled]="!respuestaForm.valid || fileError || isLoading" 
+                class="btn-enviar">
+                <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+                {{ isLoading ? 'Enviando...' : 'Enviar Respuesta' }}
+              </button>
+            </div>
+          </form>
+  
+          <!-- Lista de seguimientos -->
+          <!-- Reemplazar la sección de lista de seguimientos -->
+          <div class="seguimientos-list">
+            <div *ngFor="let seguimiento of filtrarSeguimientosSinAdjuntosIniciales(seguimientosPaginados)" 
+       class="seguimiento-item"
+       [ngClass]="{'seguimiento-funcionario': seguimiento.tipoSeguimiento === 'FUNCIONARIO',
+                  'seguimiento-respuesta': seguimiento.tipoSeguimiento === 'RESPUESTA_USUARIO'}">
+              <div class="seguimiento-header">
+                <span class="fecha">{{ seguimiento.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+                <div class="badges">
+                  <span class="tipo-badge">
+                    {{ seguimiento.tipoSeguimiento === 'FUNCIONARIO' ? 'Seguimiento' : 'Respuesta' }}
+                  </span>
+                  <span *ngIf="seguimiento.esRespuestaFinal" class="respuesta-final-badge">
+                    Respuesta Final
+                  </span>
+                </div>
+              </div>
+              
+              <div class="seguimiento-content">
+                <p>{{ seguimiento.comentario }}</p>
+                <a *ngIf="seguimiento.archivoAdjunto" 
+                  [href]="getFileUrl(seguimiento.archivoAdjunto)" 
+                  target="_blank" 
+                  class="archivo-link">
+                  <i class="fas fa-file"></i> Ver archivo adjunto
+                </a>
+              </div>
+              <div class="seguimiento-footer">
+                <span class="usuario">Por: {{ seguimiento.usuario?.nombreCompleto || 'Sistema' }}</span>
+              </div>
+            </div>
+
+            <!-- Botón Cargar Más -->
+            <div *ngIf="hasMoreSeguimientos" class="cargar-mas-container">
+              <button (click)="cargarSiguientePagina()" class="btn-cargar-mas">
+                <i class="fas fa-sync-alt"></i> Cargar más
+              </button>
+            </div>
+
+            <!-- Mensaje cuando no hay seguimientos -->
+            <div *ngIf="seguimientosPaginados.length === 0" class="no-seguimientos">
+              No hay seguimientos registrados
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

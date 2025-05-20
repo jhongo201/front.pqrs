@@ -1,0 +1,145 @@
+<!-- menu.component.html -->
+<div class="sidebar-content">
+  <div class="sidebar-header">
+    <i class="fas fa-laptop-code"></i>
+    <span>Sistema de PQRS</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul>
+      <li>
+        <a routerLink="/dashboard" 
+           [class.active]="activeMenuItem === 'dashboard'"
+           (click)="setActiveMenuItem('dashboard')">
+          <i class="fas fa-home"></i>
+          <span>Inicio</span>
+        </a>
+      </li>
+      <!-- Menú Usuarios -->
+      <li class="menu-item-with-submenu">
+        <a (click)="toggleUsersMenu()" 
+           [class.active]="activeMenuItem === 'users'">
+          <i class="fas fa-users"></i>
+          <span>Gestión de Usuarios</span>
+          <i class="fas" 
+             [class.fa-chevron-down]="!isUsersMenuOpen" 
+             [class.fa-chevron-up]="isUsersMenuOpen">
+          </i>
+        </a>
+        <ul class="submenu" [class.open]="isUsersMenuOpen">
+          <li>
+            <a routerLink="/usuarios" 
+               [class.active]="isSubmenuItemActive('users-list')"
+               (click)="setActiveMenuItem('users', 'users-list')">
+              <i class="fas fa-users-cog"></i>
+              <span>Listado de Usuarios del Sistema</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/usuarios/registro" 
+               [class.active]="isSubmenuItemActive('users-register')"
+               (click)="setActiveMenuItem('users', 'users-register')">
+              <i class="fas fa-user-plus"></i>
+              <span>Registrar Usuario</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+
+      <!-- Menú PQRS -->
+      <li class="menu-item-with-submenu">
+        <a (click)="togglePqrsMenu()" 
+           [class.active]="activeMenuItem === 'pqrs'">
+          <i class="fas fa-inbox"></i>
+          <span>Gestión de PQRS</span>
+          <i class="fas" 
+             [class.fa-chevron-down]="!isPqrsMenuOpen" 
+             [class.fa-chevron-up]="isPqrsMenuOpen">
+          </i>
+        </a>
+        <ul class="submenu" [class.open]="isPqrsMenuOpen">
+          <li>
+            <a routerLink="/pqrs" 
+               [class.active]="isSubmenuItemActive('pqrs-list')"
+               (click)="setActiveMenuItem('pqrs', 'pqrs-list')">
+              <i class="fas fa-list-alt"></i>
+              <span>Listado de PQRS</span>
+            </a>
+          </li>
+          
+          <li>
+            <a routerLink="/pqrs/nuevo" 
+               [class.active]="isSubmenuItemActive('pqrs-create')"
+               (click)="setActiveMenuItem('pqrs', 'pqrs-create')">
+              <i class="fas fa-plus-circle"></i>
+              <span>Crear PQRS</span>
+            </a>
+          </li>
+<li>
+  <a routerLink="/pqrs/nuevo-pqrs"
+     [class.active]="isSubmenuItemActive('pqrs-create-external')"
+     (click)="setActiveMenuItem('pqrs', 'pqrs-create-external')">
+    <i class="fas fa-user-plus"></i>
+    <span>Crear PQRS Externa</span>
+  </a>
+</li>
+          <li>
+            <a routerLink="/pqrs/sin-asignar" 
+               [class.active]="isSubmenuItemActive('pqrs-unassigned')"
+               (click)="setActiveMenuItem('pqrs', 'pqrs-unassigned')">
+              <i class="fas fa-clock"></i>
+              <span>PQRS Sin Asignar</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/pqrs/asignados" 
+               [class.active]="isSubmenuItemActive('pqrs-assigned')"
+               (click)="setActiveMenuItem('pqrs', 'pqrs-assigned')">
+              <i class="fas fa-clock"></i>
+              <span>PQRS Con Asignacion</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/pqrs/mis-asignaciones" 
+               [class.active]="isSubmenuItemActive('pqrs-my-assigned')"
+               (click)="setActiveMenuItem('pqrs', 'pqrs-my-assigned')">
+              <i class="fas fa-clipboard-check"></i>
+              <span>Mis PQRS Asignadas</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/pqrs/mis-pqrs" 
+               [class.active]="isSubmenuItemActive('pqrs-my')"
+               (click)="setActiveMenuItem('pqrs', 'pqrs-my')">
+              <i class="fas fa-user-clock"></i>
+              <span>Mis PQRS Solicitadas</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/pqrs/consulta-pqrs" 
+               [class.active]="isSubmenuItemActive('pqrs-consulta')"
+               (click)="setActiveMenuItem('pqrs', 'pqrs-consulta')">
+              <i class="fas fa-search"></i>
+              <span>Consultar PQRS</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/pqrs/reportes" 
+               [class.active]="isSubmenuItemActive('pqrs-reports')"
+               (click)="setActiveMenuItem('pqrs', 'pqrs-reports')">
+              <i class="fas fa-chart-bar"></i>
+              <span>Reportes y Estadísticas</span>
+            </a>
+          </li>
+
+        </ul>
+      </li>
+
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <span>© 2025 Ministerio del trabajo</span>
+  </div>
+</div>

@@ -1,0 +1,216 @@
+<!-- user-list.component.html -->
+<div class="container">
+  
+  <h2>Gestión de Usuarios</h2>
+  <div class="button-group">
+    
+    <button (click)="openCreateLdapModal()" class="btn btn-secondary">
+      <i class="fas fa-users-cog"></i> Nuevo Usuario LDAP
+    </button>
+  </div>
+
+<!-- Contenedor de filtros -->
+<div class="filters-container">
+  <!-- Buscador -->
+  <div class="search-wrapper">
+    <div class="input-group custom-input-group">
+      <span class="input-group-text">
+        <i class="fas fa-search" style="color: #4a5568;"></i>
+      </span>
+      <input 
+        type="text" 
+        class="form-control custom-input"
+        placeholder="Buscar usuarios..." 
+        [(ngModel)]="searchTerm"
+        (input)="onSearch($event)"
+      >
+    </div>
+  </div>
+
+  <!-- Filtro de estado -->
+  <div class="status-wrapper">
+    <div class="input-group custom-input-group">
+      <span class="input-group-text">
+        <i class="fas fa-filter" style="color: #4a5568;"></i>
+      </span>
+      <select 
+        class="form-select custom-select"
+        [(ngModel)]="selectedStatus"
+        (change)="onStatusChange($event)"
+      >
+        <option value="todos">Todos los estados</option>
+        <option value="activo">Usuarios Activos</option>
+        <option value="inactivo">Usuarios Inactivos</option>
+      </select>
+    </div>
+  </div>
+</div>
+   
+
+  <!-- Loading y Error messages -->
+  <div *ngIf="loading" class="alert alert-info">
+    Cargando...
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+  <!-- Tabla de usuarios -->
+  <table class="table table-striped" *ngIf="!loading && displayedUsers.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Rol</th>
+        <th>Último Login</th>
+        <th>Fecha de Creación</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+        <th>Correo Activación</th>
+        <th>Activación</th> 
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of displayedUsers" [ngClass]="{'ad-user': !user.persona}" [class.inactive-user]="!user.estado">
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.persona?.nombres || 'N/A' }} {{ user.persona?.apellidos || '' }}</td>
+        <td>{{ user.persona?.email || 'N/A' }}</td>
+        <td>{{ user.rol?.nombre || 'N/A' }}</td>
+        <td>{{ user.ultimoLogin || 'N/A' }}</td>
+        <td>{{ user.fechaCreacion || 'N/A' }}</td>
+        <td class="text-center"> <!-- Añadimos clase text-center -->
+          <span class="estado-badge" [ngClass]="{
+            'estado-activo': user.estado,
+            'estado-inactivo': !user.estado
+          }">
+            {{ user.estado ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+        
+        <td>
+          <div class="action-buttons">
+            <button (click)="viewDetails(user.id)" class="btn btn-info btn-sm">
+              <i class="fas fa-eye"></i> Ver
+            </button>
+            <button (click)="editUser(user.id)" class="btn btn-primary btn-sm">
+              <i class="fas fa-edit"></i> Editar
+            </button>
+            <button (click)="deleteUser(user)" class="btn btn-danger btn-sm">
+              <i class="fas fa-trash"></i> Eliminar
+            </button>
+          </div>          
+        </td>
+        <td>
+          <div class="action-buttons">
+            <button 
+              (click)="resendActivation(user)" 
+              class="btn btn-success btn-sm"
+              *ngIf="!user.estado">
+              <i class="fas fa-envelope"></i> Reenviar
+            </button>
+          </div>    
+        </td>
+        <td>
+          <!-- Nuevo botón de activación -->
+          <button 
+            *ngIf="!user.estado"
+            (click)="goToActivation(user.username)"
+            class="btn btn-warning btn-sm">
+            <i class="fas fa-key"></i> Activar
+          </button>
+        </td>
+        
+      </tr>
+    </tbody>
+  </table>
+  <!-- Mensaje cuando no hay resultados -->
+  <div *ngIf="!loading && filteredUsers.length === 0" class="alert alert-warning">
+    No se encontraron usuarios que coincidan con la búsqueda.
+  </div>
+
+  <!-- Paginación -->
+  <app-pagination
+    *ngIf="filteredUsers.length > 0"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    [totalItems]="totalItems"
+    [totalPages]="totalPages"
+    (pageChange)="onPageChange($event)">
+  </app-pagination>
+</div>
+
+
+<!-- Modal de para consultar si desea reenviar correo y/o elimiar usuarios -->
+<app-confirm-modal
+  [show]="showResendModal"
+  title="Reenviar Activación"
+  [message]="'¿Desea reenviar el correo de activación para el usuario ' + (selectedUser?.username || '') + '?'"
+  confirmText="Enviar"
+  confirmButtonClass="btn-success"
+  [loading]="loading"
+  (confirm)="confirmResend()"
+  (cancel)="cancelResend()">
+</app-confirm-modal>
+
+<app-confirm-modal
+  [show]="showDeleteModal"
+  title="Eliminar Usuario"
+  [message]="'¿Está seguro que desea eliminar al usuario ' + (selectedUser?.username || '') + '?'"
+  confirmText="Eliminar"
+  confirmButtonClass="btn-danger"
+  [loading]="loading"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()">
+</app-confirm-modal>
+
+<!-- Modal de confirmaciond e envio correo -->
+<app-success-modal
+  [show]="showSuccessModal"
+  [title]="successTitle"
+  [message]="successMessage"
+  [type]="modalType"
+  (close)="closeSuccessModal()">
+</app-success-modal>
+
+<!-- Modal para Usuario LDAP -->
+<app-confirm-modal
+[show]="showCreateLdapModal"
+title="Crear Usuario LDAP"
+confirmText="Crear"
+confirmButtonClass="btn-success"
+[loading]="loading"
+(confirm)="createLdapUser()"
+(cancel)="showCreateLdapModal = false">
+<form [formGroup]="ldapForm" class="form-container">
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input 
+      type="text" 
+      id="username"
+      formControlName="username" 
+      class="form-control" 
+      placeholder="Ingrese username">
+  </div>
+  <div class="form-group">
+    <label for="idRol">Rol</label>
+    <select 
+      id="idRol"
+      formControlName="idRol" 
+      class="form-control">
+      <option value="">Seleccione un rol</option>
+      <option [value]="role.id" *ngFor="let role of roles">
+        {{ role.nombre }}
+      </option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="checkbox-label">
+      <input type="checkbox" formControlName="estado">
+      <span>Estado activo</span>
+    </label>
+  </div>
+</form>
+</app-confirm-modal>

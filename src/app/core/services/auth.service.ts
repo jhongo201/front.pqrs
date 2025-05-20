@@ -1,0 +1,130 @@
+import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+
+interface UserData {
+  username: string;
+  nombreCompleto: string;
+  rol: string | { id: number; nombre: string };
+  empresa?: {
+    id: number;
+    nombre: string;
+  };
+  area?: {
+    id: number;
+    nombre: string;
+  };
+  direccion?: {
+    id: number;
+    nombre: string;
+  };
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private isAuthenticated = signal<boolean>(false);
+  private userDataSubject = new BehaviorSubject<UserData | null>(null);
+  public userData$ = this.userDataSubject.asObservable();
+
+  // Mapeo de roles string a ID
+  private readonly ROLE_MAP: { [key: string]: number } = {
+    'ADMIN': 1,
+    'USER': 2
+    // Agrega más roles según necesites
+  };
+
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    this.initializeAuth();
+  }
+
+  private initializeAuth() {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
+      try {
+        const parsedUserData = JSON.parse(userData);
+        this.isAuthenticated.set(true);
+        this.userDataSubject.next(parsedUserData);
+        console.log('Auth inicializada:', { token: !!token, userData: parsedUserData });
+      } catch (error) {
+        console.error('Error parseando userData:', error);
+        this.logout();
+      }
+    }
+  }
+
+  login(credentials: { username: string; password: string }): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/auth/login`, credentials)
+      .pipe(
+        tap(response => {
+          console.log('Respuesta de login:', response);
+          if (response && response.token) {
+            // Transformar la respuesta para incluir el ID del rol
+            const transformedResponse = {
+              ...response,
+              rol: {
+                id: this.ROLE_MAP[response.rol] || 1, // Por defecto ADMIN si no se encuentra
+                nombre: response.rol
+              }
+            };
+
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('user', JSON.stringify(transformedResponse));
+            this.isAuthenticated.set(true);
+            this.userDataSubject.next(transformedResponse);
+            
+            console.log('Datos de usuario transformados:', transformedResponse);
+            this.router.navigate(['/dashboard']);
+          } else {
+            console.error('Respuesta de login inválida:', response);
+          }
+        }),
+        catchError(error => {
+          console.error('Error en login:', error);
+          throw error;
+        })
+      );
+  }
+
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.isAuthenticated.set(false);
+    this.userDataSubject.next(null);
+    this.router.navigate(['/login']);
+  }
+
+  isLoggedIn(): boolean {
+    return this.isAuthenticated();
+  }
+
+  getUserData(): UserData | null {
+    return this.userDataSubject.value;
+  }
+
+  getUserRole(): number | undefined {
+    const userData = this.getUserData();
+    if (!userData) return undefined;
+
+    // Si el rol es un string, usar el mapeo
+    if (typeof userData.rol === 'string') {
+      return this.ROLE_MAP[userData.rol];
+    }
+    
+    // Si el rol es un objeto, usar el id
+    if (typeof userData.rol === 'object' && userData.rol !== null) {
+      return userData.rol.id;
+    }
+
+    return undefined;
+  }
+}

@@ -1,0 +1,205 @@
+/* menu.component.css */
+.sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: #e2e8f0;
+}
+
+/* Header del sidebar */
+.sidebar-header {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header i {
+  font-size: 1.5rem;
+  color: #60a5fa;
+}
+
+.sidebar-header span {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+}
+
+/* Navegación */
+.sidebar-nav {
+  flex: 1;
+  padding: 1rem 0;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav li {
+  margin: 0.25rem 0;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  color: #e2e8f0;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-nav a i {
+  width: 1.5rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.sidebar-nav a span {
+  font-size: 0.95rem;
+}
+
+.sidebar-nav a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-left-color: #60a5fa;
+}
+
+.sidebar-nav a.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-left-color: #60a5fa;
+  color: white;
+}
+
+.submenu a.active {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left-color: #60a5fa;
+}
+
+.submenu a {
+  padding-left: 2.5rem;
+}
+
+/* Footer del sidebar */
+.sidebar-footer {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Efectos hover */
+.sidebar-nav a:hover i,
+.sidebar-nav a.active i {
+  color: #60a5fa;
+}
+
+/* Animaciones */
+.sidebar-nav a {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: width 0.2s ease;
+}
+
+.sidebar-nav a:hover::after {
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar-header span {
+    font-size: 1.1rem;
+  }
+
+  .sidebar-nav a {
+    padding: 0.75rem 1rem;
+  }
+
+  .sidebar-nav a span {
+    font-size: 0.9rem;
+  }
+}
+
+
+/* menu.component.css */
+.menu-item-with-submenu > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  transition: all 0.3s ease;
+}
+
+.menu-item-with-submenu > a.active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.submenu.open {
+  max-height: 500px; /* Ajusta según necesidad */
+}
+
+.submenu li a {
+  padding-left: 2.5rem;
+  font-size: 0.9rem;
+}
+
+.submenu li a i {
+  margin-right: 8px;
+  width: 16px;
+  text-align: center;
+}
+
+/* Estilos para los íconos de chevron */
+.fa-chevron-down,
+.fa-chevron-up {
+  font-size: 0.8em;
+  transition: transform 0.3s ease;
+}
+
+/* Ajuste para los íconos en los submenús */
+.submenu li a i {
+  font-size: 0.9em;
+}
+
+/* Estilos específicos para los íconos de PQRS si lo necesitas */
+.submenu li a i.fa-inbox,
+.submenu li a i.fa-plus-circle,
+.submenu li a i.fa-user-plus,
+.submenu li a i.fa-clock,
+.submenu li a i.fa-user-clock {
+  margin-right: 10px;
+  width: 16px;
+  text-align: center;
+}
+
+.app-loading {
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+}
+
+.app-loaded {
+  opacity: 1;
+}

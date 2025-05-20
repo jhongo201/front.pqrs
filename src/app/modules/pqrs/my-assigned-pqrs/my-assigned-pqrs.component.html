@@ -1,0 +1,166 @@
+<!-- my-assigned-pqrs.component.html -->
+<div class="dashboard-container">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+      <div class="header-title">
+        <h2><i class="fas fa-folder-open"></i> Mis PQRS Asignados</h2>
+        <p class="subtitle">Gestión de solicitudes a mi cargo</p>
+      </div>
+      <div class="header-actions">
+        <!-- Búsqueda -->
+        <div class="search-wrapper">
+          <div class="search-input">
+            <input 
+              type="text" 
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onFiltroChange()"
+              placeholder="Buscar por radicado, título o solicitante..."
+              class="form-control">
+            <i class="fas fa-search"></i>
+          </div>
+        </div>
+        
+        <!-- Filtros -->
+        <div class="filter-wrapper">
+          <div class="filter-group">
+            <label for="estadoFilter">Estado:</label>
+            <div class="select-wrapper">
+              <select 
+                id="estadoFilter" 
+                [(ngModel)]="filtroEstado" 
+                (change)="onFiltroChange()"
+                class="form-control">
+                <option value="">Todos los estados</option>
+                <option *ngFor="let estado of estados" [value]="estado">
+                  {{estado}}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down select-icon"></i>
+            </div>
+          </div>
+  
+          <div class="filter-group">
+            <label for="prioridadFilter">Prioridad:</label>
+            <div class="select-wrapper">
+              <select 
+                id="prioridadFilter" 
+                [(ngModel)]="filtroPrioridad" 
+                (change)="onFiltroChange()"
+                class="form-control">
+                <option value="">Todas las prioridades</option>
+                <option *ngFor="let prioridad of prioridades" [value]="prioridad">
+                  {{prioridad}}
+                </option>
+              </select>
+              <i class="fas fa-chevron-down select-icon"></i>
+            </div>
+          </div>
+  
+          <!-- Botones de acción -->
+          <button 
+            (click)="aplicarFiltros()" 
+            class="btn-clear" 
+            *ngIf="filtroEstado || filtroPrioridad || searchTerm">
+            <i class="fas fa-times"></i>
+            Limpiar filtros
+          </button>
+          
+          <button (click)="cargarMisAsignaciones()" class="btn-refresh" [disabled]="isLoading">
+            <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+            Actualizar
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Loading y Error messages -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando PQRS asignados...</p>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-error">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
+  
+    <!-- Main Content -->
+    <div class="card">
+      <div class="table-responsive">
+        <table class="pqrs-table">
+          <thead>
+            <tr>
+              <th>Radicado</th>
+              <th>Título</th>
+              <th>Solicitante</th>
+              <th>Tema</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Tiempo Restante</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pqrs of filteredPqrsList">
+              <td>
+                <span class="radicado-badge">{{ pqrs.numeroRadicado }}</span>
+              </td>
+              <td>{{ pqrs.titulo }}</td>
+              <td>
+                <div class="solicitante-info">
+                  <span>{{ pqrs.nombreSolicitante }}</span>
+                  <small>{{ pqrs.emailSolicitante }}</small>
+                </div>
+              </td>
+              <td>
+                <span class="tema-badge">{{ pqrs.tema.nombre }}</span>
+                <small class="area-badge">{{ pqrs.tema.area.nombre }}</small>
+              </td>
+              <td>
+                <span [class]="'status-badge ' + getEstadoClass(pqrs.estadoPqrs)">
+                  {{ pqrs.estadoPqrs }}
+                </span>
+              </td>
+              <td>
+                <span [class]="'priority-badge ' + getPrioridadClass(pqrs.prioridad)">
+                  {{ pqrs.prioridad }}
+                </span>
+              </td>
+              <td>
+                <div class="tiempo-restante" 
+     [class.urgente]="getDiasHabilesRestantes(pqrs.fechaCreacion) <= 3">
+  <i class="fas" 
+     [class.fa-clock]="getDiasHabilesRestantes(pqrs.fechaCreacion) > 3"
+     [class.fa-exclamation-circle]="getDiasHabilesRestantes(pqrs.fechaCreacion) <= 3"></i>
+  <span>{{ getDiasHabilesRestantes(pqrs.fechaCreacion) }} días hábiles</span>
+</div>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button [routerLink]="['/pqrs', pqrs.idPqrs]" 
+                          class="btn-icon" 
+                          title="Ver detalles">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button [routerLink]="['/pqrs', pqrs.idPqrs, 'seguimiento']" 
+                          class="btn-icon"
+                          title="Agregar seguimiento">
+                    <i class="fas fa-clipboard-list"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredPqrsList.length === 0">
+              <td colspan="8" class="no-data">
+                <i class="fas fa-inbox"></i>
+                <span>No tienes PQRS asignados</span>
+                <p *ngIf="searchTerm || filtroEstado || filtroPrioridad">
+                  Prueba a eliminar los filtros aplicados
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,295 @@
+<div class="dashboard-container">
+  <div class="dashboard-nav">
+    <div class="nav-tabs">
+      <button 
+        *ngFor="let tab of tabs"
+        [class.active]="activeTab === tab.id"
+        (click)="activeTab = tab.id"
+        class="nav-tab">
+        <i class="fas fa-{{tab.icon}}"></i>
+        {{tab.label}}
+      </button>
+    </div>
+  </div>
+  
+  <div [ngSwitch]="activeTab">
+    <div *ngSwitchCase="'overview'">
+      <!-- Quick summary cards -->
+    </div>
+    
+    <div *ngSwitchCase="'priority'">
+      <!-- Priority detailed view -->
+    </div>
+    
+    <div *ngSwitchCase="'status'">
+      <!-- Status detailed view -->
+    </div>
+    
+    <div *ngSwitchCase="'trends'">
+      <!-- Trends and comparisons -->
+    </div>
+  </div>
+
+
+
+  <!-- Dashboard totals and summary section -->
+<div class="summary-section">
+  <div class="stat-card total-stats">
+    <div class="total-header">
+      <h2>Resumen General PQRS</h2>
+      <div class="period-selector">
+        <span [class.active]="selectedPeriod === 'day'" (click)="setPeriod('day')">Hoy</span>
+        <span [class.active]="selectedPeriod === 'week'" (click)="setPeriod('week')">Semana</span>
+        <span [class.active]="selectedPeriod === 'month'" (click)="setPeriod('month')">Mes</span>
+      </div>
+    </div>
+ 
+    <div class="stats-grid">
+      <!-- Quick stats -->
+      <div class="quick-stat">
+        <div class="stat-label">Total PQRS</div>
+        <div class="stat-value">{{getTotalPQRS()}}</div>
+      </div>
+      
+      <div class="quick-stat">
+        <div class="stat-label">Pendientes</div>
+        <div class="stat-value warning">{{getEstadoValue('PENDIENTE')}}</div>
+      </div>
+      
+      <div class="quick-stat">
+        <div class="stat-label">En Proceso</div>
+        <div class="stat-value info">{{getEstadoValue('EN_PROCESO')}}</div>
+      </div>
+    </div>
+  </div>
+ </div>
+
+ <div class="stats-grid detailed-stats" *ngIf="!loading">
+
+  <!-- Add percentage indicators -->
+  <div class="stat-item" 
+      *ngFor="let estado of getOrderedKeys(stats.pqrs?.porEstado, estadosOrden)"
+      [style.--percentage-width]="getPercentageWidth(estado)">
+  <div class="stat-label">
+    <span>{{formatEstado(estado)}}</span>
+    <div class="percentage-badge">
+      <span class="percentage">{{getPercentage(getEstadoValue(estado), getTotalPQRS())}}</span>
+    </div>
+  </div>
+  <span class="value">{{getEstadoValue(estado)}}</span>
+  </div>
+  </div>
+
+ <div class="stat-card performance-card">
+  <h3>Métricas de Rendimiento</h3>
+  <div class="metrics-grid">
+    <div class="metric-item">
+      <div class="metric-label">Tasa de Resolución</div>
+      <div class="metric-value">
+        {{calculateResolutionRate(selectedPeriod).toFixed(1)}}%
+        <span class="trend" [class.up]="calculateResolutionRate(selectedPeriod) > 80">
+          {{calculateResolutionRate(selectedPeriod) > 80 ? '↑' : '↓'}}
+        </span>
+      </div>
+    </div>
+    
+    <div class="metric-item">
+      <div class="metric-label">Puntuación de Eficiencia</div>
+      <div class="metric-value">{{getEfficiencyScore().toFixed(1)}}</div>
+      <div class="progress-bar">
+        <div class="progress" [style.width.%]="getEfficiencyScore()"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detailed statistics section -->
+<!--div class="detailed-stats">
+  <div class="stat-card priority-analytics">
+    <h3>Análisis por Prioridad</h3>
+    <div class="priority-grid">
+      <div class="priority-item" *ngFor="let prioridad of prioridadesOrden">
+        <div class="priority-header {{prioridad.toLowerCase()}}">
+          <span>{{formatPrioridad(prioridad)}}</span>
+          <span class="count">{{getPrioridadValue(prioridad)}}</span>
+        </div>
+        <div class="priority-details">
+          <div class="detail-row">
+            <span>Hoy</span>
+            <span>{{getPrioridadCountByPeriod(prioridad, 'Hoy')}}</span>
+          </div>
+          <div class="detail-row">
+            <span>Semana</span>
+            <span>{{getPrioridadCountByPeriod(prioridad, 'Semana')}}</span>
+          </div>
+          <div class="detail-row">
+            <span>Mes</span>
+            <span>{{getPrioridadCountByPeriod(prioridad, 'Mes')}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+ </!--div-->
+ <div class="grid-2-cols detailed-stats">
+  <!-- Análisis por Prioridad -->
+
+  
+  <!-- Tendencias y Comparativas -->
+  <section class="stat-card">
+    <h3>Tendencias y Comparativas</h3>
+    <div class="trend-container">
+      <div class="trend-item" *ngFor="let estado of estadosOrden">
+        <div [class]="'trend-header ' + estado.toLowerCase()">
+          <span>{{formatEstado(estado)}}</span>
+          <span class="trend-badge" [class]="getTrendDirection(estado)">
+            {{getStatusTrend(estado)}}
+            <i [class]="getTrendIcon(estado)" class="trend-icon"></i>
+          </span>
+        </div>
+        <div class="trend-details">
+          <div class="trend-row">
+            <div class="week-info">
+              <span class="week-title">Semana Actual</span>
+              <span class="week-label">({{getCurrentWeekRange()}})</span>
+            </div>
+            <span class="value">{{stats.pqrs.estadosHoy?.[estado] || 0}}</span>
+          </div>
+          <div class="trend-row">
+            <div class="week-info">
+              <span class="week-title">Semana Anterior</span>
+              <span class="week-label">({{getPreviousWeekRange()}})</span>
+            </div>
+            <span class="value">{{stats.pqrs.estadosSemana?.[estado] || 0}}</span>
+          </div>
+           
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PQRS por Estado - Por Período -->
+  <section class="stat-card">
+    <h3>PQRS por Estado - Período</h3>
+  
+    <div *ngFor="let estado of estadosOrden" class="estado-card">
+      <div class="estado-header">
+        <span>{{formatEstado(estado)}}</span>
+        <span class="total">Total: {{getEstadoValue(estado)}}</span>
+      </div>
+      <div class="period-values">
+        <div *ngFor="let periodo of periodos" class="period-value">
+          <span class="periodo-value">{{periodo}}</span>
+            <span class="value">{{getEstadoCountByPeriod(estado, periodo)}}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="grid-2-cols detailed-stats">
+  <!-- Análisis por Prioridad -->
+  <section class="stat-card">
+    <!-- ... contenido existente ... -->
+    <section class="stat-card">
+      <h3>Análisis por Prioridad</h3>
+      <div class="priority-grid">
+        <div *ngFor="let prioridad of prioridadesOrden" class="priority-card">
+          <div [class]="'priority-header ' + prioridad.toLowerCase()">
+            <span>{{formatPrioridad(prioridad)}}</span>
+            <span class="count">{{getPrioridadValue(prioridad)}}</span>
+          </div>
+          <div class="priority-details">
+            <div *ngFor="let periodo of periodos" class="detail-row">
+              <span>{{periodo}}</span>
+              <span>{{getPrioridadCountByPeriod(prioridad, periodo)}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  
+</div>
+
+  <div class="stats-grid detailed-stats" *ngIf="!loading">
+
+    <!-- PQRS Cards -->
+    <div class="stat-card">
+      <h3>PQRS Recientes</h3>
+      <div class="stat-content">
+        <div class="stat-item">
+          <span>Hoy</span>
+          <span class="value">{{stats.pqrs?.pqrsHoy || 0}}</span>
+        </div>
+        <div class="stat-item">
+          <span>Esta Semana</span>
+          <span class="value">{{stats.pqrs?.pqrsSemana || 0}}</span>
+        </div>
+        <div class="stat-item">
+          <span>Este Mes</span>
+          <span class="value">{{stats.pqrs?.pqrsMes || 0}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usuarios Cards -->
+    <div class="stat-card">
+      <h3>Usuarios Recientes</h3>
+      <div class="stat-content">
+        <div class="stat-item">
+          <span>Hoy</span>
+          <span class="value">{{stats.usuarios?.usuariosHoy || 0}}</span>
+        </div>
+        <div class="stat-item">
+          <span>Esta Semana</span>
+          <span class="value">{{stats.usuarios?.usuariosSemana || 0}}</span>
+        </div>
+        <div class="stat-item">
+          <span>Este Mes</span>
+          <span class="value">{{stats.usuarios?.usuariosMes || 0}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estados -->
+    <div class="stat-card">
+      <h3>Usuarios por Estado</h3>
+      <div class="stat-content">
+        <div class="stat-item" *ngFor="let estado of stats.usuarios?.porEstado | keyvalue">
+          <span>{{estado.key}}</span>
+          <span class="value">{{estado.value}}</span>
+        </div>
+      </div>
+    </div>
+
+  
+    <div class="stats-grid">
+      <!-- Estado y Prioridad -->
+      <div class="stat-section">
+        <div class="stat-card">
+          <h3>PQRS por Estado</h3>
+          <div class="stat-content">
+            <div *ngIf="!hasStats(stats.pqrs?.porEstado)" class="no-data">
+              No hay PQRS registrados
+            </div>
+            <div 
+              class="stat-item status-{{estado.toLowerCase()}}" 
+              *ngFor="let estado of getOrderedKeys(stats.pqrs?.porEstado, estadosOrden)">
+              <span>{{formatEstado(estado)}}</span>
+              <span class="value">{{getEstadoValue(estado)}}</span>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+</div>
+
+
+  </div>
+</div>

@@ -1,0 +1,151 @@
+<!-- create-pqrs.component.html -->
+<div class="create-pqrs-container">
+  <div class="header-section">
+    <h2>Crear Nueva PQRS</h2>
+    <button (click)="router.navigate(['/pqrs'])" class="btn-volver">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </div>
+
+  <form [formGroup]="pqrsForm" (ngSubmit)="onSubmit()" class="pqrs-form">
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+
+    <div class="form-section">
+      <h3>Información del Solicitante</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombreSolicitante">Nombre Completo *</label>
+          <input 
+            type="text" 
+            id="nombreSolicitante" 
+            formControlName="nombreSolicitante"
+            [class.invalid]="pqrsForm.get('nombreSolicitante')?.invalid && 
+                           pqrsForm.get('nombreSolicitante')?.touched">
+        </div>
+
+        <div class="form-group">
+          <label for="emailSolicitante">Correo Electrónico *</label>
+          <input 
+            type="email" 
+            id="emailSolicitante" 
+            formControlName="emailSolicitante"
+            [class.invalid]="pqrsForm.get('emailSolicitante')?.invalid && 
+                           pqrsForm.get('emailSolicitante')?.touched">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="telefonoSolicitante">Teléfono *</label>
+          <input 
+            type="tel" 
+            id="telefonoSolicitante" 
+            formControlName="telefonoSolicitante"
+            [class.invalid]="pqrsForm.get('telefonoSolicitante')?.invalid && 
+                           pqrsForm.get('telefonoSolicitante')?.touched">
+        </div>
+
+        <div class="form-group">
+          <label for="tipoDocumentoSolicitante">Tipo de Documento *</label>
+          <select 
+            id="tipoDocumentoSolicitante" 
+            formControlName="tipoDocumentoSolicitante">
+            <option *ngFor="let tipo of tiposDocumento" [value]="tipo">
+              {{tipo}}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="numeroDocumentoSolicitante">Número de Documento *</label>
+          <input 
+            type="text" 
+            id="numeroDocumentoSolicitante" 
+            formControlName="numeroDocumentoSolicitante"
+            [class.invalid]="pqrsForm.get('numeroDocumentoSolicitante')?.invalid && 
+                           pqrsForm.get('numeroDocumentoSolicitante')?.touched">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Información de la PQRS</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="idTema">Tema *</label>
+          <select 
+            id="idTema" 
+            formControlName="idTema"
+            [class.invalid]="pqrsForm.get('idTema')?.invalid && 
+                           pqrsForm.get('idTema')?.touched">
+            <option value="">Seleccione un tema</option>
+            <option *ngFor="let tema of temas" [value]="tema.idTema">
+              {{tema.nombre}} - {{tema.area.nombre}}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="prioridad">Prioridad *</label>
+          <select 
+            id="prioridad" 
+            formControlName="prioridad">
+            <option *ngFor="let prioridad of prioridades" [value]="prioridad">
+              {{prioridad}}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="titulo">Título *</label>
+        <input 
+          type="text" 
+          id="titulo" 
+          formControlName="titulo"
+          [class.invalid]="pqrsForm.get('titulo')?.invalid && 
+                         pqrsForm.get('titulo')?.touched">
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción *</label>
+        <textarea 
+          id="descripcion" 
+          formControlName="descripcion"
+          rows="4"
+          [class.invalid]="pqrsForm.get('descripcion')?.invalid && 
+                         pqrsForm.get('descripcion')?.touched"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="archivo">Archivo Adjunto</label>
+        <input 
+          type="file" 
+          id="archivo" 
+          (change)="onFileChange($event)"
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+        <small class="file-help">Formatos permitidos: PDF, DOC, DOCX, JPG, PNG. Máximo 5MB.</small>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn-cancelar"
+        (click)="router.navigate(['/pqrs'])">
+        Cancelar
+      </button>
+      <button 
+        type="submit" 
+        class="btn-crear"
+        [disabled]="pqrsForm.invalid || isLoading">
+        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+        {{ isLoading ? 'Creando...' : 'Crear PQRS' }}
+      </button>
+    </div>
+  </form>
+</div>

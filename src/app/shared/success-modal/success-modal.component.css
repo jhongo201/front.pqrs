@@ -1,0 +1,93 @@
+/* success-modal.component.css */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    backdrop-filter: blur(4px);
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  .modal-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .success .modal-icon {
+    color: #22c55e;
+  }
+  
+  .error .modal-icon {
+    color: #ef4444;
+  }
+  
+  h3 {
+    margin: 0 0 1rem;
+    color: #1e293b;
+    font-size: 1.5rem;
+  }
+  
+  p {
+    margin: 0 0 1.5rem;
+    color: #64748b;
+  }
+  
+  .btn {
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .btn-success {
+    background-color: #22c55e;
+    color: white;
+  }
+  
+  .btn-success:hover {
+    background-color: #16a34a;
+  }
+  
+  .btn-error {
+    background-color: #ef4444;
+    color: white;
+  }
+  
+  .btn-error:hover {
+    background-color: #dc2626;
+  }
+  
+  @keyframes bounceIn {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }

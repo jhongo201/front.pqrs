@@ -1,0 +1,151 @@
+<!-- consulta-pqrs.component.html -->
+<div class="consulta-container">
+    <div class="card">
+      <!-- Header -->
+      <div class="card-header">
+        <h2>
+          <i class="fas fa-search"></i>
+          Consulta de PQRS
+        </h2>
+        <p class="subtitle">
+            {{ tokenFromUrl ? 
+               'Información de su PQRS' : 
+               'Consulte el estado de su PQRS' }}
+          </p>
+      </div>
+
+      <!-- Si no hay token en la URL, mostrar el formulario completo -->
+    <ng-container *ngIf="!tokenFromUrl">
+        <!-- Selector de tipo de consulta -->
+        <div class="tipo-consulta-toggle">
+          <button 
+            [class.active]="esConsultaPublica"
+            (click)="toggleTipoConsulta()">
+            Consulta Pública
+          </button>
+          <button 
+            [class.active]="!esConsultaPublica"
+            (click)="toggleTipoConsulta()">
+            Consulta por Radicado
+          </button>
+        </div>
+
+  
+      <!-- Formulario -->
+      <form [formGroup]="consultaForm" (ngSubmit)="onSubmit()" class="consulta-form">
+        <!-- Número de Radicado -->
+      <div class="form-group">
+        <label for="numeroRadicado">Número de Radicado *</label>
+        <input 
+          type="text" 
+          id="numeroRadicado"
+          formControlName="numeroRadicado"
+          [class.is-invalid]="consultaForm.get('numeroRadicado')?.touched && 
+                             consultaForm.get('numeroRadicado')?.invalid"
+          placeholder="Ingrese el número de radicado">
+        <div class="error-message" *ngIf="consultaForm.get('numeroRadicado')?.touched && 
+                                        consultaForm.get('numeroRadicado')?.invalid">
+          {{ getErrorMensaje('numeroRadicado') }}
+        </div>
+      </div>
+  
+        <!-- Token (solo si no viene en la URL) -->
+      <div class="form-group" *ngIf="!tokenFromUrl && esConsultaPublica">
+        <label for="tokenUuid">Token de Consulta *</label>
+        <input 
+          type="text" 
+          id="tokenUuid"
+          formControlName="tokenUuid"
+          [class.is-invalid]="consultaForm.get('tokenUuid')?.touched && 
+                             consultaForm.get('tokenUuid')?.invalid"
+          placeholder="Ingrese el token de consulta">
+        <div class="error-message" *ngIf="consultaForm.get('tokenUuid')?.touched && 
+                                        consultaForm.get('tokenUuid')?.invalid">
+          {{ getErrorMensaje('tokenUuid') }}
+        </div>
+      </div>
+  
+        <!-- Botón de búsqueda -->
+        <div class="form-actions">
+            <button type="submit" class="btn-submit" [disabled]="loading">
+                <i class="fas" [class.fa-search]="!loading" [class.fa-spinner]="loading" [class.fa-spin]="loading"></i>
+                {{ loading ? 'Consultando...' : 'Consultar PQRS' }}
+              </button>
+        </div>
+      </form>
+    </ng-container>
+  
+      
+      <!-- Loading y mensajes de error -->
+      <div *ngIf="loading" class="loading-indicator">
+        <i class="fas fa-spinner fa-spin"></i>
+        Cargando información del PQRS...
+      </div>
+  
+      <div *ngIf="error" class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+      </div>
+  
+      <!-- Resultados -->
+      <div *ngIf="pqrsEncontrado" class="pqrs-resultados">
+        <h3>Información del PQRS</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Radicado:</label>
+            <span>{{ pqrsEncontrado.numeroRadicado }}</span>
+          </div>
+          <div class="info-item">
+            <label>Estado:</label>
+            <span [class]="'estado-badge ' + pqrsEncontrado.estadoPqrs">
+              {{ pqrsEncontrado.estadoPqrs }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label>Fecha de Creación:</label>
+            <span>{{ pqrsEncontrado.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Última Actualización:</label>
+            <span>{{ pqrsEncontrado.fechaUltimaActualizacion | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Título:</label>
+            <span>{{ pqrsEncontrado.titulo }}</span>
+          </div>
+          <div class="info-item">
+            <label>Tema:</label>
+            <span>{{ pqrsEncontrado.tema?.nombre }}</span>
+          </div>
+          <div class="info-item">
+            <label>Área:</label>
+            <span>{{ pqrsEncontrado.tema?.area?.nombre }}</span>
+          </div>
+        </div>
+        <div *ngIf="pqrsEncontrado?.seguimientos?.length > 0">
+            <button (click)="toggleSeguimientos()" class="btn-toggle">
+              <i class="fas" [class.fa-chevron-down]="!mostrarSeguimientos" [class.fa-chevron-up]="mostrarSeguimientos"></i>
+              Ver Seguimientos
+            </button>
+            
+            <div *ngIf="mostrarSeguimientos" class="seguimientos-lista">
+              <div *ngFor="let seguimiento of pqrsEncontrado.seguimientos" class="seguimiento-item">
+                <div class="seguimiento-header">
+                  <span class="fecha">{{ seguimiento.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+                  <span class="tipo">{{ seguimiento.tipoSeguimiento }}</span>
+                </div>
+                <div class="seguimiento-body">
+                  {{ seguimiento.comentario }}
+                </div>
+                <div *ngIf="seguimiento.archivoAdjunto" class="seguimiento-archivo">
+                  <a [href]="getFileUrl(seguimiento.archivoAdjunto)" target="_blank">
+                    <i class="fas fa-file"></i>
+                    Archivo adjunto
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>

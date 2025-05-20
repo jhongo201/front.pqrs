@@ -1,0 +1,216 @@
+<!-- pqrs-reports.component.html -->
+<div class="reports-container bg-gray-50 p-6">
+  <div class="header-section bg-white rounded-xl shadow-sm p-6 mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+      <i class="fas fa-chart-line text-blue-600 mr-3"></i>
+      Reportes y Estadísticas
+    </h2>
+      <div class="flex flex-wrap gap-6 items-center">
+        <div class="period-selector flex gap-2">
+          <button 
+            [class.active]="periodoSeleccionado === 'mes'"
+            (click)="cambiarPeriodo('mes')">
+            Este Mes
+          </button>
+          <button 
+            [class.active]="periodoSeleccionado === 'trimestre'"
+            (click)="cambiarPeriodo('trimestre')">
+            Último Trimestre
+          </button>
+          <button 
+            [class.active]="periodoSeleccionado === 'año'"
+            (click)="cambiarPeriodo('año')">
+            Este Año
+          </button>
+        </div>
+        <div class="date-range">
+          <div class="input-group">
+            <label for="fechaInicio">Desde:</label>
+            <input 
+              type="date" 
+              id="fechaInicio"
+              [(ngModel)]="fechaInicio"
+              (change)="cargarReporte()">
+          </div>
+          <div class="input-group">
+            <label for="fechaFin">Hasta:</label>
+            <input 
+              type="date" 
+              id="fechaFin"
+              [(ngModel)]="fechaFin"
+              (change)="cargarReporte()">
+          </div>
+        </div>
+        <div class="export-buttons flex gap-3">
+          <button (click)="exportarReporte('excel')" 
+                  class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-sm hover:shadow-md">
+            <i class="fas fa-file-excel"></i>
+            <span>Excel</span>
+          </button>
+          <button (click)="exportarReporte('pdf')" 
+                  class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all shadow-sm hover:shadow-md">
+            <i class="fas fa-file-pdf"></i>
+            <span>PDF</span>
+          </button>
+         </div>
+      </div>
+    </div>
+  
+    <div *ngIf="isLoading" class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Cargando reportes...</p>
+    </div>
+  
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+  
+    <div *ngIf="reportData && !isLoading" class="reports-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+       <!-- Resumen General con mejor diseño -->
+       <div class="card bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-xl p-6">
+        <h3 class="text-xl font-semibold mb-6">Resumen General</h3>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="stat-item bg-white/10 rounded-lg p-4">
+            <span class="text-3xl font-bold">{{ reportData.totalPqrs }}</span>
+            <span class="text-sm opacity-80">Total PQRS</span>
+          </div>
+          <div class="stat-item bg-white/10 rounded-lg p-4">
+            <span class="text-3xl font-bold">{{ reportData.tiempoPromedio.toFixed(2) }}d</span>
+            <span class="text-sm opacity-80">Tiempo Promedio</span>
+          </div>
+        </div>
+        
+        <!-- Gráfico circular -->
+        <div class="donut-chart mt-4 h-48 relative group">
+          <div *ngFor="let estado of reportData.porEstado; let i = index" 
+               class="donut-segment"
+               [style.--percentage]="(estado.cantidad / reportData.totalPqrs * 100) + '%'"
+               [style.--color]="getEstadoColor(estado.estado)"
+               [style.--rotation]="getRotation(i, reportData.porEstado)">
+          </div>
+          
+          <!-- Leyenda en hover -->
+          <div class="legend opacity-0 group-hover:opacity-100 absolute top-0 right-0 bg-black/75 p-3 rounded-lg transition-opacity">
+            <div *ngFor="let estado of reportData.porEstado" class="flex items-center gap-2 mb-1">
+              <div class="w-3 h-3 rounded-full" [style.background-color]="getEstadoColor(estado.estado)"></div>
+              <span class="text-xs text-white">
+                {{estado.estado}}: {{(estado.cantidad / reportData.totalPqrs * 100).toFixed(1)}}%
+              </span>
+            </div>
+          </div>
+         </div>
+       </div>
+
+       <!-- Barras del grafico resumen general -->
+      <div class="card bg-white rounded-xl p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-tasks text-blue-600 mr-2"></i>
+          PQRS 
+        </h3>
+        <div class="flex flex-col gap-2 mt-4">
+          <div *ngFor="let estado of reportData.porEstado" 
+              class="relative h-8 bg-gray-200 rounded-full overflow-hidden">
+            <div class="absolute h-full transition-all duration-500"
+                [style.width]="(estado.cantidad / reportData.totalPqrs * 100) + '%'"
+                [style.background-color]="getEstadoColor(estado.estado)">
+            </div>
+            <div class="absolute inset-0 flex items-center justify-between px-3 text-sm">
+              <span class="text-white">{{estado.estado}}</span>
+              <span class="text-white font-medium">{{(estado.cantidad / reportData.totalPqrs * 100).toFixed(1)}}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Gráfico de Estado -->
+      <div class="card bg-white rounded-xl p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-tasks text-blue-600 mr-2"></i>
+          PQRS por Estado
+        </h3>
+        <div class="chart-container">
+          <div *ngFor="let estado of reportData.porEstado" class="estado-bar">
+            <div class="bar-label">{{ estado.estado }}</div>
+            <div class="bar-container">
+              <div 
+                class="bar" 
+                [style.width.%]="(estado.cantidad / reportData.totalPqrs) * 100"
+                [class]="getEstadoClass(estado.estado)">
+                {{ estado.cantidad }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Gráfico de Prioridad -->
+      <div class="card bg-white rounded-xl p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-flag text-orange-500 mr-2"></i>
+          PQRS por Prioridad
+        </h3>
+        <div class="chart-container">
+          <div *ngFor="let prioridad of reportData.porPrioridad" class="prioridad-bar">
+            <div class="bar-label">{{ prioridad.prioridad }}</div>
+            <div class="bar-container">
+              <div 
+                class="bar" 
+                [style.width.%]="(prioridad.cantidad / reportData.totalPqrs) * 100"
+                [class]="getPrioridadClass(prioridad.prioridad)">
+                {{ prioridad.cantidad }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Tabla de Tema -->
+      <div class="card bg-white rounded-xl p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-sitemap text-indigo-600 mr-2"></i>
+          PQRS por Tema
+        </h3>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Área</th>
+              <th>Cantidad</th>
+              <th>Porcentaje</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let area of reportData.porArea">
+              <td>{{ area.area }}</td>
+              <td>{{ area.cantidad }}</td>
+              <td>{{ (area.cantidad / reportData.totalPqrs * 100).toFixed(1) }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  
+      <!-- Tendencia Mensual -->
+      <div class="card bg-white rounded-xl p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-chart-line text-green-600 mr-2"></i>
+          Tendencia Mensual
+        </h3>
+        <div class="trend-chart">
+          <div class="chart-grid">
+            <div *ngFor="let punto of reportData.tendenciaMensual; let i = index" 
+                class="chart-bar"
+                [style.height.%]="(punto.cantidad / maxTendencia()) * 100"
+                [style.background]="getMonthColor(i)">
+            <div class="bar-tooltip">
+              {{ punto.mes }}: {{ punto.cantidad }}
+            </div>
+          </div>
+          </div>
+          <div class="chart-labels">
+            <span *ngFor="let punto of reportData.tendenciaMensual">
+              {{ punto.mes }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
