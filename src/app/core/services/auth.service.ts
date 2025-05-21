@@ -62,12 +62,51 @@ export class AuthService {
     }
   }
 
+  /**
+   * Valida si un token JWT tiene el formato correcto
+   * @param token El token JWT a validar
+   * @returns true si el token tiene un formato válido, false en caso contrario
+   */
+  private isValidJwtFormat(token: string): boolean {
+    // Un token JWT válido debe tener exactamente 2 puntos (3 partes)
+    const parts = token.split('.');
+    return parts.length === 3;
+  }
+
+  /**
+   * Almacena un token JWT de forma segura
+   * @param token El token JWT a almacenar
+   * @returns true si el token se almacenó correctamente, false en caso contrario
+   */
+  private storeToken(token: string): boolean {
+    // Validar el formato del token
+    if (!this.isValidJwtFormat(token)) {
+      console.error('Intento de almacenar un token JWT inválido:', {
+        token: token.length > 20 ? `${token.substring(0, 10)}...${token.substring(token.length - 10)}` : token,
+        puntos: token.split('.').length - 1
+      });
+      return false;
+    }
+
+    // Almacenar el token limpio
+    localStorage.setItem('token', token.trim());
+    return true;
+  }
+
   login(credentials: { username: string; password: string }): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/auth/login`, credentials)
       .pipe(
         tap(response => {
           console.log('Respuesta de login:', response);
           if (response && response.token) {
+            // Validar y almacenar el token
+            const tokenStored = this.storeToken(response.token);
+            
+            if (!tokenStored) {
+              console.error('No se pudo almacenar el token JWT. Formato inválido.');
+              return;
+            }
+            
             // Transformar la respuesta para incluir el ID del rol
             const transformedResponse = {
               ...response,
@@ -77,7 +116,6 @@ export class AuthService {
               }
             };
 
-            localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(transformedResponse));
             this.isAuthenticated.set(true);
             this.userDataSubject.next(transformedResponse);
