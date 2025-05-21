@@ -34,7 +34,7 @@ export class AuthService {
   // Mapeo de roles string a ID
   private readonly ROLE_MAP: { [key: string]: number } = {
     'ADMIN': 1,
-    'USER': 2
+    'USUARIO': 2
     // Agrega más roles según necesites
   };
 
@@ -108,10 +108,22 @@ export class AuthService {
             }
             
             // Transformar la respuesta para incluir el ID del rol
+            let rolId: number;
+            
+            // Si el backend ya envía el ID del rol, usarlo directamente
+            if (response.rolId) {
+              rolId = response.rolId;
+              console.log('ID de rol obtenido directamente del backend:', rolId);
+            } else {
+              // Si no, usar el mapeo
+              rolId = this.ROLE_MAP[response.rol] || 1;
+              console.log('ID de rol obtenido mediante mapeo:', { rol: response.rol, id: rolId });
+            }
+            
             const transformedResponse = {
               ...response,
               rol: {
-                id: this.ROLE_MAP[response.rol] || 1, // Por defecto ADMIN si no se encuentra
+                id: rolId,
                 nombre: response.rol
               }
             };
@@ -149,6 +161,10 @@ export class AuthService {
     return this.userDataSubject.value;
   }
 
+  /**
+   * Obtiene el ID del rol del usuario actual
+   * @returns El ID del rol o undefined si no hay usuario autenticado
+   */
   getUserRole(): number | undefined {
     const userData = this.getUserData();
     if (!userData) return undefined;
@@ -164,5 +180,44 @@ export class AuthService {
     }
 
     return undefined;
+  }
+  
+  /**
+   * Obtiene todos los roles disponibles desde el backend
+   * @returns Observable con la lista de roles
+   */
+  getRoles(): Observable<{id: number, nombre: string}[]> {
+    return this.http.get<{id: number, nombre: string}[]>(`${environment.apiUrl}/roles`)
+      .pipe(
+        tap(roles => {
+          console.log('Roles obtenidos del backend:', roles);
+          // Actualizar el mapeo de roles con los datos del backend
+          roles.forEach(rol => {
+            this.ROLE_MAP[rol.nombre] = rol.id;
+          });
+        }),
+        catchError(error => {
+          console.error('Error obteniendo roles:', error);
+          return [];
+        })
+      );
+  }
+  
+  /**
+   * Obtiene el ID del rol por su nombre
+   * @param rolNombre Nombre del rol
+   * @returns Observable con el ID del rol
+   */
+  getRoleIdByName(rolNombre: string): Observable<number> {
+    return this.getRoles().pipe(
+      map(roles => {
+        const rol = roles.find(r => r.nombre === rolNombre);
+        if (rol) {
+          return rol.id;
+        }
+        // Si no se encuentra, usar el mapeo estático
+        return this.ROLE_MAP[rolNombre] || 1;
+      })
+    );
   }
 }

@@ -1,0 +1,70 @@
+<div class="modal-header">
+  <h3>
+    <i class="fas" [ngClass]="isEditMode ? 'fa-edit' : 'fa-plus-circle'"></i>
+    {{title}}
+  </h3>
+  <button class="btn-close" (click)="onCancel()" [disabled]="isLoading">
+    <i class="fas fa-times"></i>
+  </button>
+</div>
+
+<div class="modal-body" [class.blur]="isLoading">
+  <form [formGroup]="roleForm" class="form-grid">
+    <div class="form-group">
+      <label for="nombre">Nombre del Rol <span class="required">*</span></label>
+      <input 
+        type="text" 
+        id="nombre"
+        formControlName="nombre" 
+        placeholder="Ej: Administrador"
+        [class.is-invalid]="roleForm.get('nombre')?.invalid && roleForm.get('nombre')?.touched"
+      >
+      <div class="error-message" *ngIf="roleForm.get('nombre')?.hasError('required') && roleForm.get('nombre')?.touched">
+        El nombre del rol es requerido
+      </div>
+      <div class="error-message" *ngIf="roleForm.get('nombre')?.hasError('maxlength')">
+        El nombre no debe exceder los 50 caracteres
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="descripcion">Descripción</label>
+      <textarea 
+        id="descripcion"
+        formControlName="descripcion" 
+        rows="3" 
+        placeholder="Descripción de las funciones y permisos del rol"
+        [class.is-invalid]="roleForm.get('descripcion')?.invalid && roleForm.get('descripcion')?.touched"
+      ></textarea>
+      <div class="error-message" *ngIf="roleForm.get('descripcion')?.hasError('maxlength')">
+        La descripción no debe exceder los 200 caracteres
+      </div>
+    </div>
+
+    <div class="form-group checkbox-group">
+      <div class="checkbox-container">
+        <input 
+          type="checkbox" 
+          id="estado"
+          formControlName="estado"
+        >
+        <label for="estado">Rol activo</label>
+      </div>
+    </div>
+  </form>
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Procesando...</p>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button class="btn-secondary" (click)="onCancel()" [disabled]="isLoading">
+    <i class="fas fa-times"></i> Cancelar
+  </button>
+  <button class="btn-primary" (click)="onSubmit()" [disabled]="isLoading || roleForm.invalid">
+    <i class="fas" [ngClass]="isEditMode ? 'fa-save' : 'fa-plus'"></i>
+    {{isEditMode ? 'Actualizar' : 'Crear'}}
+  </button>
+</div>

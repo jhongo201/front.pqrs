@@ -21,6 +21,7 @@ import { CreatePqrsComponent } from './modules/pqrs/create-pqrs/create-pqrs.comp
 import { AssignedPqrsComponent } from './modules/pqrs/assigned-pqrs/assigned-pqrs.component';
 import { MyAssignedPqrsComponent } from './modules/pqrs/my-assigned-pqrs/my-assigned-pqrs.component';
 import { ConsultaPqrsComponent } from './modules/pqrs/consulta-pqrs/consulta-pqrs.component';
+import { RoleManagementComponent } from './modules/role-management/role-management.component';
 
 
 export const routes: Routes = [
@@ -37,6 +38,11 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'roles',
+    component: RoleManagementComponent,
     canActivate: [AuthGuard]
   },
   {

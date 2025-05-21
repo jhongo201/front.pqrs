@@ -69,8 +69,15 @@ export class AuthGuard {
         console.log('Verificación de permiso:', { fullPath, hasPermission });
         
         if (!hasPermission) {
-          console.log('Sin permiso - redirigiendo a dashboard');
-          this.router.navigate(['/dashboard']);
+          // Evitar bucle infinito: si ya estamos en dashboard y no tenemos permiso
+          if (fullPath === '/dashboard') {
+            console.log('Sin permiso para dashboard - redirigiendo a una página segura');
+            // Redirigir a una página que todos los usuarios puedan ver
+            this.router.navigate(['/welcome']);
+          } else {
+            console.log('Sin permiso - redirigiendo a dashboard');
+            this.router.navigate(['/dashboard']);
+          }
         }
         
         return hasPermission;

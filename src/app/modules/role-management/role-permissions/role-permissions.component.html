@@ -1,0 +1,249 @@
+<div class="modal-header">
+  <h3>
+    <i class="fas fa-shield-alt"></i>
+    Gestión de Permisos: {{roleName}}
+  </h3>
+  <button class="btn-close" (click)="onCancel()" [disabled]="isLoading">
+    <i class="fas fa-times"></i>
+  </button>
+</div>
+
+<div class="modal-body" [class.blur]="isLoading">
+  <!-- Resumen de permisos del rol actual -->
+  <div class="role-summary">
+    <div class="role-info">
+      <div class="role-name">
+        <i class="fas fa-user-tag"></i>
+        <span>Rol: <strong>{{roleName}}</strong></span>
+      </div>
+      <div class="permission-summary">
+        <div class="summary-item" [class.has-permissions]="getTotalPermissionsByType('puedeLeer') > 0">
+          <i class="fas fa-eye"></i>
+          <span>Lectura: <strong>{{getTotalPermissionsByType('puedeLeer')}}</strong> de {{totalRoutes}}</span>
+        </div>
+        <div class="summary-item" [class.has-permissions]="getTotalPermissionsByType('puedeEscribir') > 0">
+          <i class="fas fa-plus"></i>
+          <span>Escritura: <strong>{{getTotalPermissionsByType('puedeEscribir')}}</strong> de {{totalRoutes}}</span>
+        </div>
+        <div class="summary-item" [class.has-permissions]="getTotalPermissionsByType('puedeActualizar') > 0">
+          <i class="fas fa-edit"></i>
+          <span>Actualización: <strong>{{getTotalPermissionsByType('puedeActualizar')}}</strong> de {{totalRoutes}}</span>
+        </div>
+        <div class="summary-item" [class.has-permissions]="getTotalPermissionsByType('puedeEliminar') > 0">
+          <i class="fas fa-trash"></i>
+          <span>Eliminación: <strong>{{getTotalPermissionsByType('puedeEliminar')}}</strong> de {{totalRoutes}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Leyenda de permisos -->
+  <div class="permissions-legend">
+    <div class="legend-title">Tipos de permisos:</div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <div class="legend-icon"><i class="fas fa-eye"></i></div>
+        <div class="legend-text">Leer</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-icon"><i class="fas fa-plus"></i></div>
+        <div class="legend-text">Escribir</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-icon"><i class="fas fa-edit"></i></div>
+        <div class="legend-text">Actualizar</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-icon"><i class="fas fa-trash"></i></div>
+        <div class="legend-text">Eliminar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search"></i>
+      <input 
+        type="text" 
+        [(ngModel)]="searchText" 
+        placeholder="Buscar por ruta o descripción"
+        class="search-input"
+      >
+      <button *ngIf="searchText" class="clear-search" (click)="clearSearch()">
+        <i class="fas fa-times-circle"></i>
+      </button>
+    </div>
+    
+    <div class="search-filters" *ngIf="moduleGroups.length > 0">
+      <div class="search-results-count">
+        <span>{{ getTotalFilteredRoutes() }} rutas encontradas</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Cargando permisos...</p>
+  </div>
+
+  <div class="permissions-container">
+    <!-- Encabezados de columnas -->
+    <div class="permissions-header" *ngIf="moduleGroups.length > 0">
+      <div class="route-header">Ruta</div>
+      <div class="permissions-columns">
+        <div class="permission-column">Leer</div>
+        <div class="permission-column">Escribir</div>
+        <div class="permission-column">Actualizar</div>
+        <div class="permission-column">Eliminar</div>
+      </div>
+    </div>
+    
+    <div class="accordion">
+      <div class="accordion-item" *ngFor="let module of filterRoutes()">
+        <div class="accordion-header" (click)="module.isExpanded = !module.isExpanded">
+          <div class="accordion-title">
+            <i class="fas fa-folder" [class.fa-folder-open]="module.isExpanded"></i>
+            <span>{{module.nombre}}</span>
+          </div>
+          <div class="accordion-badge">
+            {{module.rutas.length}} rutas
+          </div>
+          <i class="fas" [class.fa-chevron-down]="!module.isExpanded" [class.fa-chevron-up]="module.isExpanded"></i>
+        </div>
+
+        <div class="accordion-content" [class.expanded]="module.isExpanded">
+          <div class="module-actions">
+            <button class="btn-secondary" (click)="toggleAllModulePermissions(module, true)">
+              <i class="fas fa-check-circle"></i> Seleccionar todos
+            </button>
+            <button class="btn-secondary" (click)="toggleAllModulePermissions(module, false)">
+              <i class="fas fa-times-circle"></i> Deseleccionar todos
+            </button>
+          </div>
+
+          <div class="permission-header">
+            <div class="permission-route">Ruta</div>
+            <div class="permission-controls">
+              <div class="permission-label">
+                <span>Leer</span>
+                <div class="permission-toggle-buttons">
+                  <button class="btn-icon btn-icon-sm btn-icon-success" matTooltip="Seleccionar todos" (click)="toggleAllPermissions(module, 'read', true)">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn-icon btn-icon-sm btn-icon-danger" matTooltip="Deseleccionar todos" (click)="toggleAllPermissions(module, 'read', false)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="permission-label">
+                <span>Escribir</span>
+                <div class="permission-toggle-buttons">
+                  <button class="btn-icon btn-icon-sm btn-icon-success" matTooltip="Seleccionar todos" (click)="toggleAllPermissions(module, 'write', true)">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn-icon btn-icon-sm btn-icon-danger" matTooltip="Deseleccionar todos" (click)="toggleAllPermissions(module, 'write', false)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="permission-label">
+                <span>Actualizar</span>
+                <div class="permission-toggle-buttons">
+                  <button class="btn-icon btn-icon-sm btn-icon-success" matTooltip="Seleccionar todos" (click)="toggleAllPermissions(module, 'update', true)">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn-icon btn-icon-sm btn-icon-danger" matTooltip="Deseleccionar todos" (click)="toggleAllPermissions(module, 'update', false)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="permission-label">
+                <span>Eliminar</span>
+                <div class="permission-toggle-buttons">
+                  <button class="btn-icon btn-icon-sm btn-icon-success" matTooltip="Seleccionar todos" (click)="toggleAllPermissions(module, 'delete', true)">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn-icon btn-icon-sm btn-icon-danger" matTooltip="Deseleccionar todos" (click)="toggleAllPermissions(module, 'delete', false)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="permission-list">
+            <div class="permission-item" *ngFor="let route of module.rutas">
+              <div class="permission-route-info">
+                <div class="route-path">{{route.ruta}}</div>
+                <div class="route-description">{{route.descripcion || 'Sin descripción'}}</div>
+              </div>
+              <div class="permission-checkboxes">
+                <div class="permission-cell">
+                  <div class="permission-status-icon" [ngClass]="{'check': route.permisos.puedeLeer, 'cross': !route.permisos.puedeLeer}">
+                    <i class="fas" [ngClass]="{'fa-check': route.permisos.puedeLeer, 'fa-times': !route.permisos.puedeLeer}"></i>
+                  </div>
+                  <label class="custom-checkbox" [class.has-permission]="route.permisos.puedeLeer">
+                    <input type="checkbox" [(ngModel)]="route.permisos.puedeLeer">
+                    <span class="checkmark"><i class="fas fa-eye permission-icon"></i></span>
+                  </label>
+                </div>
+                
+                <div class="permission-cell">
+                  <div class="permission-status-icon" [ngClass]="{'check': route.permisos.puedeEscribir, 'cross': !route.permisos.puedeEscribir}">
+                    <i class="fas" [ngClass]="{'fa-check': route.permisos.puedeEscribir, 'fa-times': !route.permisos.puedeEscribir}"></i>
+                  </div>
+                  <label class="custom-checkbox" [class.has-permission]="route.permisos.puedeEscribir">
+                    <input type="checkbox" [(ngModel)]="route.permisos.puedeEscribir">
+                    <span class="checkmark"><i class="fas fa-plus permission-icon"></i></span>
+                  </label>
+                </div>
+                
+                <div class="permission-cell">
+                  <div class="permission-status-icon" [ngClass]="{'check': route.permisos.puedeActualizar, 'cross': !route.permisos.puedeActualizar}">
+                    <i class="fas" [ngClass]="{'fa-check': route.permisos.puedeActualizar, 'fa-times': !route.permisos.puedeActualizar}"></i>
+                  </div>
+                  <label class="custom-checkbox" [class.has-permission]="route.permisos.puedeActualizar">
+                    <input type="checkbox" [(ngModel)]="route.permisos.puedeActualizar">
+                    <span class="checkmark"><i class="fas fa-edit permission-icon"></i></span>
+                  </label>
+                </div>
+                
+                <div class="permission-cell">
+                  <div class="permission-status-icon" [ngClass]="{'check': route.permisos.puedeEliminar, 'cross': !route.permisos.puedeEliminar}">
+                    <i class="fas" [ngClass]="{'fa-check': route.permisos.puedeEliminar, 'fa-times': !route.permisos.puedeEliminar}"></i>
+                  </div>
+                  <label class="custom-checkbox" [class.has-permission]="route.permisos.puedeEliminar">
+                    <input type="checkbox" [(ngModel)]="route.permisos.puedeEliminar">
+                    <span class="checkmark"><i class="fas fa-trash permission-icon"></i></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="empty-state" *ngIf="module.rutas.length === 0">
+              <i class="fas fa-folder-open"></i>
+              <span>No hay rutas disponibles en este módulo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="filterRoutes().length === 0">
+        <i class="fas fa-search"></i>
+        <span>No se encontraron rutas con el término "{{searchText}}"</span>
+        <button class="btn-link" (click)="clearSearch()">Limpiar búsqueda</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button class="btn-secondary" (click)="onCancel()" [disabled]="isLoading">
+    <i class="fas fa-times"></i> Cancelar
+  </button>
+  <button class="btn-primary" (click)="savePermissions()" [disabled]="isLoading">
+    <i class="fas fa-save"></i> Guardar Permisos
+  </button>
+</div>

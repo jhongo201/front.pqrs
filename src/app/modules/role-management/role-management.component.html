@@ -1,0 +1,112 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h2><i class="fas fa-user-tag"></i> Gestión de Roles</h2>
+      <p class="subtitle">Administración de roles y permisos del sistema</p>
+    </div>
+    <button (click)="loadRoles()" class="btn-refresh" [disabled]="isLoading">
+      <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Loading y Error messages -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando información...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">
+    <i class="fas fa-exclamation-circle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Search and Add Role -->
+  <div class="filters-container">
+    <div class="search-container">
+      <form [formGroup]="searchForm">
+        <div class="search-input">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            formControlName="searchTerm" 
+            placeholder="Buscar roles por nombre o descripción"
+          >
+        </div>
+      </form>
+    </div>
+    <button (click)="openRoleForm()" class="btn-primary">
+      <i class="fas fa-plus-circle"></i> Nuevo Rol
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-content">
+    <div class="card">
+      <div class="card-header">
+        <div class="user-info">
+          <i class="fas fa-users-cog"></i>
+          <div>
+            <h3>Roles del Sistema</h3>
+            <span class="pqrs-count">{{ filteredRoles.length }} roles encontrados</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="pqrs-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let role of filteredRoles">
+              <td>
+                <span class="radicado-badge">{{ role.id }}</span>
+              </td>
+              <td>{{ role.nombre }}</td>
+              <td>{{ role.descripcion || 'Sin descripción' }}</td>
+              <td>
+                <span [class]="'status-badge ' + (role.estado ? 'status-active' : 'status-inactive')">
+                  {{ role.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button (click)="openRoleForm(role)" class="btn-icon" matTooltip="Editar rol">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button (click)="openPermissionsDialog(role)" class="btn-icon" matTooltip="Gestionar permisos">
+                    <i class="fas fa-shield-alt"></i>
+                  </button>
+                  <button (click)="toggleRoleStatus(role)" class="btn-icon" 
+                          [matTooltip]="role.estado ? 'Desactivar rol' : 'Activar rol'">
+                    <i class="fas" [ngClass]="role.estado ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                  </button>
+                  <button (click)="confirmDeleteRole(role)" class="btn-icon" matTooltip="Eliminar rol">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <!-- Fila para cuando no hay datos -->
+            <tr *ngIf="filteredRoles.length === 0 && !isLoading">
+              <td colspan="5" class="text-center">
+                <div class="empty-state">
+                  <i class="fas fa-folder-open"></i>
+                  <span>No se encontraron roles</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
