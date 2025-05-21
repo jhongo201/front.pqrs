@@ -190,32 +190,52 @@ export class RoleManagementComponent implements OnInit {
     this.isLoading = true;
     this.roleService.deleteRole(id).subscribe({
       next: () => {
-        this.showSnackBar('Rol eliminado correctamente.');
+        this.showSnackBar('Rol eliminado correctamente');
         this.loadRoles();
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error al eliminar el rol', err);
-        this.showSnackBar('No se pudo eliminar el rol.');
+        console.error('Error al eliminar rol:', err);
+        this.showSnackBar('Error al eliminar el rol');
         this.isLoading = false;
       }
     });
   }
-
+  
   toggleRoleStatus(role: Role): void {
-    const updatedRole: Role = {
-      ...role,
-      estado: !role.estado
+    // Obtener el ID del rol de manera segura (puede estar en id o idRol)
+    // @ts-ignore - Ignorar error de TypeScript por propiedad idRol
+    const roleId = (!isNaN(role.id) && role.id) ? role.id : (role.idRol || null);
+    
+    if (!roleId) {
+      console.error('Error: Rol inválido o sin ID', role);
+      this.showSnackBar('Error: No se puede cambiar el estado de este rol');
+      return;
+    }
+    
+    // Invertir el estado actual del rol
+    const newStatus = !role.estado;
+    const statusText = newStatus ? 'activado' : 'desactivado';
+    
+    console.log(`Cambiando estado del rol ${role.nombre} (ID: ${roleId}) a ${statusText}`);
+    
+    // Crear objeto con solo los datos necesarios para actualizar
+    const roleData: Partial<Role> = {
+      nombre: role.nombre,
+      descripcion: role.descripcion || '',
+      estado: newStatus
     };
 
     this.isLoading = true;
-    this.roleService.updateRole(role.id, updatedRole).subscribe({
+    this.roleService.updateRole(roleId, roleData as Role).subscribe({
       next: () => {
-        this.showSnackBar(`Rol ${updatedRole.estado ? 'activado' : 'desactivado'} correctamente.`);
+        this.showSnackBar(`Rol ${newStatus ? 'activado' : 'desactivado'} correctamente`);
         this.loadRoles();
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Error al actualizar el estado del rol', err);
-        this.showSnackBar('No se pudo actualizar el estado del rol.');
+        this.showSnackBar('No se pudo actualizar el estado del rol');
         this.isLoading = false;
       }
     });
