@@ -105,16 +105,18 @@
 
 /* Accordion */
 .accordion {
+  margin-top: 1rem;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid #e9ecef;
 }
 
 .accordion-item {
-  background: white;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
-  overflow: hidden;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
 }
 
 .accordion-header {
@@ -122,13 +124,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background: #f8f9fa;
+  background-color: #f8f9fa;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .accordion-header:hover {
-  background: #e9ecef;
+  background-color: #e9ecef;
 }
 
 .accordion-title {
@@ -137,18 +139,23 @@
   gap: 0.75rem;
   font-weight: 500;
   color: #2c3e50;
-}
-
-.accordion-title i {
-  color: #4a90e2;
+  font-size: 0.95rem;
+  flex: 1;
 }
 
 .accordion-badge {
-  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9ecef;
   color: #495057;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  margin-right: 1rem;
+  min-width: 80px;
+  text-align: center;
+  font-weight: 500;
 }
 
 .accordion-content {
@@ -396,15 +403,111 @@
   border-color: #1890ff;
 }
 
+/* Estilos para los iconos de permisos */
 .permission-icon {
-  font-size: 10px;
-  opacity: 0.7;
+  font-size: 12px;
+  opacity: 0.8;
   color: #495057;
+  position: relative;
+  z-index: 2;
 }
 
 .custom-checkbox.has-permission .permission-icon {
   opacity: 1;
   color: #1890ff;
+}
+
+/* Estilos mejorados para los checkboxes */
+.custom-checkbox {
+  position: relative;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.custom-checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 24px;
+  width: 24px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+/* Añadir el chulito cuando el checkbox está marcado */
+.custom-checkbox input:checked ~ .checkmark:after {
+  content: '\f00c'; /* Código del icono fa-check */
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  color: #1890ff;
+  font-size: 14px;
+  display: block;
+}
+
+/* Ocultar el icono original cuando el checkbox está marcado */
+.custom-checkbox input:checked ~ .checkmark .permission-icon {
+  display: none;
+}
+
+.custom-checkbox:hover .checkmark {
+  background-color: #e9ecef;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+
+/* Mejoras para las celdas de permisos */
+.permission-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  min-width: 40px;
+}
+
+/* Mejoras para los iconos de estado */
+.permission-status-icon {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  z-index: 3;
+}
+
+.permission-status-icon.check {
+  background-color: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  color: #4caf50;
+}
+
+.permission-status-icon.cross {
+  background-color: #ffebee;
+  border: 1px solid #ef9a9a;
+  color: #f44336;
 }
 
 /* Resumen de permisos del rol */
