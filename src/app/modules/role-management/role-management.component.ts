@@ -88,14 +88,19 @@ export class RoleManagementComponent implements OnInit {
     this.error = null;
     this.roleService.getRoles().subscribe({
       next: (data) => {
-        this.roles = data;
+        // Asegurarse de que todos los IDs sean números
+        this.roles = data.map(role => ({
+          ...role,
+          id: Number(role.id) // Convertir explícitamente a número
+        }));
+        
+        console.log('Roles cargados y procesados:', this.roles);
         this.filteredRoles = [...this.roles];
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error al cargar los roles', err);
-        this.error = 'No se pudieron cargar los roles. Por favor, intente nuevamente.';
-        this.showSnackBar('No se pudieron cargar los roles.');
+        console.error('Error al cargar roles:', err);
+        this.error = 'Error al cargar los roles. Por favor, intente nuevamente.';
         this.isLoading = false;
       }
     });
@@ -103,16 +108,52 @@ export class RoleManagementComponent implements OnInit {
 
   openRoleForm(role?: Role): void {
     this.error = null;
-    const dialogRef = this.dialog.open(RoleFormComponent, {
-      width: '500px',
-      data: { role: role ? { ...role } : null }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadRoles();
+    
+    if (role) {
+      // Obtener el ID del rol de manera segura (puede estar en id o idRol)
+      // @ts-ignore - Ignorar error de TypeScript por propiedad idRol
+      const roleId = (!isNaN(role.id) && role.id) ? role.id : (role.idRol || null);
+      
+      console.log('ID del rol a editar:', roleId);
+      console.log('Datos completos del rol:', role);
+      
+      if (!role || !roleId) {
+        console.error('Error: Rol inválido o sin ID', role);
+        this.showSnackBar('Error: No se puede editar este rol');
+        return;
       }
-    });
+      
+      console.log(`Abriendo modal de edición para rol: ${role.nombre} (ID: ${roleId})`);
+      
+      // Crear una copia del rol con el ID correcto
+      const roleToEdit = {
+        ...role,
+        id: roleId  // Asegurarse de que id tenga el valor correcto
+      };
+      
+      const dialogRef = this.dialog.open(RoleFormComponent, {
+        width: '500px',
+        data: { roleId: roleId, roleName: role.nombre, role: roleToEdit }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.loadRoles();
+        }
+      });
+    } else {
+      // Crear nuevo rol
+      const dialogRef = this.dialog.open(RoleFormComponent, {
+        width: '500px',
+        data: { role: null }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.loadRoles();
+        }
+      });
+    }
   }
 
   openPermissionsDialog(role: any): void {

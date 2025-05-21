@@ -35,14 +35,22 @@ export class RoleFormComponent implements OnInit {
   isLoading = false;
   isEditMode = false;
   title = 'Crear Nuevo Rol';
+  roleId: number;
+  roleName: string;
+  role: Role | null = null;
 
   constructor(
     private fb: FormBuilder,
     private roleService: RoleService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<RoleFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { role: Role | null }
+    @Inject(MAT_DIALOG_DATA) public data: { roleId?: number; roleName?: string; role?: Role | null }
   ) {
+    // Inicializar igual que en el componente de permisos
+    this.roleId = data.roleId || 0;
+    this.roleName = data.roleName || '';
+    this.role = data.role || null;
+    
     this.roleForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(50)]],
       descripcion: ['', Validators.maxLength(200)],
@@ -51,14 +59,27 @@ export class RoleFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.data && this.data.role) {
+    console.log('RoleFormComponent - ngOnInit - roleId:', this.roleId);
+    console.log('RoleFormComponent - ngOnInit - roleName:', this.roleName);
+    console.log('RoleFormComponent - ngOnInit - role:', this.role);
+    
+    if (this.roleId && this.roleId > 0) {
+      // Modo edición
       this.isEditMode = true;
-      this.title = 'Editar Rol';
-      this.roleForm.patchValue({
-        nombre: this.data.role.nombre,
-        descripcion: this.data.role.descripcion || '',
-        estado: this.data.role.estado
-      });
+      this.title = `Editar Rol: ${this.roleName}`;
+      
+      if (this.role) {
+        // Si ya tenemos los datos del rol, los usamos
+        this.roleForm.patchValue({
+          nombre: this.role.nombre,
+          descripcion: this.role.descripcion || '',
+          estado: this.role.estado
+        });
+      }
+    } else {
+      // Modo creación
+      this.isEditMode = false;
+      this.title = 'Crear Nuevo Rol';
     }
   }
 
@@ -67,43 +88,88 @@ export class RoleFormComponent implements OnInit {
       this.markFormGroupTouched(this.roleForm);
       return;
     }
-
+    
     this.isLoading = true;
-    const roleData: Role = {
-      ...this.roleForm.value,
-      id: this.isEditMode && this.data.role ? this.data.role.id : 0
-    };
-
-    if (this.isEditMode && this.data.role) {
-      this.updateRole(this.data.role.id, roleData);
+    
+    // Verificar el ID del rol
+    console.log('onSubmit - roleId:', this.roleId);
+    console.log('onSubmit - role:', this.role);
+    
+    // Modo creación o edición
+    if (this.isEditMode && this.roleId > 0) {
+      console.log('Actualizando rol con ID:', this.roleId);
+      
+      // Crear objeto para actualizar
+      const roleData: Partial<Role> = {
+        nombre: this.roleForm.value.nombre,
+        descripcion: this.roleForm.value.descripcion || '',
+        estado: this.roleForm.value.estado
+      };
+      
+      // Actualizar el rol usando el roleId
+      this.updateRole(this.roleId, roleData as Role);
     } else {
+      console.log('Creando nuevo rol');
+      
+      // Modo creación
+      const roleData: Role = {
+        ...this.roleForm.value,
+        id: 0 // El backend ignorará este valor
+      };
+      
       this.createRole(roleData);
     }
   }
 
   createRole(role: Role): void {
-    this.roleService.createRole(role).subscribe({
+    // Asegurarse de que el objeto role tiene la estructura correcta
+    // Omitimos el id ya que el backend lo generará
+    const roleToCreate: Partial<Role> = {
+      nombre: role.nombre,
+      descripcion: role.descripcion || '',
+      estado: role.estado
+    };
+
+    console.log('Enviando datos para crear rol:', roleToCreate);
+
+    this.roleService.createRole(roleToCreate as Role).subscribe({
       next: (response) => {
+        console.log('Respuesta exitosa al crear rol:', response);
         this.showSnackBar('Rol creado correctamente');
         this.dialogRef.close(true);
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error al crear rol:', error);
         this.showSnackBar('Error al crear el rol');
+        this.isLoading = false;
+      },
+      complete: () => {
         this.isLoading = false;
       }
     });
   }
 
   updateRole(id: number, role: Role): void {
-    this.roleService.updateRole(id, role).subscribe({
+    // Crear objeto con los datos necesarios para la actualización
+    const roleToUpdate: Partial<Role> = {
+      nombre: role.nombre,
+      descripcion: role.descripcion || '',
+      estado: role.estado
+    };
+
+    this.roleService.updateRole(id, roleToUpdate as Role).subscribe({
       next: (response) => {
         this.showSnackBar('Rol actualizado correctamente');
         this.dialogRef.close(true);
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error al actualizar rol:', error);
         this.showSnackBar('Error al actualizar el rol');
+        this.isLoading = false;
+      },
+      complete: () => {
         this.isLoading = false;
       }
     });

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { tap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 export interface Role {
   id: number;
@@ -69,26 +68,51 @@ export class RoleService {
   }
 
   // Crear un nuevo rol
-  createRole(role: Role): Observable<Role> {
+  createRole(role: Partial<Role>): Observable<Role> {
+    console.log('Servicio - Creando rol con datos:', role);
+    console.log('URL completa:', `${this.apiUrl}/roles`);
+    console.log('Headers:', this.getRequestHeaders());
+    
     return this.http.post<Role>(`${this.apiUrl}/roles`, role, {
       headers: this.getRequestHeaders()
     }).pipe(
-      tap(newRole => console.log('Rol creado:', newRole)),
+      tap(newRole => {
+        console.log('Rol creado exitosamente:', newRole);
+      }),
       catchError(error => {
         console.error('Error al crear rol:', error);
+        console.error('Detalles del error:', error.error);
+        console.error('Estado HTTP:', error.status);
+        console.error('Mensaje:', error.message);
         throw error;
       })
     );
   }
 
   // Actualizar un rol existente
-  updateRole(id: number, role: Role): Observable<Role> {
+  updateRole(id: number, role: Partial<Role>): Observable<Role> {
+    // Validar que el ID sea válido
+    if (!id || isNaN(id)) {
+      console.error('Error: ID de rol inválido para actualización:', id);
+      return throwError(() => new Error('ID de rol inválido'));
+    }
+    
+    console.log('Servicio - Actualizando rol con ID:', id);
+    console.log('URL completa:', `${this.apiUrl}/roles/${id}`);
+    console.log('Datos para actualizar:', role);
+    console.log('Headers:', this.getRequestHeaders());
+    
     return this.http.put<Role>(`${this.apiUrl}/roles/${id}`, role, {
       headers: this.getRequestHeaders()
     }).pipe(
-      tap(updatedRole => console.log('Rol actualizado:', updatedRole)),
+      tap(updatedRole => {
+        console.log('Rol actualizado exitosamente:', updatedRole);
+      }),
       catchError(error => {
         console.error(`Error al actualizar rol con ID ${id}:`, error);
+        console.error('Detalles del error:', error.error);
+        console.error('Estado HTTP:', error.status);
+        console.error('Mensaje:', error.message);
         throw error;
       })
     );
