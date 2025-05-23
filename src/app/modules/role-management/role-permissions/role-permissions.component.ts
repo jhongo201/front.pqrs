@@ -281,34 +281,85 @@ export class RolePermissionsComponent implements OnInit {
   savePermissions(): void {
     this.isLoading = true;
     
-    // Preparamos los permisos para enviar al backend
+    // Verificar que el ID del rol sea válido
+    if (!this.roleId || isNaN(this.roleId) || this.roleId <= 0) {
+      console.error('ID de rol inválido:', this.roleId);
+      this.showSnackBar('Error: ID de rol inválido');
+      this.isLoading = false;
+      return;
+    }
+    
+    console.log('Preparando permisos para guardar. ID del rol:', this.roleId);
+    
+    // Crear un array para almacenar solo los permisos esenciales
     const permissionsToSave: PermisoRol[] = [];
     
-    this.moduleGroups.forEach(module => {
-      module.rutas.forEach(route => {
-        permissionsToSave.push({
-          idRol: this.roleId,
-          idRuta: route.idRuta,
-          puedeLeer: route.permisos.puedeLeer,
-          puedeEscribir: route.permisos.puedeEscribir,
-          puedeActualizar: route.permisos.puedeActualizar,
-          puedeEliminar: route.permisos.puedeEliminar,
-          estado: true
+    try {
+      // Recorrer todos los módulos y rutas para obtener los permisos actualizados
+      this.moduleGroups.forEach(module => {
+        module.rutas.forEach(route => {
+          // Verificar que la ruta tenga un ID válido
+          if (!route.idRuta || isNaN(route.idRuta)) {
+            console.warn('Ruta sin ID válido:', route);
+            return; // Saltar esta ruta
+          }
+          
+          // Crear objeto de permiso con solo los campos necesarios
+          const permission: PermisoRol = {
+            idRol: this.roleId,
+            idRuta: route.idRuta,
+            puedeLeer: !!route.permisos.puedeLeer, // Convertir a booleano
+            puedeEscribir: !!route.permisos.puedeEscribir,
+            puedeActualizar: !!route.permisos.puedeActualizar,
+            puedeEliminar: !!route.permisos.puedeEliminar,
+            estado: true
+          };
+          
+          permissionsToSave.push(permission);
         });
       });
-    });
-    
-    this.roleService.updateRolePermissions(this.roleId, permissionsToSave).subscribe({
-      next: () => {
-        this.showSnackBar('Permisos actualizados correctamente');
-        this.dialogRef.close(true);
-      },
-      error: (error) => {
-        console.error('Error al guardar permisos:', error);
-        this.showSnackBar('Error al guardar los permisos');
-        this.isLoading = false;
+      
+      // Verificar que haya permisos para guardar
+      if (permissionsToSave.length === 0) {
+        throw new Error('No hay permisos para guardar');
       }
-    });
+      
+      console.log(`Guardando ${permissionsToSave.length} permisos para el rol ${this.roleId}`);
+      
+      this.roleService.updateRolePermissions(this.roleId, permissionsToSave).subscribe({
+        next: (response) => {
+          console.log('Respuesta exitosa al guardar permisos:', response);
+          this.showSnackBar('Permisos actualizados correctamente');
+          this.dialogRef.close(true);
+        },
+        error: (error) => {
+          console.error('Error al guardar permisos:', error);
+          
+          // Manejar diferentes tipos de errores
+          let errorMessage = 'Error al guardar los permisos';
+          
+          if (error && error.message) {
+            // Extraer mensaje de error más descriptivo
+            if (error.message.includes('Http failure')) {
+              if (error.status === 500) {
+                errorMessage = 'Error interno del servidor. Contacte al administrador.';
+              } else {
+                errorMessage = `Error de comunicación con el servidor (${error.status})`;
+              }
+            } else {
+              errorMessage = error.message;
+            }
+          }
+          
+          this.showSnackBar(errorMessage);
+          this.isLoading = false;
+        }
+      });
+    } catch (error) {
+      console.error('Error al preparar los permisos:', error);
+      this.showSnackBar(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      this.isLoading = false;
+    }
   }
 
   toggleAllPermissions(module: ModuleWithRoutes, permission: string, value: boolean): void {

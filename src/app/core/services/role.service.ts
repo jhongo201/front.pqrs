@@ -154,16 +154,68 @@ export class RoleService {
 
   // Actualizar permisos de un rol
   updateRolePermissions(roleId: number, permissions: PermisoRol[]): Observable<any> {
-    return this.http.put(`${this.apiUrl}/permisos-rol/actualizar-batch`, {
+    // Verificar que el roleId sea válido
+    if (!roleId || isNaN(roleId) || roleId <= 0) {
+      console.error('ID de rol inválido:', roleId);
+      return throwError(() => new Error('ID de rol inválido'));
+    }
+    
+    // Verificar que hay permisos para actualizar
+    if (!permissions || permissions.length === 0) {
+      console.error('No hay permisos para actualizar');
+      return throwError(() => new Error('No hay permisos para actualizar'));
+    }
+    
+    // Adaptar los permisos al formato esperado por el endpoint
+    const formattedPermissions = permissions.map(permission => ({
+      idRuta: permission.idRuta,
+      puedeLeer: permission.puedeLeer || false,
+      puedeEscribir: permission.puedeEscribir || false,
+      puedeActualizar: permission.puedeActualizar || false,
+      puedeEliminar: permission.puedeEliminar || false
+      // No incluir estado ni idRol en cada permiso
+    }));
+    
+    console.log('Enviando actualización de permisos para rol:', roleId);
+    console.log(`Total de permisos a actualizar: ${formattedPermissions.length}`);
+    
+    // Crear la estructura de datos para enviar al backend
+    const payload = {
       idRol: roleId,
-      permisos: permissions
-    }, {
+      permisos: formattedPermissions
+    };
+    
+    // Registrar solo una muestra de los datos para evitar saturar la consola
+    console.log('Muestra de los primeros 5 permisos:', JSON.stringify({
+      idRol: roleId,
+      permisos: formattedPermissions.slice(0, 5)
+    }, null, 2));
+    
+    // Usar el endpoint correcto con método POST
+    return this.http.post(`${this.apiUrl}/permisos-rol/asignar`, payload, {
       headers: this.getRequestHeaders()
     }).pipe(
-      tap(() => console.log(`Permisos actualizados para rol ${roleId}`)),
+      tap(response => {
+        console.log(`Permisos actualizados exitosamente para rol ${roleId}:`, response);
+      }),
       catchError(error => {
         console.error(`Error al actualizar permisos para rol ${roleId}:`, error);
-        throw error;
+        
+        // Intentar obtener más información sobre el error
+        let errorMessage = 'Error desconocido';
+        
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        if (error.status === 500) {
+          console.error('Error interno del servidor. Verifique el formato de los datos enviados.');
+          console.error('Detalles del error:', error.error);
+        }
+        
+        return throwError(() => new Error(`Error al actualizar permisos: ${errorMessage}`));
       })
     );
   }
