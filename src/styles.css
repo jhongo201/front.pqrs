@@ -3,3 +3,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Estilos personalizados para diálogos */
+.custom-dialog-container .mat-mdc-dialog-container {
+  padding: 0;
+  overflow: hidden;
+}
+
+.custom-dialog-container .mat-mdc-dialog-container .mdc-dialog__surface {
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.custom-dialog-container .mat-mdc-dialog-content {
+  max-height: none;
+  overflow: hidden;
+}
+
+/* Eliminar barras de desplazamiento */
+.custom-dialog-container .mat-mdc-dialog-content::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-dialog-container .mat-mdc-dialog-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

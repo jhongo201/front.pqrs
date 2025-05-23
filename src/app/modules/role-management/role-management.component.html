@@ -58,7 +58,7 @@
         <table class="pqrs-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>#</th>
               <th>Nombre</th>
               <th>Descripción</th>
               <th>Estado</th>
@@ -66,9 +66,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let role of filteredRoles">
+            <tr *ngFor="let role of filteredRoles; let i = index">
               <td>
-                <span class="radicado-badge">{{ role.id }}</span>
+                <span class="radicado-badge">{{ i + 1 }}</span>
               </td>
               <td>{{ role.nombre }}</td>
               <td>{{ role.descripcion || 'Sin descripción' }}</td>

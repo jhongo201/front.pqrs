@@ -15,6 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RoleFormComponent } from './role-form/role-form.component';
 import { RolePermissionsComponent } from './role-permissions/role-permissions.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-role-management',
@@ -34,6 +35,7 @@ import { RolePermissionsComponent } from './role-permissions/role-permissions.co
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    ConfirmDialogComponent,
     RoleFormComponent,
     RolePermissionsComponent
   ],
@@ -181,22 +183,59 @@ export class RoleManagementComponent implements OnInit {
   }
 
   confirmDeleteRole(role: Role): void {
-    if (confirm(`¿Está seguro que desea eliminar el rol "${role.nombre}"?`)) {
-      this.deleteRole(role.id);
+    // Verificar que el rol tenga un ID válido
+    // @ts-ignore - Ignorar error de TypeScript por propiedad idRol
+    const roleId = (!isNaN(role.id) && role.id) ? role.id : (role.idRol || null);
+    
+    if (!roleId) {
+      console.error('Error: Rol inválido o sin ID', role);
+      this.showSnackBar('Error: No se puede eliminar este rol (ID inválido)');
+      return;
     }
+    
+    console.log(`Confirmando eliminación del rol: ${role.nombre} (ID: ${roleId})`);
+    
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      panelClass: 'custom-dialog-container',
+      disableClose: true,
+      autoFocus: false,
+      data: {
+        title: 'Confirmar eliminación',
+        message: `¿Está seguro que desea eliminar el rol "${role.nombre}"?`,
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.deleteRole(roleId);
+      }
+    });
   }
 
   deleteRole(id: number): void {
+    // Validar que el ID sea un número válido
+    if (!id || isNaN(id) || id <= 0) {
+      console.error('Error: ID de rol inválido para eliminación:', id);
+      this.showSnackBar('Error: No se puede eliminar el rol con ID inválido');
+      return;
+    }
+    
+    console.log(`Eliminando rol con ID: ${id}`);
     this.isLoading = true;
+    
     this.roleService.deleteRole(id).subscribe({
       next: () => {
+        console.log(`Rol con ID ${id} eliminado correctamente`);
         this.showSnackBar('Rol eliminado correctamente');
         this.loadRoles();
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error al eliminar rol:', err);
-        this.showSnackBar('Error al eliminar el rol');
+        console.error(`Error al eliminar rol con ID ${id}:`, err);
+        this.showSnackBar('Error al eliminar el rol. Intente nuevamente.');
         this.isLoading = false;
       }
     });

@@ -120,13 +120,24 @@ export class RoleService {
 
   // Eliminar un rol
   deleteRole(id: number): Observable<any> {
+    // Validar que el ID sea válido
+    if (!id || isNaN(id) || id <= 0) {
+      console.error('Error: ID de rol inválido para eliminación:', id);
+      return throwError(() => new Error(`ID de rol inválido: ${id}`));
+    }
+    
+    console.log(`Servicio - Eliminando rol con ID: ${id}`);
+    
     return this.http.delete(`${this.apiUrl}/roles/${id}`, {
       headers: this.getRequestHeaders()
     }).pipe(
-      tap(() => console.log(`Rol con ID ${id} eliminado`)),
+      tap(() => console.log(`Rol con ID ${id} eliminado exitosamente`)),
       catchError(error => {
         console.error(`Error al eliminar rol con ID ${id}:`, error);
-        throw error;
+        if (error.status === 404) {
+          return throwError(() => new Error(`El rol con ID ${id} no existe`));
+        }
+        return throwError(() => new Error(`Error al eliminar rol: ${error.message || 'Error desconocido'}`));
       })
     );
   }
