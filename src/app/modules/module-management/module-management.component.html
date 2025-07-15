@@ -1,0 +1,129 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-title">
+      <h2><i class="fas fa-cubes"></i> Gestión de Módulos</h2>
+      <p>Administre los módulos del sistema</p>
+    </div>
+    <div class="header-actions">
+      <form [formGroup]="searchForm" class="search-form">
+        <div class="search-input-container">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            formControlName="searchTerm" 
+            placeholder="Buscar módulos..." 
+            class="search-input"
+          >
+          <button 
+            *ngIf="searchForm.get('searchTerm')?.value" 
+            type="button" 
+            class="clear-search-btn" 
+            (click)="searchForm.get('searchTerm')?.setValue('')"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </form>
+      <button 
+        class="primary-btn" 
+        (click)="openModuleForm()"
+        matTooltip="Crear nuevo módulo"
+      >
+        <i class="fas fa-plus"></i> Nuevo Módulo
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-content">
+    <div class="card">
+      <div class="card-header">
+        <div class="user-info">
+          <i class="fas fa-cubes"></i>
+          <div>
+            <h3>Módulos del Sistema</h3>
+            <span class="pqrs-count">{{ filteredModules.length }} módulos encontrados</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="pqrs-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let module of filteredModules; let i = index">
+              <td>
+                <span class="radicado-badge">{{ i + 1 }}</span>
+              </td>
+              <td>{{ module.nombre }}</td>
+              <td>{{ module.descripcion || 'Sin descripción' }}</td>
+              <td>
+                <span [class]="'status-badge ' + (module.estado ? 'status-active' : 'status-inactive')">
+                  {{ module.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button 
+                    class="icon-btn edit-btn" 
+                    (click)="openModuleForm(module)"
+                    matTooltip="Editar módulo"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button 
+                    class="icon-btn status-btn" 
+                    [class.activate-btn]="!module.estado"
+                    [class.deactivate-btn]="module.estado"
+                    (click)="toggleModuleStatus(module)"
+                    matTooltip="{{ module.estado ? 'Desactivar' : 'Activar' }} módulo"
+                  >
+                    <i class="fas" [class.fa-toggle-on]="module.estado" [class.fa-toggle-off]="!module.estado"></i>
+                  </button>
+                  <button 
+                    class="icon-btn delete-btn" 
+                    (click)="confirmDeleteModule(module)"
+                    matTooltip="Eliminar módulo"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <!-- Mensaje cuando no hay módulos -->
+            <tr *ngIf="filteredModules.length === 0 && !isLoading">
+              <td colspan="5" class="empty-table-message">
+                <div *ngIf="error">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <p>{{ error }}</p>
+                  <button class="retry-btn" (click)="loadModules()">
+                    <i class="fas fa-sync-alt"></i> Reintentar
+                  </button>
+                </div>
+                <div *ngIf="!error">
+                  <i class="fas fa-info-circle"></i>
+                  <p>No se encontraron módulos</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Spinner de carga -->
+        <div *ngIf="isLoading" class="loading-spinner">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Cargando módulos...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -22,6 +22,7 @@ import { AssignedPqrsComponent } from './modules/pqrs/assigned-pqrs/assigned-pqr
 import { MyAssignedPqrsComponent } from './modules/pqrs/my-assigned-pqrs/my-assigned-pqrs.component';
 import { ConsultaPqrsComponent } from './modules/pqrs/consulta-pqrs/consulta-pqrs.component';
 import { RoleManagementComponent } from './modules/role-management/role-management.component';
+import { ModuleManagementComponent } from './modules/module-management/module-management.component';
 
 
 export const routes: Routes = [
@@ -43,6 +44,11 @@ export const routes: Routes = [
   {
     path: 'roles',
     component: RoleManagementComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'modulos',
+    component: ModuleManagementComponent,
     canActivate: [AuthGuard]
   },
   {

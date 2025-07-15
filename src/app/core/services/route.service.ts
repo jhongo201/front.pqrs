@@ -110,7 +110,7 @@ export class RouteService {
     // Crear una nueva solicitud y almacenarla
     console.log(`Cargando permisos para el rol con ID: ${roleId}`);
     
-    const request = this.http.get<RolePermission[]>(`${environment.apiUrl}/permisos-rol/rol/${roleId}`).pipe(
+    const request = this.http.get<RolePermission[]>(`${environment.apiUrl}/permisorols/rol/${roleId}`).pipe(
       tap(permissions => console.log(`Permisos cargados para rol ${roleId}:`, permissions.length)),
       map(permissions => {
         this.userPermissions = permissions;

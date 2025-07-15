@@ -1,0 +1,102 @@
+<div class="modal-container">
+  <div class="modal-header">
+    <h3>
+      <i class="fas" [ngClass]="isEditMode ? 'fa-edit' : 'fa-plus-circle'"></i>
+      {{ formTitle }}
+    </h3>
+    <button class="btn-close" (click)="onCancel()" [disabled]="isLoading">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="modal-body" [class.blur]="isLoading">
+    <form [formGroup]="moduleForm" class="form-grid">
+      <div class="form-group">
+        <label for="nombre">Nombre del Módulo <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="nombre"
+          formControlName="nombre" 
+          placeholder="Ej: Administración"
+          [class.is-invalid]="moduleForm.get('nombre')?.invalid && moduleForm.get('nombre')?.touched"
+        >
+        <div class="error-message" *ngIf="moduleForm.get('nombre')?.hasError('required') && moduleForm.get('nombre')?.touched">
+          El nombre del módulo es requerido
+        </div>
+        <div class="error-message" *ngIf="moduleForm.get('nombre')?.hasError('maxlength')">
+          El nombre no debe exceder los 100 caracteres
+        </div>
+        <div class="char-count" [class.limit-reached]="(moduleForm.get('nombre')?.value?.length || 0) >= 100">
+          {{ moduleForm.get('nombre')?.value?.length || 0 }}/100
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea 
+          id="descripcion"
+          formControlName="descripcion" 
+          placeholder="Ingrese una descripción para el módulo"
+          rows="3"
+          [class.is-invalid]="moduleForm.get('descripcion')?.invalid && moduleForm.get('descripcion')?.touched"
+        ></textarea>
+        <div class="error-message" *ngIf="moduleForm.get('descripcion')?.hasError('maxlength')">
+          La descripción no debe exceder los 255 caracteres
+        </div>
+        <div class="char-count" [class.limit-reached]="(moduleForm.get('descripcion')?.value?.length || 0) >= 255">
+          {{ moduleForm.get('descripcion')?.value?.length || 0 }}/255
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Estado</label>
+        <div class="toggle-container">
+          <div class="toggle-switch">
+            <input type="checkbox" id="estado" formControlName="estado" class="toggle-input">
+            <label for="estado" class="toggle-label">
+              <span class="toggle-inner"></span>
+              <span class="toggle-switch"></span>
+            </label>
+          </div>
+          <span class="toggle-text">{{ moduleForm.get('estado')?.value ? 'Activo' : 'Inactivo' }}</span>
+        </div>
+        <div class="hint-text">
+          Los módulos inactivos no estarán disponibles en el sistema
+        </div>
+      </div>
+
+      <!-- Mensaje de error general -->
+      <div *ngIf="error" class="alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ error }}</span>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <div class="loading-indicator" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <span>Procesando...</span>
+    </div>
+    <div class="action-buttons">
+      <button 
+        type="button" 
+        class="btn-secondary" 
+        (click)="onCancel()"
+        [disabled]="isLoading"
+      >
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+      <button 
+        type="button" 
+        class="btn-primary" 
+        (click)="onSubmit()"
+        [disabled]="moduleForm.invalid || isLoading"
+      >
+        <i class="fas" [ngClass]="isEditMode ? 'fa-save' : 'fa-plus'"></i>
+        {{ submitButtonText }}
+      </button>
+    </div>
+  </div>
+</div>

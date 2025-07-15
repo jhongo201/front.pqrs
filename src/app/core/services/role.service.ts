@@ -145,7 +145,7 @@ export class RoleService {
   // Obtener permisos de un rol
   getRolePermissions(roleId: number): Observable<PermisoRol[]> {
     console.log(`Obteniendo permisos para el rol con ID ${roleId}`);
-    return this.http.get<PermisoRol[]>(`${this.apiUrl}/permisos-rol/rol/${roleId}`, {
+    return this.http.get<PermisoRol[]>(`${this.apiUrl}/permisorols/rol/${roleId}`, {
       headers: this.getRequestHeaders()
     }).pipe(
       tap(permissions => {

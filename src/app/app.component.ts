@@ -73,6 +73,19 @@ export class AppComponent implements OnInit {
     // Obtener la ruta base (primer segmento)
     const baseSegment = '/' + currentPath.split('/')[1];
     
+    // Rutas protegidas que siempre deben mostrar el dashboard completo
+    const protectedRoutes = [
+      '/modulos',
+      '/roles',
+      '/dashboard',
+      '/usuarios'
+    ];
+    
+    // Si la ruta actual está en la lista de rutas protegidas, mostrar el dashboard
+    if (protectedRoutes.includes(baseSegment)) {
+      return true;
+    }
+    
     // Verificar si alguna de las rutas (completa o base) es pública
     const isPublicFull = this.routeService.isPublicRoute(currentPath);
     const isPublicBase = this.routeService.isPublicRoute(baseSegment);
