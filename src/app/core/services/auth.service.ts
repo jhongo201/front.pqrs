@@ -133,7 +133,16 @@ export class AuthService {
             this.userDataSubject.next(transformedResponse);
             
             console.log('Datos de usuario transformados:', transformedResponse);
+            console.log('Rol del usuario para redirección:', transformedResponse.rol.nombre);
+          
+          // Redirigir según el rol del usuario
+          if (transformedResponse.rol.nombre === 'USUARIO') {
+            console.log('AuthService - Redirigiendo usuario a user-dashboard');
+            this.router.navigate(['/user-dashboard']);
+          } else {
+            console.log('AuthService - Redirigiendo a dashboard principal');
             this.router.navigate(['/dashboard']);
+          }
           } else {
             console.error('Respuesta de login inválida:', response);
           }
@@ -203,6 +212,14 @@ export class AuthService {
       );
   }
   
+  /**
+   * Obtiene los datos del usuario actual
+   * @returns UserData | null
+   */
+  getCurrentUser(): UserData | null {
+    return this.userDataSubject.value;
+  }
+
   /**
    * Obtiene el ID del rol por su nombre
    * @param rolNombre Nombre del rol

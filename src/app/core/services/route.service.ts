@@ -49,11 +49,34 @@ export class RouteService {
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Obtiene el rol del usuario actual desde localStorage
+   * @returns number | null
+   */
+  private getCurrentUserRole(): number | null {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        return typeof user.rol === 'object' ? user.rol.id : null;
+      }
+    } catch (error) {
+      console.error('Error obteniendo rol del usuario:', error);
+    }
+    return null;
+  }
+
   loadRoutes(): Observable<Route[]> {
     return this.http.get<Route[]>(`${environment.apiUrl}/rutas`).pipe(
-    //  tap(routes => console.log('Rutas sin procesar:', routes)),
+      tap(routes => {
+        console.log('RouteService - Rutas cargadas:', routes.length);
+        // Log específico de rutas PQRS
+        const pqrsRoutes = routes.filter(r => r.ruta.includes('pqrs'));
+        console.log('RouteService - Rutas PQRS encontradas:', pqrsRoutes.map(r => ({ id: r.idRuta, ruta: r.ruta })));
+      }),
       map(routes => {
         this.routes = routes;
+        console.log('RouteService - Rutas almacenadas:', this.routes.length);
         return this.routes;
       })
     );
@@ -73,6 +96,7 @@ export class RouteService {
       const existingPermission = this.userPermissions.find(p => p.idRol === roleId);
       if (existingPermission) {
         console.log(`Usando permisos en caché para rol ${roleId}`);
+        console.log('Permisos en caché:', this.userPermissions.map(p => ({ idRuta: p.idRuta, ruta: this.routes.find(r => r.idRuta === p.idRuta)?.ruta })));
         return of(this.userPermissions);
       }
     }
@@ -152,44 +176,73 @@ export class RouteService {
   }
 
   hasPermission(path: string, action: 'read' | 'write' | 'update' | 'delete'): boolean {
+    console.log(`RouteService - Verificando permiso para: ${path}, acción: ${action}`);
+    console.log(`RouteService - Rutas disponibles: ${this.routes.length}`);
+    console.log(`RouteService - Permisos de usuario: ${this.userPermissions.length}`);
+    
+    // Permitir acceso especial a /user-dashboard para usuarios con rol USUARIO (ID: 2)
+    if (path === '/user-dashboard' && action === 'read') {
+      const userRole = this.getCurrentUserRole();
+      console.log(`RouteService - Verificación especial user-dashboard, rol: ${userRole}`);
+      if (userRole === 2) { // Rol USUARIO
+        console.log('RouteService - Acceso permitido a user-dashboard para rol USUARIO');
+        return true;
+      }
+    }
+    
     // Si es una ruta pública y la acción es lectura, permitir
     if (this.isPublicRoute(path) && action === 'read') {
+      console.log(`RouteService - Ruta pública permitida: ${path}`);
       return true;
     }
 
     const route = this.findMatchingRoute(path);
     if (!route) {
-    //  console.log('Ruta no encontrada:', path);
+      console.log(`RouteService - Ruta no encontrada: ${path}`);
       return false;
     }
+    
+    console.log(`RouteService - Ruta encontrada:`, route);
 
     const permission = this.userPermissions.find(p => p.idRuta === route.idRuta);
     if (!permission) {
-    //  console.log('Permiso no encontrado para la ruta:', route.idRuta);
+      console.log(`RouteService - Permiso no encontrado para la ruta: ${route.idRuta}`);
       return false;
     }
+    
+    console.log(`RouteService - Permiso encontrado:`, permission);
 
     const hasPermission = action === 'read' ? permission.puedeLeer :
                          action === 'write' ? permission.puedeEscribir :
                          action === 'update' ? permission.puedeActualizar :
                          permission.puedeEliminar;
 
-  //  console.log('Verificación de permiso:', { route, permission, action, hasPermission });
+    console.log(`RouteService - Resultado verificación:`, { route, permission, action, hasPermission });
     return hasPermission;
   }
 
   private findMatchingRoute(path: string): Route | undefined {
     const normalizedPath = this.normalizeRoute(path);
-    
+  
+  // Log específico para rutas problemáticas
+  if (path.includes('user-dashboard') || path.includes('pqrs/nuevo') || path.includes('pqrs')) {
+    console.log(`RouteService - Buscando ruta: ${path}`, {
+      pathOriginal: path,
+      pathNormalizado: normalizedPath,
+      rutasDisponibles: this.routes.filter(r => r.ruta.includes('pqrs') || r.ruta.includes('dashboard')).map(r => ({ id: r.idRuta, ruta: r.ruta, modulo: r.nombreModulo }))
+    });
+  }
+  
     // Obtener el segmento base y construir la ruta completa para PQRS
     const segments = normalizedPath.split('/').filter(Boolean);
     const baseSegment = '/' + segments[0];
     
     // Construir posibles rutas basadas en la estructura actual
+    // IMPORTANTE: Priorizar rutas frontend exactas sobre rutas API
     const possiblePaths = [
-      normalizedPath,                              // ruta original
-      `/api${normalizedPath}`,                     // con prefijo api
-      normalizedPath.replace('/api/', '/'),        // sin prefijo api
+      normalizedPath,                              // ruta original (prioridad 1)
+      normalizedPath.replace('/api/', '/'),        // sin prefijo api (prioridad 2)
+      `/api${normalizedPath}`,                     // con prefijo api (prioridad 3)
       `/api/pqrs/${segments.slice(1).join('/')}`,  // para subrutas de pqrs
       `/api${baseSegment}/${segments.slice(1).join('/')}` // para otras subrutas
     ].filter(Boolean); // eliminar posibles undefined
@@ -201,21 +254,42 @@ export class RouteService {
       posiblesRutas: possiblePaths
     });*/
 
-    const route = this.routes.find(route => {
-      const matches = possiblePaths.some(p => this.pathMatch(route.ruta, p));
-      if (matches) {
-      /*  console.log('Ruta coincidente encontrada:', {
-          rutaBD: route.ruta,
-          rutaActual: path,
-          coincidencia: true
-        });*/
-      }
-      return matches;
-    });
+    // Buscar coincidencias con prioridad: exactas primero, luego aproximadas
+    let route = null;
+    
+    // 1. Buscar coincidencia exacta primero
+    route = this.routes.find(r => r.ruta === normalizedPath);
+    
+    if (route && (path.includes('pqrs') || path.includes('dashboard'))) {
+      console.log('RouteService - Coincidencia EXACTA encontrada:', {
+        rutaBD: route.ruta,
+        rutaActual: path,
+        tipoCoincidencia: 'exacta'
+      });
+    }
+    
+    // 2. Si no hay coincidencia exacta, buscar con possiblePaths
+    if (!route) {
+      route = this.routes.find(route => {
+        const matches = possiblePaths.some(p => this.pathMatch(route.ruta, p));
+        if (matches && (path.includes('pqrs') || path.includes('dashboard'))) {
+          console.log('RouteService - Coincidencia APROXIMADA encontrada:', {
+            rutaBD: route.ruta,
+            rutaActual: path,
+            tipoCoincidencia: 'aproximada'
+          });
+        }
+        return matches;
+      });
+    }
 
-  /*  if (!route) {
-      console.log('No se encontró ruta coincidente para ninguna de las posibles rutas');
-    }*/
+    if (!route && (path.includes('pqrs') || path.includes('dashboard'))) {
+      console.log('RouteService - No se encontró ruta coincidente:', {
+        path,
+        possiblePaths,
+        rutasDisponibles: this.routes.filter(r => r.ruta.includes('pqrs')).map(r => r.ruta)
+      });
+    }
 
     return route;
   }

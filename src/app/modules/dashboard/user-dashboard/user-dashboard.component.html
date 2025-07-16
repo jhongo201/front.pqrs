@@ -1,0 +1,232 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Mi Dashboard</h1>
+        <p class="text-gray-600 mt-1">Bienvenido, {{ userName }}</p>
+      </div>
+      <button 
+        (click)="refreshData()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+        [disabled]="loading">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="flex items-center">
+      <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+      </svg>
+      <p class="text-red-800">{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Total PQRS -->
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-100 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Total PQRS</p>
+            <p class="text-2xl font-bold text-gray-900">{{ userStats.totalPqrs }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pendientes de Respuesta -->
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center">
+          <div class="p-2 bg-yellow-100 rounded-lg">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">En Proceso</p>
+            <p class="text-2xl font-bold text-gray-900">{{ userStats.pendientesRespuesta }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tiempo Promedio -->
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-100 rounded-lg">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Tiempo Promedio</p>
+            <p class="text-2xl font-bold text-gray-900">{{ userStats.tiempoPromedioRespuesta }} días</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones Rápidas -->
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div class="text-center">
+          <button 
+            routerLink="/pqrs/nuevo" 
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors">
+            Nueva PQRS
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Estados Chart -->
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">PQRS por Estado</h3>
+        <div class="space-y-4">
+          <div *ngFor="let estado of getEstadoKeys()" class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-4 h-4 rounded-full mr-3" [ngClass]="getEstadoConfig(estado).color"></div>
+              <span class="text-sm font-medium text-gray-700">{{ getEstadoConfig(estado).label }}</span>
+            </div>
+            <div class="flex items-center">
+              <span class="text-sm text-gray-600 mr-2">{{ userStats.porEstado[estado] }}</span>
+              <span class="text-xs text-gray-500">({{ getPercentage(userStats.porEstado[estado], userStats.totalPqrs) }}%)</span>
+            </div>
+          </div>
+          <!-- Progress bars -->
+          <div class="mt-4 space-y-2">
+            <div *ngFor="let estado of getEstadoKeys()" class="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                class="h-2 rounded-full transition-all duration-300" 
+                [ngClass]="getEstadoConfig(estado).color"
+                [style.width.%]="getPercentage(userStats.porEstado[estado], userStats.totalPqrs)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prioridades Chart -->
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">PQRS por Prioridad</h3>
+        <div class="space-y-4">
+          <div *ngFor="let prioridad of getPrioridadKeys()" class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-4 h-4 rounded-full mr-3" [ngClass]="getPrioridadConfig(prioridad).color"></div>
+              <span class="text-sm font-medium text-gray-700">{{ getPrioridadConfig(prioridad).label }}</span>
+            </div>
+            <div class="flex items-center">
+              <span class="text-sm text-gray-600 mr-2">{{ userStats.porPrioridad[prioridad] }}</span>
+              <span class="text-xs text-gray-500">({{ getPercentage(userStats.porPrioridad[prioridad], userStats.totalPqrs) }}%)</span>
+            </div>
+          </div>
+          <!-- Progress bars -->
+          <div class="mt-4 space-y-2">
+            <div *ngFor="let prioridad of getPrioridadKeys()" class="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                class="h-2 rounded-full transition-all duration-300" 
+                [ngClass]="getPrioridadConfig(prioridad).color"
+                [style.width.%]="getPercentage(userStats.porPrioridad[prioridad], userStats.totalPqrs)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent PQRS Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-gray-900">PQRS Recientes</h3>
+          <a routerLink="/pqrs/mis-pqrs" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            Ver todas →
+          </a>
+        </div>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Radicado</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridad</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let pqrs of recentPqrs" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ pqrs.numeroRadicado }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                <div class="max-w-xs truncate" [title]="pqrs.titulo">
+                  {{ pqrs.titulo }}
+                </div>
+                <div class="text-xs text-gray-500 mt-1">
+                  {{ pqrs.tema?.area?.nombre }} - {{ pqrs.tema?.nombre }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                      [ngClass]="getEstadoConfig(pqrs.estadoPqrs).color">
+                  {{ getEstadoConfig(pqrs.estadoPqrs).label }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100"
+                      [ngClass]="getPrioridadConfig(pqrs.prioridad).textColor">
+                  {{ getPrioridadConfig(pqrs.prioridad).label }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(pqrs.fechaCreacion) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <a [routerLink]="['/pqrs/detalle', pqrs.idPqrs]" 
+                   class="text-blue-600 hover:text-blue-900">
+                  Ver detalles
+                </a>
+              </td>
+            </tr>
+            <tr *ngIf="recentPqrs.length === 0">
+              <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                <div class="flex flex-col items-center">
+                  <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  <p class="text-lg font-medium text-gray-900 mb-1">No tienes PQRS registradas</p>
+                  <p class="text-gray-500 mb-4">Comienza creando tu primera solicitud</p>
+                  <button routerLink="/pqrs/nuevo" 
+                          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    Crear PQRS
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

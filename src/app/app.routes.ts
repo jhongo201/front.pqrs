@@ -23,6 +23,7 @@ import { MyAssignedPqrsComponent } from './modules/pqrs/my-assigned-pqrs/my-assi
 import { ConsultaPqrsComponent } from './modules/pqrs/consulta-pqrs/consulta-pqrs.component';
 import { RoleManagementComponent } from './modules/role-management/role-management.component';
 import { ModuleManagementComponent } from './modules/module-management/module-management.component';
+import { UserDashboardComponent } from './modules/dashboard/user-dashboard/user-dashboard.component';
 
 
 export const routes: Routes = [
@@ -39,6 +40,11 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'user-dashboard',
+    component: UserDashboardComponent,
     canActivate: [AuthGuard]
   },
   {

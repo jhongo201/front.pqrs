@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { UserService } from '../../core/services/user.service';
 import { PqrsService } from '../../core/services/pqrs.service';
+import { AuthService } from '../../core/services/auth.service';
 import { forkJoin } from 'rxjs';
-
 
 interface LabelMap {
   [key: string]: string;
@@ -131,9 +132,43 @@ export class DashboardComponent implements OnInit {
   periods: PeriodType[] = ['day', 'week', 'month'];
   periodos: Array<'Hoy' | 'Semana' | 'Mes'> = ['Hoy', 'Semana', 'Mes'];
 
-  constructor(private pqrsService: PqrsService) {}
+  constructor(
+    private pqrsService: PqrsService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
+    // Verificar inmediatamente si hay un usuario autenticado
+    const currentUser = this.authService.getCurrentUser();
+    console.log('Dashboard - Usuario actual:', currentUser);
+    
+    if (currentUser) {
+      const userRole = typeof currentUser.rol === 'object' ? currentUser.rol.nombre : currentUser.rol;
+      console.log('Dashboard - rol del usuario (inmediato):', userRole);
+      
+      if (userRole === 'USUARIO') {
+        console.log('Dashboard - Redirigiendo inmediatamente a user-dashboard');
+        this.router.navigate(['/user-dashboard']);
+        return;
+      }
+    }
+    
+    // También suscribirse a cambios futuros
+    this.authService.userData$.subscribe(userData => {
+      if (userData) {
+        const userRole = typeof userData.rol === 'object' ? userData.rol.nombre : userData.rol;
+        
+        // Si es un usuario regular, redirigir al dashboard personalizado
+        if (userRole === 'USUARIO') {
+          console.log('Dashboard - Redirigiendo a user-dashboard (observable)');
+          this.router.navigate(['/user-dashboard']);
+          return;
+        }
+      }
+    });
+
+    // Cargar estadísticas solo para administradores
     this.pqrsService.obtenerEstadisticas().subscribe({
       next: (data) => {
         this.stats = data;

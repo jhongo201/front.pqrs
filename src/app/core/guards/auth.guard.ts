@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router, ActivatedRouteSnapshot } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { RouteService } from '../services/route.service';
@@ -63,10 +63,25 @@ export class AuthGuard {
     }
 
     // Verificar permisos solo si la ruta no es pública y el usuario está autenticado
-    return this.routeService.loadUserPermissions(userRole).pipe(
+    // Cargar tanto las rutas como los permisos
+    return forkJoin({
+      routes: this.routeService.loadRoutes(),
+      permissions: this.routeService.loadUserPermissions(userRole)
+    }).pipe(
       map(() => {
         const hasPermission = this.routeService.hasPermission(fullPath, 'read');
-        console.log('Verificación de permiso:', { fullPath, hasPermission });
+        
+        // Log específico para rutas de PQRS
+        if (fullPath.includes('pqrs')) {
+          console.log('AuthGuard - Verificación ruta PQRS:', {
+            fullPath,
+            userRole,
+            hasPermission,
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          console.log('Verificación de permiso:', { fullPath, hasPermission });
+        }
         
         if (!hasPermission) {
           // Evitar bucle infinito: si ya estamos en dashboard y no tenemos permiso
@@ -95,20 +110,34 @@ export class AuthGuard {
       return '';
     }
 
-    let path = '';
+    // Construir la ruta completa incluyendo todos los segmentos padre
+    const pathSegments: string[] = [];
+    let currentRoute: ActivatedRouteSnapshot | null = route;
     
-    if (route.routeConfig && route.routeConfig.path !== undefined) {
-      path = route.routeConfig.path;
+    // Recorrer hacia atrás para obtener todos los segmentos
+    while (currentRoute) {
+      if (currentRoute.url.length > 0) {
+        // Agregar segmentos de la ruta actual al inicio del array
+        const segments = currentRoute.url.map(segment => segment.path);
+        pathSegments.unshift(...segments);
+      } else if (currentRoute.routeConfig && currentRoute.routeConfig.path) {
+        // Si no hay URL pero hay configuración de ruta
+        const configPath = currentRoute.routeConfig.path;
+        if (configPath !== '' && configPath !== '**') {
+          pathSegments.unshift(configPath);
+        }
+      }
+      currentRoute = currentRoute.parent;
     }
-
-    if (route.url.length > 0) {
-      path = route.url.map(segment => segment.path).join('/');
-    }
-
-    if (path === '') {
-      return '/';
-    }
-
-    return '/' + path.split('/').filter(Boolean).join('/');
+    
+    const fullPath = '/' + pathSegments.filter(Boolean).join('/');
+    
+    // Log para debugging
+    console.log('AuthGuard - Construcción de ruta:', {
+      segmentos: pathSegments,
+      rutaCompleta: fullPath
+    });
+    
+    return fullPath || '/';
   }
 }
