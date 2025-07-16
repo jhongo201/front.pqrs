@@ -203,7 +203,7 @@ export class RoleService {
     }, null, 2));
     
     // Usar el endpoint correcto con método POST
-    return this.http.post(`${this.apiUrl}/permisos-rol/asignar`, payload, {
+    return this.http.post(`${this.apiUrl}/permisorols/asignar`, payload, {
       headers: this.getRequestHeaders()
     }).pipe(
       tap(response => {

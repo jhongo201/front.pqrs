@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PqrsService } from '../../../core/services/pqrs.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { uploadProgress } from '../../../shared/operators/upload-progress.operator';
 import { filter } from 'rxjs/operators';
@@ -113,10 +114,15 @@ export class PqrsDetailComponent implements OnInit {
   seguimientosPaginados: Array<any> = [];
   hasMoreSeguimientos = true;
 
+  // Propiedades para control de roles
+  isUsuarioRole = false;
+  userRole: string = '';
+
   constructor(
     private route: ActivatedRoute,
     public router: Router,
     private pqrsService: PqrsService,
+    private authService: AuthService,
     private fb: FormBuilder
   ) {
     this.seguimientoForm = this.fb.group({
@@ -131,6 +137,9 @@ export class PqrsDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Detectar el rol del usuario
+    this.detectarRolUsuario();
+    
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.cargarPQRS(params['id']);
@@ -524,6 +533,21 @@ async enviarRespuesta() {
 
   contarSeguimientosSinIniciales(): number {
     return this.pqrs?.seguimientos?.filter(s => s.tipoSeguimiento !== 'ADJUNTO_INICIAL').length || 0;
+  }
+
+  // Método para detectar el rol del usuario
+  detectarRolUsuario(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.rol) {
+      // El rol puede ser string o objeto
+      this.userRole = typeof currentUser.rol === 'string' 
+        ? currentUser.rol 
+        : currentUser.rol.nombre;
+      this.isUsuarioRole = this.userRole === 'USUARIO';
+      console.log('PqrsDetail - Rol detectado:', this.userRole, 'Es USUARIO:', this.isUsuarioRole);
+    } else {
+      console.warn('PqrsDetail - No se pudo detectar el rol del usuario');
+    }
   }
 
 }

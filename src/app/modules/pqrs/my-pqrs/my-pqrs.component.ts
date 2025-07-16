@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PqrsService } from '../../../core/services/pqrs.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -50,9 +51,14 @@ export class MyPqrsComponent implements OnInit, OnDestroy {
   refreshInterval: any;
   private destroy$ = new Subject<void>();
 
-  constructor(private pqrsService: PqrsService) {}
+  // Propiedades para control de rol
+  isUsuarioRole: boolean = false;
+  userRole: string = '';
+
+  constructor(private pqrsService: PqrsService, private authService: AuthService) {}
 
   ngOnInit() {
+    this.detectarRolUsuario();
     this.cargarMisPQRS();
     // Actualizar cada 5 minutos
     this.refreshInterval = setInterval(() => {
@@ -193,5 +199,20 @@ export class MyPqrsComponent implements OnInit, OnDestroy {
     this.filtroPrioridad = '';
     this.searchTerm = '';
     this.aplicarFiltros();
+  }
+
+  // Método para detectar el rol del usuario
+  detectarRolUsuario(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.rol) {
+      // El rol puede ser string o objeto
+      this.userRole = typeof currentUser.rol === 'string' 
+        ? currentUser.rol 
+        : currentUser.rol.nombre;
+      this.isUsuarioRole = this.userRole === 'USUARIO';
+      console.log('MyPqrs - Rol detectado:', this.userRole, 'Es USUARIO:', this.isUsuarioRole);
+    } else {
+      console.warn('MyPqrs - No se pudo detectar el rol del usuario');
+    }
   }
 }

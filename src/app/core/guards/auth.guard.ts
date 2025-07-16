@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router, ActivatedRouteSnapshot } from '@angular/router';
 import { Observable, of, forkJoin } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, shareReplay } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { RouteService } from '../services/route.service';
 
@@ -9,6 +9,8 @@ import { RouteService } from '../services/route.service';
   providedIn: 'root'
 })
 export class AuthGuard {
+  private initializationCache: { [key: number]: Observable<any> } = {};
+  
   constructor(
     private authService: AuthService,
     private routeService: RouteService,
@@ -63,11 +65,21 @@ export class AuthGuard {
     }
 
     // Verificar permisos solo si la ruta no es pública y el usuario está autenticado
-    // Cargar tanto las rutas como los permisos
-    return forkJoin({
-      routes: this.routeService.loadRoutes(),
-      permissions: this.routeService.loadUserPermissions(userRole)
-    }).pipe(
+    // Cargar tanto las rutas como los permisos (con caché para evitar múltiples llamadas)
+    if (!this.initializationCache[userRole]) {
+      console.log(`AuthGuard - Inicializando caché para rol ${userRole}`);
+      this.initializationCache[userRole] = forkJoin({
+        routes: this.routeService.loadRoutes(),
+        permissions: this.routeService.loadUserPermissions(userRole)
+      }).pipe(
+        tap(() => console.log(`AuthGuard - Inicialización completada para rol ${userRole}`)),
+        shareReplay(1) // Compartir el resultado entre múltiples suscriptores
+      );
+    } else {
+      console.log(`AuthGuard - Usando caché existente para rol ${userRole}`);
+    }
+    
+    return this.initializationCache[userRole].pipe(
       map(() => {
         const hasPermission = this.routeService.hasPermission(fullPath, 'read');
         
@@ -84,11 +96,13 @@ export class AuthGuard {
         }
         
         if (!hasPermission) {
-          // Evitar bucle infinito: si ya estamos en dashboard y no tenemos permiso
-          if (fullPath === '/dashboard') {
-            console.log('Sin permiso para dashboard - redirigiendo a una página segura');
-            // Redirigir a una página que todos los usuarios puedan ver
-            this.router.navigate(['/welcome']);
+          // Lógica especial para usuarios USUARIO que intentan acceder a dashboard
+          if (fullPath === '/dashboard' && userRole === 2) {
+            console.log('Usuario USUARIO sin permiso para dashboard - redirigiendo a user-dashboard');
+            this.router.navigate(['/user-dashboard']);
+          } else if (fullPath === '/dashboard') {
+            console.log('Sin permiso para dashboard - redirigiendo a login');
+            this.router.navigate(['/login']);
           } else {
             console.log('Sin permiso - redirigiendo a dashboard');
             this.router.navigate(['/dashboard']);

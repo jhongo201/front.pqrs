@@ -32,6 +32,7 @@ interface RolePermission {
 export class RouteService {
   private routes: Route[] = [];
   private userPermissions: RolePermission[] = [];
+  private currentRoleId: number | null = null;
 
   // Rutas que siempre son públicas
   private readonly ALWAYS_PUBLIC_ROUTES = [
@@ -66,18 +67,33 @@ export class RouteService {
     return null;
   }
 
+  /**
+   * Carga las rutas desde el backend con caché
+   * @returns Observable con las rutas
+   */
   loadRoutes(): Observable<Route[]> {
+    // Si ya tenemos rutas cargadas, devolver las existentes
+    if (this.routes.length > 0) {
+      console.log('RouteService - Usando rutas en caché:', this.routes.length);
+      return of(this.routes);
+    }
+
+    console.log('RouteService - Cargando rutas desde backend...');
     return this.http.get<Route[]>(`${environment.apiUrl}/rutas`).pipe(
       tap(routes => {
-        console.log('RouteService - Rutas cargadas:', routes.length);
+        console.log('RouteService - Rutas cargadas desde backend:', routes.length);
         // Log específico de rutas PQRS
         const pqrsRoutes = routes.filter(r => r.ruta.includes('pqrs'));
         console.log('RouteService - Rutas PQRS encontradas:', pqrsRoutes.map(r => ({ id: r.idRuta, ruta: r.ruta })));
       }),
       map(routes => {
         this.routes = routes;
-        console.log('RouteService - Rutas almacenadas:', this.routes.length);
+        console.log('RouteService - Rutas almacenadas en caché:', this.routes.length);
         return this.routes;
+      }),
+      catchError(error => {
+        console.error('RouteService - Error cargando rutas:', error);
+        return of([]);
       })
     );
   }
@@ -91,14 +107,11 @@ export class RouteService {
    * @returns Observable con los permisos del rol
    */
   loadUserPermissions(roleId?: number): Observable<RolePermission[]> {
-    // Si ya tenemos permisos cargados y se solicita el mismo rol, devolver los existentes
-    if (this.userPermissions.length > 0 && roleId !== undefined) {
-      const existingPermission = this.userPermissions.find(p => p.idRol === roleId);
-      if (existingPermission) {
-        console.log(`Usando permisos en caché para rol ${roleId}`);
-        console.log('Permisos en caché:', this.userPermissions.map(p => ({ idRuta: p.idRuta, ruta: this.routes.find(r => r.idRuta === p.idRuta)?.ruta })));
-        return of(this.userPermissions);
-      }
+    // Si ya tenemos permisos cargados para el mismo rol, devolver los existentes
+    if (this.userPermissions.length > 0 && this.currentRoleId === roleId) {
+      console.log(`Usando permisos en caché para rol ${roleId}`);
+      console.log('Permisos en caché:', this.userPermissions.length);
+      return of(this.userPermissions);
     }
 
     // Si no se proporciona ID, obtenerlo del localStorage
@@ -138,6 +151,7 @@ export class RouteService {
       tap(permissions => console.log(`Permisos cargados para rol ${roleId}:`, permissions.length)),
       map(permissions => {
         this.userPermissions = permissions;
+        this.currentRoleId = roleId;
         // Eliminar la solicitud del caché una vez completada
         delete this.permissionsRequests[roleId];
         return permissions;
@@ -190,6 +204,16 @@ export class RouteService {
       }
     }
     
+    // Verificación especial para /dashboard - usuarios USUARIO deben ir a /user-dashboard
+    if (path === '/dashboard' && action === 'read') {
+      const userRole = this.getCurrentUserRole();
+      console.log(`RouteService - Verificación especial dashboard, rol: ${userRole}`);
+      if (userRole === 2) { // Rol USUARIO
+        console.log('RouteService - Usuario USUARIO intentando acceder a /dashboard - debe usar /user-dashboard');
+        return false; // Forzar redirección
+      }
+    }
+    
     // Si es una ruta pública y la acción es lectura, permitir
     if (this.isPublicRoute(path) && action === 'read') {
       console.log(`RouteService - Ruta pública permitida: ${path}`);
@@ -223,16 +247,27 @@ export class RouteService {
 
   private findMatchingRoute(path: string): Route | undefined {
     const normalizedPath = this.normalizeRoute(path);
-  
-  // Log específico para rutas problemáticas
-  if (path.includes('user-dashboard') || path.includes('pqrs/nuevo') || path.includes('pqrs')) {
-    console.log(`RouteService - Buscando ruta: ${path}`, {
-      pathOriginal: path,
-      pathNormalizado: normalizedPath,
-      rutasDisponibles: this.routes.filter(r => r.ruta.includes('pqrs') || r.ruta.includes('dashboard')).map(r => ({ id: r.idRuta, ruta: r.ruta, modulo: r.nombreModulo }))
-    });
-  }
-  
+
+    // Log específico para rutas problemáticas
+    if (path.includes('user-dashboard') || path.includes('pqrs/nuevo') || path.includes('pqrs')) {
+      console.log(`RouteService - Buscando ruta: ${path}`, {
+        pathOriginal: path,
+        pathNormalizado: normalizedPath,
+        rutasDisponibles: this.routes.filter(r => r.ruta.includes('pqrs') || r.ruta.includes('dashboard')).map(r => ({ id: r.idRuta, ruta: r.ruta, modulo: r.nombreModulo }))
+      });
+      
+      // Log específico para rutas de detalle PQRS
+      if (path.match(/\/pqrs\/\d+/)) {
+        console.log(`RouteService - Detectada ruta de detalle PQRS: ${path}`);
+        const pqrsDetailRoutes = this.routes.filter(r => 
+          r.ruta === '/pqrs/{id}' || 
+          r.ruta === '/api/pqrs/{id}' || 
+          r.ruta.includes('pqrs') && r.ruta.includes('{id}')
+        );
+        console.log('RouteService - Rutas de detalle PQRS disponibles:', pqrsDetailRoutes);
+      }
+    }
+
     // Obtener el segmento base y construir la ruta completa para PQRS
     const segments = normalizedPath.split('/').filter(Boolean);
     const baseSegment = '/' + segments[0];
@@ -242,17 +277,11 @@ export class RouteService {
     const possiblePaths = [
       normalizedPath,                              // ruta original (prioridad 1)
       normalizedPath.replace('/api/', '/'),        // sin prefijo api (prioridad 2)
+      // Rutas API con menor prioridad
       `/api${normalizedPath}`,                     // con prefijo api (prioridad 3)
       `/api/pqrs/${segments.slice(1).join('/')}`,  // para subrutas de pqrs
       `/api${baseSegment}/${segments.slice(1).join('/')}` // para otras subrutas
     ].filter(Boolean); // eliminar posibles undefined
-
-  /*  console.log('Buscando coincidencia para rutas:', {
-      original: path,
-      normalizada: normalizedPath,
-      segmentos: segments,
-      posiblesRutas: possiblePaths
-    });*/
 
     // Buscar coincidencias con prioridad: exactas primero, luego aproximadas
     let route = null;
@@ -269,18 +298,37 @@ export class RouteService {
     }
     
     // 2. Si no hay coincidencia exacta, buscar con possiblePaths
+    // CRÍTICO: Priorizar rutas frontend sobre rutas API
     if (!route) {
+      // Primero buscar rutas que NO sean API
       route = this.routes.find(route => {
         const matches = possiblePaths.some(p => this.pathMatch(route.ruta, p));
-        if (matches && (path.includes('pqrs') || path.includes('dashboard'))) {
-          console.log('RouteService - Coincidencia APROXIMADA encontrada:', {
+        const isApiRoute = route.ruta.startsWith('/api/');
+        if (matches && !isApiRoute && (path.includes('pqrs') || path.includes('dashboard'))) {
+          console.log('RouteService - Coincidencia FRONTEND encontrada:', {
             rutaBD: route.ruta,
             rutaActual: path,
-            tipoCoincidencia: 'aproximada'
+            tipoCoincidencia: 'frontend-prioritaria'
           });
         }
-        return matches;
+        return matches && !isApiRoute;
       });
+      
+      // Si no se encuentra ruta frontend, entonces buscar API
+      if (!route) {
+        route = this.routes.find(route => {
+          const matches = possiblePaths.some(p => this.pathMatch(route.ruta, p));
+          const isApiRoute = route.ruta.startsWith('/api/');
+          if (matches && isApiRoute && (path.includes('pqrs') || path.includes('dashboard'))) {
+            console.log('RouteService - Coincidencia API encontrada (fallback):', {
+              rutaBD: route.ruta,
+              rutaActual: path,
+              tipoCoincidencia: 'api-fallback'
+            });
+          }
+          return matches && isApiRoute;
+        });
+      }
     }
 
     if (!route && (path.includes('pqrs') || path.includes('dashboard'))) {

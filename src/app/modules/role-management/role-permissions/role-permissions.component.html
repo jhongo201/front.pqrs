@@ -66,6 +66,7 @@
       <input 
         type="text" 
         [(ngModel)]="searchText" 
+        (input)="updateFilteredModules()"
         placeholder="Buscar por ruta o descripción"
         class="search-input"
       >
@@ -99,7 +100,7 @@
     </div>
     
     <div class="accordion">
-      <div class="accordion-item" *ngFor="let module of filterRoutes()">
+      <div class="accordion-item" *ngFor="let module of filteredModuleGroups">
         <div class="accordion-header" (click)="module.isExpanded = !module.isExpanded">
           <div class="accordion-title">
             <i class="fas fa-folder" [class.fa-folder-open]="module.isExpanded"></i>
@@ -230,7 +231,7 @@
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="filterRoutes().length === 0">
+      <div class="empty-state" *ngIf="filteredModuleGroups.length === 0">
         <i class="fas fa-search"></i>
         <span>No se encontraron rutas con el término "{{searchText}}"</span>
         <button class="btn-link" (click)="clearSearch()">Limpiar búsqueda</button>

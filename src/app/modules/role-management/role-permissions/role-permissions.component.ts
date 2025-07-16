@@ -68,6 +68,7 @@ export class RolePermissionsComponent implements OnInit {
   routes: any[] = [];
   permissions: PermisoRol[] = [];
   moduleGroups: ModuleWithRoutes[] = [];
+  filteredModuleGroups: ModuleWithRoutes[] = [];
   searchText = '';
   totalRoutes = 0;
 
@@ -212,17 +213,24 @@ export class RolePermissionsComponent implements OnInit {
       console.log('Este rol tiene muchos permisos, expandiendo módulos automáticamente');
       this.moduleGroups.forEach(module => module.isExpanded = true);
     }
+    
+    // Inicializar la lista filtrada
+    this.updateFilteredModules();
   }
 
-  filterRoutes(): ModuleWithRoutes[] {
+  /**
+   * Actualiza la lista filtrada de módulos basada en el texto de búsqueda
+   */
+  updateFilteredModules(): void {
     if (!this.searchText.trim()) {
-      return this.moduleGroups;
+      this.filteredModuleGroups = [...this.moduleGroups];
+      return;
     }
     
     const searchLower = this.searchText.toLowerCase();
     
     // Si hay un término de búsqueda, expandimos automáticamente los módulos que tienen coincidencias
-    return this.moduleGroups
+    this.filteredModuleGroups = this.moduleGroups
       .map(module => {
         const filteredRoutes = module.rutas.filter(route => 
           route.ruta.toLowerCase().includes(searchLower) || 
@@ -237,6 +245,13 @@ export class RolePermissionsComponent implements OnInit {
       })
       .filter(module => module.rutas.length > 0);
   }
+
+  /**
+   * Método legacy mantenido para compatibilidad
+   */
+  filterRoutes(): ModuleWithRoutes[] {
+    return this.filteredModuleGroups;
+  }
   
   /**
    * Limpia el campo de búsqueda
@@ -245,6 +260,8 @@ export class RolePermissionsComponent implements OnInit {
     this.searchText = '';
     // Restauramos el estado de expansión de los módulos
     this.moduleGroups.forEach(module => module.isExpanded = false);
+    // Actualizamos la lista filtrada
+    this.updateFilteredModules();
   }
   
   /**
@@ -255,7 +272,7 @@ export class RolePermissionsComponent implements OnInit {
       return this.totalRoutes;
     }
     
-    return this.filterRoutes()
+    return this.filteredModuleGroups
       .reduce((total, module) => total + module.rutas.length, 0);
   }
   

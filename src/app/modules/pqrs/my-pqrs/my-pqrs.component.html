@@ -141,14 +141,15 @@
                         title="Ver detalles">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button [routerLink]="['/pqrs', pqrs.idPqrs, 'seguimiento']" 
+                <button *ngIf="!isUsuarioRole" 
+                        [routerLink]="['/pqrs', pqrs.idPqrs, 'seguimiento']" 
                         class="btn-icon"
                         title="Agregar seguimiento">
                   <i class="fas fa-clipboard-list"></i>
                 </button>
                 
                 <!-- Dropdown personalizado para estados -->
-                <div class="dropdown" *ngIf="pqrs.estadoPqrs !== 'CERRADO'">
+                <div class="dropdown" *ngIf="pqrs.estadoPqrs !== 'CERRADO' && !isUsuarioRole">
                   <button class="btn-icon" 
                           (click)="mostrarOpcionesEstado($event, pqrs)"
                           title="Cambiar estado">
