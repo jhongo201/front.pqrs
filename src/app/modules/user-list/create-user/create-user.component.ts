@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { UserService } from '../../../core/services/user.service';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -31,6 +31,7 @@ interface FormValidations {
   styleUrls: ['./create-user.component.css'],
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule, PublicHeaderComponent, PublicFooterComponent, HeaderDashboardComponent],
+  encapsulation: ViewEncapsulation.None  // ← AGREGAR ESTA LÍNEA
 })
 export class CreateUserComponent implements OnInit {
   
@@ -55,6 +56,10 @@ export class CreateUserComponent implements OnInit {
   passwordHasLower = false;
   passwordHasNumber = false;
   passwordHasSpecial = false;
+
+  // Propiedades para el loading con pasos
+showLoadingSteps = false;
+currentStep = 0;
 
   // Valores predeterminados para usuarios externos
   //territorial => 4
@@ -226,6 +231,8 @@ export class CreateUserComponent implements OnInit {
   onSubmit(): void {
     if (this.userForm.valid) {
       this.loading = true;
+      this.showLoadingSteps = true;
+      this.currentStep = 1;
       this.errorMessage = '';
   
       const userData = this.isExternalUser ? 
@@ -236,26 +243,39 @@ export class CreateUserComponent implements OnInit {
         this.userService.registerExternalUser(userData) :
         this.userService.createUser(userData);
   
+      // Simular pasos del proceso
+      setTimeout(() => this.currentStep = 2, 500);
+      setTimeout(() => this.currentStep = 3, 1000);
+  
       request.subscribe({
         next: (response) => {
-          this.loading = false;
-          if (this.isExternalUser) {
-            this.showMessage('success', 'Registro exitoso. En breve recibirás un correo para activar tu cuenta.');
-            setTimeout(() => this.router.navigate(['/login']), 2000);
-          } else {
-            this.showMessage('success', 'Usuario creado exitosamente');
-            this.userForm.reset();
-            // Opcional: redirigir a la lista de usuarios
+          setTimeout(() => {
+            this.currentStep = 4;
             setTimeout(() => {
-              this.router.navigate(['/usuarios']);
-            }, 2000);
-          }
+              this.loading = false;
+              this.showLoadingSteps = false;
+              this.currentStep = 0;
+              
+              if (this.isExternalUser) {
+                this.showMessage('success', 'Registro exitoso. En breve recibirás un correo para activar tu cuenta.');
+                setTimeout(() => this.router.navigate(['/login']), 3000);
+              } else {
+                this.showMessage('success', 'Usuario creado exitosamente');
+                this.userForm.reset();
+                setTimeout(() => {
+                  this.router.navigate(['/usuarios']);
+                }, 2000);
+              }
+            }, 800);
+          }, 500);
         },
         error: (error) => {
           this.loading = false;
+          this.showLoadingSteps = false;
+          this.currentStep = 0;
           console.error('Error detallado:', error);
   
-          // Verificar si el error viene en el formato esperado
+          // [Mantener el mismo manejo de errores que ya tienes]
           if (error.error) {
             switch (error.error.code) {
               case 'USERNAME_EXISTS':
@@ -288,14 +308,6 @@ export class CreateUserComponent implements OnInit {
           } else {
             this.errorMessage = 'Error de conexión. Por favor, intente nuevamente.';
           }
-          
-          // Para debugging
-          console.log('Error response structure:', {
-            errorObject: error,
-            errorBody: error.error,
-            errorMessage: error.error?.message,
-            errorCode: error.error?.code
-          });
         }
       });
     } else {
@@ -326,11 +338,13 @@ export class CreateUserComponent implements OnInit {
         validators: [
           Validators.required,
           Validators.minLength(2),
+          Validators.maxLength(50),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
         ],
         messages: {
           required: 'El nombre es requerido',
           minlength: 'El nombre debe tener al menos 2 caracteres',
+          maxlength: 'El nombre no puede superar 50 caracteres',
           pattern: 'Solo se permiten letras y espacios'
         }
       },
@@ -338,11 +352,13 @@ export class CreateUserComponent implements OnInit {
         validators: [
           Validators.required,
           Validators.minLength(2),
+          Validators.maxLength(50),
           Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
         ],
         messages: {
           required: 'El apellido es requerido',
           minlength: 'El apellido debe tener al menos 2 caracteres',
+          maxlength: 'El apellido no puede superar 50 caracteres',
           pattern: 'Solo se permiten letras y espacios'
         }
       },
@@ -355,50 +371,86 @@ export class CreateUserComponent implements OnInit {
       numeroDocumento: {
         validators: [
           Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(15),
           Validators.pattern('^[0-9]+$')
         ],
         messages: {
           required: 'El número de documento es requerido',
+          minlength: 'El documento debe tener al menos 6 caracteres',
+          maxlength: 'El documento no puede superar 15 caracteres',
           pattern: 'Solo se permiten números'
         }
       },
       email: {
         validators: [
           Validators.required,
-          Validators.email
+          Validators.email,
+          Validators.maxLength(100)
         ],
         messages: {
           required: 'El correo electrónico es requerido',
-          email: 'Ingrese un correo electrónico válido'
+          email: 'Ingrese un correo electrónico válido',
+          maxlength: 'El correo no puede superar 100 caracteres'
         }
       },
       telefono: {
         validators: [
           Validators.required,
+          Validators.minLength(7),
+          Validators.maxLength(10),
           Validators.pattern('^[0-9]+$')
         ],
         messages: {
           required: 'El teléfono es requerido',
+          minlength: 'El teléfono debe tener al menos 7 dígitos',
+          maxlength: 'El teléfono no puede superar 10 dígitos',
           pattern: 'Solo se permiten números'
         }
       },
       username: {
-        validators: [Validators.required],
+        validators: [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(20),
+          Validators.pattern('^[a-zA-Z0-9._-]+$')
+        ],
         messages: {
-          required: 'El nombre de usuario es requerido'
+          required: 'El nombre de usuario es requerido',
+          minlength: 'El usuario debe tener al menos 3 caracteres',
+          maxlength: 'El usuario no puede superar 20 caracteres',
+          pattern: 'Solo se permiten letras, números, puntos, guiones y guiones bajos'
         }
       },
       password: {
         validators: [
           Validators.required,
-          Validators.minLength(8)
+          Validators.minLength(8),
+          Validators.maxLength(50),
+          this.passwordStrengthValidator
         ],
         messages: {
           required: 'La contraseña es requerida',
-          minLength: 'La contraseña debe tener al menos 8 caracteres'
+          minlength: 'La contraseña debe tener al menos 8 caracteres',
+          maxlength: 'La contraseña no puede superar 50 caracteres',
+          passwordStrength: 'La contraseña debe cumplir todos los requisitos de seguridad'
         }
       }
     };
+  }
+  
+  // Validador personalizado para la fortaleza de la contraseña
+  private passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
+    const password = control.value;
+    if (!password) return null;
+  
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[@$!%*?&]/.test(password);
+  
+    const valid = hasUpper && hasLower && hasNumber && hasSpecial;
+    return valid ? null : { passwordStrength: true };
   }
 
   // Método para obtener mensajes de error
