@@ -44,8 +44,11 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const rawToken = localStorage.getItem('token');
 
-  // No interceptar peticiones de autenticación
-  if (req.url.includes('/auth/login') || req.url.includes('/registro-externo')) {
+  // No interceptar peticiones de autenticación y PQRS públicas
+  if (req.url.includes('/auth/login') || 
+      req.url.includes('/registro-externo') ||
+      (req.url.includes('/api/pqrs/publico') && req.method === 'POST' && !rawToken)) {
+    console.log('JWT Interceptor - Permitiendo petición sin token:', req.url);
     return next(req);
   }
 

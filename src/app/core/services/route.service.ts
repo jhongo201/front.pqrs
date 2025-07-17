@@ -42,6 +42,7 @@ export class RouteService {
     '/',
     '/welcome',
     '/pqrs/nuevo-pqrs', 
+    '/api/pqrs/publico',          // Endpoint para crear PQRS públicas
     '/files',
     '/api/usuarios/registro',     // Endpoint de registro
     '/usuarios/registro',         // Ruta frontend de registro
@@ -174,18 +175,25 @@ export class RouteService {
   isPublicRoute(path: string): boolean {
     // Si es una ruta siempre pública, retornar true inmediatamente
     if (this.ALWAYS_PUBLIC_ROUTES.includes(path)) {
-     // console.log('Ruta siempre pública:', path);
+      console.log('RouteService - Ruta siempre pública:', path);
+      return true;
+    }
+
+    // Verificación especial para rutas de PQRS públicas
+    if (path.startsWith('/api/pqrs/publico') || path === '/pqrs/nuevo-pqrs') {
+      console.log('RouteService - Ruta PQRS pública detectada:', path);
       return true;
     }
 
     // Si no hay rutas cargadas, considerar privada
     if (!this.routes || this.routes.length === 0) {
+      console.log('RouteService - No hay rutas cargadas, considerando privada:', path);
       return false;
     }
 
     const route = this.findMatchingRoute(path);
     const isPublic = route?.esPublica ?? false;
-  //  console.log('Verificación de ruta pública:', { path, route, isPublic });
+    console.log('RouteService - Verificación de ruta pública:', { path, route: route?.ruta, isPublic });
     return isPublic;
   }
 

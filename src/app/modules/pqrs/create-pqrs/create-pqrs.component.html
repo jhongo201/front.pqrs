@@ -232,4 +232,60 @@
     </form>
   </div>
 </div>
+
+<!-- Modal de Confirmación de Éxito -->
+<div *ngIf="showSuccessModal" class="modal-overlay" (click)="closeSuccessModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3>{{ successMessage }}</h3>
+      <button class="close-btn" (click)="closeSuccessModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="success-details">
+        <div class="detail-item">
+          <i class="fas fa-hashtag"></i>
+          <div class="detail-text">
+            <strong>Número de Radicado:</strong>
+            <span class="radicado-number">{{ pqrsRadicado }}</span>
+          </div>
+        </div>
+        
+        <div class="detail-item">
+          <i class="fas fa-envelope"></i>
+          <div class="detail-text">
+            <strong>Confirmación por Email:</strong>
+            <span>Recibirá una confirmación en su correo electrónico</span>
+          </div>
+        </div>
+        
+        <div class="detail-item">
+          <i class="fas fa-clock"></i>
+          <div class="detail-text">
+            <strong>Tiempo de Respuesta:</strong>
+            <span>Máximo 15 días hábiles</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="important-note">
+        <i class="fas fa-info-circle"></i>
+        <p><strong>Importante:</strong> Guarde el número de radicado para futuras consultas sobre el estado de su PQRS.</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-primary" (click)="closeSuccessModal()">
+        <i class="fas fa-check"></i>
+        Entendido
+      </button>
+    </div>
+  </div>
+</div>
+
 <app-public-footer></app-public-footer>

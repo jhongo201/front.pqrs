@@ -28,6 +28,9 @@ export class CreatePqrsComponent implements OnInit {
   isLoading = false;
   error = '';
   archivoSeleccionado: File | null = null;
+  showSuccessModal = false;
+  successMessage = '';
+  pqrsRadicado = '';
   tiposDocumento = ['CC', 'CE', 'PA', 'NIT'];
   prioridades = ['BAJA', 'MEDIA', 'ALTA'];
   
@@ -93,12 +96,20 @@ export class CreatePqrsComponent implements OnInit {
         }
       }
 
-      this.pqrsService.crearPQRS(formData).subscribe({
+      this.pqrsService.crearPQRSPublica(formData).subscribe({
         next: (response) => {
           this.isLoading = false;
-          this.router.navigate(['/pqrs'], { 
-            queryParams: { creado: 'success' } 
+          // Extraer información de la respuesta si está disponible
+          this.pqrsRadicado = response?.radicado || 'Se generará automáticamente';
+          this.successMessage = '¡PQRS creada exitosamente!';
+          this.showSuccessModal = true;
+          // Limpiar el formulario
+          this.pqrsForm.reset();
+          this.pqrsForm.patchValue({
+            tipoDocumentoSolicitante: 'CC',
+            prioridad: 'MEDIA'
           });
+          this.archivoSeleccionado = null;
         },
         error: (error) => {
           this.isLoading = false;
@@ -141,6 +152,13 @@ export class CreatePqrsComponent implements OnInit {
         Object.values(control.controls).forEach(innerControl => innerControl.markAsTouched());
       }
     });
+  }
+
+  // Método para cerrar la modal de éxito
+  closeSuccessModal() {
+    this.showSuccessModal = false;
+    this.successMessage = '';
+    this.pqrsRadicado = '';
   }
   
 }
