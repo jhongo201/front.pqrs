@@ -150,7 +150,12 @@ crearPQRS(formData: FormData): Observable<HttpEvent<any>> {
 
   // Consultar por radicado
   consultarPorRadicado(radicado: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/radicado/${radicado}`);
+    return this.http.get(`${this.apiUrl}/radicado/${radicado}`).pipe(
+      catchError(error => {
+        console.error('Error en consulta por radicado:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   // Listar PQRS del usuario actual
@@ -200,9 +205,8 @@ crearPQRS(formData: FormData): Observable<HttpEvent<any>> {
 
   // Método para consultar PQRS público
   consultarPqrsPublico(numeroRadicado: string, tokenUuid: string): Observable<any> {
-    return this.http.get<any>(
-      `${this.apiUrl}/consulta/${numeroRadicado}/${tokenUuid}`
-    ).pipe(
+    const url = `${this.apiUrl}/consulta/${numeroRadicado}/${tokenUuid}`;
+    return this.http.get<any>(url).pipe(
       catchError(error => {
         console.error('Error en consulta pública:', error);
         return throwError(() => error);

@@ -47,8 +47,9 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   // No interceptar peticiones de autenticación y PQRS públicas
   if (req.url.includes('/auth/login') || 
       req.url.includes('/registro-externo') ||
+      req.url.includes('/api/pqrs/consulta/') ||  // Consulta PQRS pública
+      req.url.includes('/api/pqrs/radicado/') ||  // Consulta por radicado
       (req.url.includes('/api/pqrs/publico') && req.method === 'POST' && !rawToken)) {
-    console.log('JWT Interceptor - Permitiendo petición sin token:', req.url);
     return next(req);
   }
 
@@ -77,8 +78,13 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error) => {
-      if (error.status === 401 || error.status === 403) {
-        // Limpiar almacenamiento local
+      // Verificar si es un endpoint público de PQRS
+      const isPublicPqrsEndpoint = req.url.includes('/api/pqrs/consulta/') || 
+                                   req.url.includes('/api/pqrs/radicado/') ||
+                                   req.url.includes('/api/pqrs/publico');
+      
+      if ((error.status === 401 || error.status === 403) && !isPublicPqrsEndpoint) {
+        // Solo limpiar y redirigir si NO es un endpoint público
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         

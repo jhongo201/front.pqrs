@@ -1,1 +1,103 @@
-<p>public-header works!</p>
+<header class="public-header">
+  <div class="header-container">
+    <!-- Logo y título -->
+    <div class="brand-section">
+      <div class="logo">
+        <i class="fas fa-building"></i>
+      </div>
+      <div class="brand-text">
+        <h1>Sistema PQRS</h1>
+        <span class="subtitle">Ministerio del Trabajo</span>
+      </div>
+    </div>
+
+    <!-- Navegación pública -->
+    <nav class="public-nav">
+      <ul class="nav-links">
+        <li>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/pqrs/nuevo-pqrs" routerLinkActive="active">
+            <i class="fas fa-plus-circle"></i>
+            <span>Crear PQRS</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/consulta-pqrs" routerLinkActive="active">
+            <i class="fas fa-search"></i>
+            <span>Consultar PQRS</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/registro-externo" routerLinkActive="active">
+            <i class="fas fa-user-plus"></i>
+            <span>Registrarse</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/activate-user" routerLinkActive="active">
+            <i class="fas fa-user-check"></i>
+            <span>Activar Cuenta</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/login" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Iniciar Sesión</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Menú móvil -->
+    <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+      <i class="fas" [ngClass]="{'fa-bars': !isMobileMenuOpen, 'fa-times': isMobileMenuOpen}"></i>
+    </button>
+  </div>
+
+  <!-- Menú móvil desplegable -->
+  <div class="mobile-menu" [class.active]="isMobileMenuOpen">
+    <ul class="mobile-nav-links">
+      <li>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
+          <i class="fas fa-home"></i>
+          <span>Inicio</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/pqrs/nuevo-pqrs" routerLinkActive="active" (click)="closeMobileMenu()">
+          <i class="fas fa-plus-circle"></i>
+          <span>Crear PQRS</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/consulta-pqrs" routerLinkActive="active" (click)="closeMobileMenu()">
+          <i class="fas fa-search"></i>
+          <span>Consultar PQRS</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/registro-externo" routerLinkActive="active" (click)="closeMobileMenu()">
+          <i class="fas fa-user-plus"></i>
+          <span>Registrarse</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/activate-user" routerLinkActive="active" (click)="closeMobileMenu()">
+          <i class="fas fa-user-check"></i>
+          <span>Activar Cuenta</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/login" class="login-btn" (click)="closeMobileMenu()">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Iniciar Sesión</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>

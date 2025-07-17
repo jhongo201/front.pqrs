@@ -1,151 +1,210 @@
-<!-- consulta-pqrs.component.html -->
-<div class="consulta-container">
+<!-- Header público -->
+<app-public-header></app-public-header>
+
+<!-- Contenedor principal -->
+<div class="external-page-container">
+  <!-- Header de la página -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1>Consulta de PQRS</h1>
+        <p>{{ tokenFromUrl ? 'Información de su PQRS' : 'Consulte el estado de su PQRS ingresando el número de radicado y token' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor del formulario -->
+  <div class="form-container">
     <div class="card">
-      <!-- Header -->
+      <!-- Header de la tarjeta -->
       <div class="card-header">
-        <h2>
-          <i class="fas fa-search"></i>
-          Consulta de PQRS
-        </h2>
-        <p class="subtitle">
-            {{ tokenFromUrl ? 
-               'Información de su PQRS' : 
-               'Consulte el estado de su PQRS' }}
-          </p>
+        <h2>{{ tokenFromUrl ? 'Información de PQRS' : 'Consultar PQRS' }}</h2>
+        <p class="description">
+          {{ tokenFromUrl ? 'A continuación se muestra la información de su PQRS.' : 'Ingrese los datos para consultar el estado de su PQRS.' }}
+        </p>
       </div>
 
-      <!-- Si no hay token en la URL, mostrar el formulario completo -->
-    <ng-container *ngIf="!tokenFromUrl">
-        <!-- Selector de tipo de consulta -->
-        <div class="tipo-consulta-toggle">
-          <button 
-            [class.active]="esConsultaPublica"
-            (click)="toggleTipoConsulta()">
-            Consulta Pública
-          </button>
-          <button 
-            [class.active]="!esConsultaPublica"
-            (click)="toggleTipoConsulta()">
-            Consulta por Radicado
-          </button>
+      <!-- Cuerpo de la tarjeta -->
+      <div class="card-body">
+        <!-- Mensajes de error -->
+        <div *ngIf="error" class="alert alert-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <div class="alert-content">
+            <h4>Error</h4>
+            <p>{{ error }}</p>
+          </div>
         </div>
 
-  
-      <!-- Formulario -->
-      <form [formGroup]="consultaForm" (ngSubmit)="onSubmit()" class="consulta-form">
-        <!-- Número de Radicado -->
-      <div class="form-group">
-        <label for="numeroRadicado">Número de Radicado *</label>
-        <input 
-          type="text" 
-          id="numeroRadicado"
-          formControlName="numeroRadicado"
-          [class.is-invalid]="consultaForm.get('numeroRadicado')?.touched && 
-                             consultaForm.get('numeroRadicado')?.invalid"
-          placeholder="Ingrese el número de radicado">
-        <div class="error-message" *ngIf="consultaForm.get('numeroRadicado')?.touched && 
-                                        consultaForm.get('numeroRadicado')?.invalid">
-          {{ getErrorMensaje('numeroRadicado') }}
-        </div>
-      </div>
-  
-        <!-- Token (solo si no viene en la URL) -->
-      <div class="form-group" *ngIf="!tokenFromUrl && esConsultaPublica">
-        <label for="tokenUuid">Token de Consulta *</label>
-        <input 
-          type="text" 
-          id="tokenUuid"
-          formControlName="tokenUuid"
-          [class.is-invalid]="consultaForm.get('tokenUuid')?.touched && 
-                             consultaForm.get('tokenUuid')?.invalid"
-          placeholder="Ingrese el token de consulta">
-        <div class="error-message" *ngIf="consultaForm.get('tokenUuid')?.touched && 
-                                        consultaForm.get('tokenUuid')?.invalid">
-          {{ getErrorMensaje('tokenUuid') }}
-        </div>
-      </div>
-  
-        <!-- Botón de búsqueda -->
-        <div class="form-actions">
-            <button type="submit" class="btn-submit" [disabled]="loading">
-                <i class="fas" [class.fa-search]="!loading" [class.fa-spinner]="loading" [class.fa-spin]="loading"></i>
+        <!-- Formulario de consulta (solo si no hay token en URL) -->
+        <ng-container *ngIf="!tokenFromUrl">
+          <!-- Selector de tipo de consulta -->
+          <div class="form-section">
+            <h3><i class="fas fa-cog"></i> Tipo de Consulta</h3>
+            <div class="toggle-container">
+              <button type="button" class="toggle-option" [class.active]="!esConsultaPublica" (click)="toggleTipoConsulta()">
+                <i class="fas fa-hashtag"></i>
+                Solo Radicado
+                <small>Consulta básica con número de radicado</small>
+              </button>
+              <button type="button" class="toggle-option" [class.active]="esConsultaPublica" (click)="toggleTipoConsulta()">
+                <i class="fas fa-key"></i>
+                Radicado + Token
+                <small>Consulta completa con radicado y token de seguridad</small>
+              </button>
+            </div>
+          </div>
+
+          <!-- Formulario -->
+          <form [formGroup]="consultaForm" (ngSubmit)="onSubmit()" class="form-section">
+            <h3><i class="fas fa-search"></i> Datos de Consulta</h3>
+            
+            <div class="form-group">
+              <label for="numeroRadicado">Número de Radicado *</label>
+              <input type="text" id="numeroRadicado" class="form-control" formControlName="numeroRadicado" 
+                     placeholder="Ejemplo: PQRS-2025-01-0001"
+                     [class.error]="consultaForm.get('numeroRadicado')?.invalid && consultaForm.get('numeroRadicado')?.touched">
+              <div *ngIf="consultaForm.get('numeroRadicado')?.invalid && consultaForm.get('numeroRadicado')?.touched" class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                El número de radicado es requerido
+              </div>
+            </div>
+
+            <div *ngIf="esConsultaPublica" class="form-group">
+              <label for="tokenUuid">Token de Consulta *</label>
+              <input type="text" id="tokenUuid" class="form-control" formControlName="tokenUuid" 
+                     placeholder="Ingrese el token de consulta"
+                     [class.error]="consultaForm.get('tokenUuid')?.invalid && consultaForm.get('tokenUuid')?.touched">
+              <div *ngIf="consultaForm.get('tokenUuid')?.invalid && consultaForm.get('tokenUuid')?.touched" class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                El token es requerido
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="consultaForm.invalid || loading">
+                <i class="fas fa-search" *ngIf="!loading"></i>
+                <span class="spinner" *ngIf="loading"></span>
                 {{ loading ? 'Consultando...' : 'Consultar PQRS' }}
               </button>
-        </div>
-      </form>
-    </ng-container>
-  
-      
-      <!-- Loading y mensajes de error -->
-      <div *ngIf="loading" class="loading-indicator">
-        <i class="fas fa-spinner fa-spin"></i>
-        Cargando información del PQRS...
-      </div>
-  
-      <div *ngIf="error" class="alert alert-error">
-        <i class="fas fa-exclamation-circle"></i>
-        {{ error }}
-      </div>
-  
-      <!-- Resultados -->
-      <div *ngIf="pqrsEncontrado" class="pqrs-resultados">
-        <h3>Información del PQRS</h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <label>Radicado:</label>
-            <span>{{ pqrsEncontrado.numeroRadicado }}</span>
+            </div>
+          </form>
+        </ng-container>
+
+        <!-- Resultados -->
+        <div *ngIf="pqrsEncontrado" class="pqrs-resultados">
+          <!-- Información del PQRS -->
+          <div class="form-section">
+            <h3><i class="fas fa-info-circle"></i> Información del PQRS</h3>
+            
+            <div class="info-grid">
+              <div class="info-item">
+                <label>RADICADO:</label>
+                <div class="value">{{ pqrsEncontrado.numeroRadicado || pqrsEncontrado.radicado }}</div>
+              </div>
+              <div class="info-item">
+                <label>ESTADO:</label>
+                <div class="value">
+                  <span class="badge" [ngClass]="{
+                    'badge-warning': pqrsEncontrado.estadoPqrs === 'PENDIENTE',
+                    'badge-success': pqrsEncontrado.estadoPqrs === 'RESUELTO',
+                    'badge-info': pqrsEncontrado.estadoPqrs === 'EN_PROCESO'
+                  }">{{ pqrsEncontrado.estadoPqrs }}</span>
+                </div>
+              </div>
+              <div class="info-item">
+                <label>PRIORIDAD:</label>
+                <div class="value">
+                  <span class="badge" [ngClass]="{
+                    'badge-warning': pqrsEncontrado.prioridad === 'MEDIA',
+                    'badge-success': pqrsEncontrado.prioridad === 'BAJA',
+                    'badge-info': pqrsEncontrado.prioridad === 'ALTA'
+                  }">{{ pqrsEncontrado.prioridad }}</span>
+                </div>
+              </div>
+              <div class="info-item">
+                <label>FECHA DE CREACIÓN:</label>
+                <div class="value">{{ pqrsEncontrado.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</div>
+              </div>
+              <div class="info-item">
+                <label>ÚLTIMA ACTUALIZACIÓN:</label>
+                <div class="value">{{ pqrsEncontrado.fechaUltimaActualizacion | date:'dd/MM/yyyy HH:mm' }}</div>
+              </div>
+              <div class="info-item">
+                <label>ÁREA:</label>
+                <div class="value">{{ pqrsEncontrado.tema?.area?.nombre }}</div>
+              </div>
+              <div class="info-item">
+                <label>Módulo:</label>
+                <div class="value">{{ pqrsEncontrado.tema?.nombre }}</div>
+              </div>
+              <div class="info-item">
+                <label>TÍTULO:</label>
+                <div class="value">{{ pqrsEncontrado.titulo }}</div>
+              </div>
+            </div>
           </div>
-          <div class="info-item">
-            <label>Estado:</label>
-            <span [class]="'estado-badge ' + pqrsEncontrado.estadoPqrs">
-              {{ pqrsEncontrado.estadoPqrs }}
-            </span>
+
+          <!-- Descripción -->
+          <div class="form-section">
+            <div class="descripcion-section">
+              <h4>Descripción:</h4>
+              <p>{{ pqrsEncontrado.descripcion }}</p>
+            </div>
           </div>
-          <div class="info-item">
-            <label>Fecha de Creación:</label>
-            <span>{{ pqrsEncontrado.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+
+          <!-- Archivo inicial -->
+          <div *ngIf="pqrsEncontrado.archivoInicial" class="form-section">
+            <div class="archivo-inicial">
+              <h4><i class="fas fa-file"></i> Archivo Inicial</h4>
+              <a [href]="getFileUrl(pqrsEncontrado.archivoInicial)" target="_blank" class="btn-download">
+                <i class="fas fa-download"></i>
+                Descargar archivo
+              </a>
+            </div>
           </div>
-          <div class="info-item">
-            <label>Última Actualización:</label>
-            <span>{{ pqrsEncontrado.fechaUltimaActualizacion | date:'dd/MM/yyyy' }}</span>
-          </div>
-          <div class="info-item">
-            <label>Título:</label>
-            <span>{{ pqrsEncontrado.titulo }}</span>
-          </div>
-          <div class="info-item">
-            <label>Tema:</label>
-            <span>{{ pqrsEncontrado.tema?.nombre }}</span>
-          </div>
-          <div class="info-item">
-            <label>Área:</label>
-            <span>{{ pqrsEncontrado.tema?.area?.nombre }}</span>
-          </div>
-        </div>
-        <div *ngIf="pqrsEncontrado?.seguimientos?.length > 0">
-            <button (click)="toggleSeguimientos()" class="btn-toggle">
-              <i class="fas" [class.fa-chevron-down]="!mostrarSeguimientos" [class.fa-chevron-up]="mostrarSeguimientos"></i>
-              Ver Seguimientos
-            </button>
+
+          <!-- Seguimientos -->
+          <div *ngIf="pqrsEncontrado?.seguimientos?.length > 0" class="form-section">
+            
+            <div class="seguimientos-lista">
+              <h3><i class="fas fa-history"></i> Seguimientos</h3>
+              <button type="button" (click)="toggleSeguimientos()" class="btn-toggle">
+                <i class="fas" [class.fa-chevron-down]="!mostrarSeguimientos" [class.fa-chevron-up]="mostrarSeguimientos"></i>
+                {{ mostrarSeguimientos ? 'Ocultar' : 'Ver' }} Seguimientos
+              </button>
+            </div>
             
             <div *ngIf="mostrarSeguimientos" class="seguimientos-lista">
               <div *ngFor="let seguimiento of pqrsEncontrado.seguimientos" class="seguimiento-item">
                 <div class="seguimiento-header">
-                  <span class="fecha">{{ seguimiento.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
-                  <span class="tipo">{{ seguimiento.tipoSeguimiento }}</span>
+                  <div class="seguimiento-info">
+                    <span class="fecha">
+                      <i class="fas fa-calendar"></i>
+                      {{ seguimiento.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+                    </span>
+                    <span class="tipo">
+                      <i class="fas fa-tag"></i>
+                      {{ seguimiento.tipoSeguimiento }}
+                    </span>
+                  </div>
                 </div>
                 <div class="seguimiento-body">
-                  {{ seguimiento.comentario }}
-                </div>
-                <div *ngIf="seguimiento.archivoAdjunto" class="seguimiento-archivo">
-                  <a [href]="getFileUrl(seguimiento.archivoAdjunto)" target="_blank">
-                    <i class="fas fa-file"></i>
-                    Archivo adjunto
-                  </a>
+                  <p>{{ seguimiento.comentario }}</p>
+                  <div *ngIf="seguimiento.archivoAdjunto" class="seguimiento-archivo">
+                    <a [href]="getFileUrl(seguimiento.archivoAdjunto)" target="_blank" class="btn-download-small">
+                      <i class="fas fa-file"></i>
+                      Archivo adjunto
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
       </div>
     </div>
   </div>
+</div>
+
+<!-- Footer público -->
+<app-public-footer></app-public-footer>

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PqrsService } from '../../../core/services/pqrs.service';
 import { RouterModule, ActivatedRoute } from '@angular/router';
+import { PublicHeaderComponent } from '../../../shared/public-header/public-header.component';
+import { PublicFooterComponent } from '../../../shared/public-footer/public-footer.component';
 
 
 interface ConsultaReciente {
@@ -13,7 +15,7 @@ interface ConsultaReciente {
 @Component({
   selector: 'app-consulta-pqrs',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,  RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, PublicHeaderComponent, PublicFooterComponent],
   templateUrl: './consulta-pqrs.component.html',
   styleUrls: ['./consulta-pqrs.component.css']
 })
@@ -49,6 +51,7 @@ export class ConsultaPqrsComponent {
       
       if (radicado && token) {
         // URL con formato: /consulta-pqrs/PQRS-2025-07-0011/token
+
         this.tokenFromUrl = token;
         this.consultaForm.patchValue({
           numeroRadicado: radicado,
@@ -188,27 +191,55 @@ export class ConsultaPqrsComponent {
       const token = tokenUuid || this.tokenFromUrl;
 
       if (this.esConsultaPublica && token) {
+        // Consulta pública con radicado y token
         this.pqrsService.consultarPqrsPublico(numeroRadicado, token).subscribe({
           next: (response) => {
             this.pqrsEncontrado = response;
             this.loading = false;
           },
           error: (error) => {
-            console.error('Error al consultar PQRS:', error);
-            this.error = error.error?.error || 'No se encontró el PQRS solicitado';
+            console.error('Error al consultar PQRS público:', error);
             this.loading = false;
+            
+            switch (error.status) {
+              case 403:
+                this.error = 'Acceso denegado. Verifique que el radicado y token sean correctos.';
+                break;
+              case 404:
+                this.error = 'No se encontró el PQRS con el radicado y token proporcionados.';
+                break;
+              case 500:
+                this.error = 'Error interno del servidor. Intente nuevamente más tarde.';
+                break;
+              default:
+                this.error = error.error?.error || error.error?.message || 'Error al consultar el PQRS. Verifique los datos e intente nuevamente.';
+            }
           }
         });
       } else {
+        // Consulta por radicado sin token
         this.pqrsService.consultarPorRadicado(numeroRadicado).subscribe({
           next: (response) => {
             this.pqrsEncontrado = response;
             this.loading = false;
           },
           error: (error) => {
-            console.error('Error al consultar PQRS:', error);
-            this.error = error.error?.mensaje || 'No se encontró el PQRS solicitado';
+            console.error('Error en consulta por radicado:', error);
             this.loading = false;
+            
+            switch (error.status) {
+              case 403:
+                this.error = 'Acceso denegado. El PQRS no está disponible para consulta pública o requiere token de acceso.';
+                break;
+              case 404:
+                this.error = 'No se encontró el PQRS con el radicado proporcionado.';
+                break;
+              case 500:
+                this.error = 'Error interno del servidor. Intente nuevamente más tarde.';
+                break;
+              default:
+                this.error = error.error?.error || error.error?.message || 'Error al consultar el PQRS. Verifique el radicado e intente nuevamente.';
+            }
           }
         });
       }
