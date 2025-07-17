@@ -85,6 +85,21 @@ export const routes: Routes = [
     component: CreateUserComponent,  // Accesible públicamente
     data: { isExternalUser: true }
   },
+  {
+    path: 'consulta-pqrs',
+    children: [
+      {
+        path: '',
+        component: ConsultaPqrsComponent
+        // Sin AuthGuard - acceso público
+      },
+      {
+        path: ':radicado/:token',
+        component: ConsultaPqrsComponent
+        // Sin AuthGuard - acceso público para enlaces de correo
+      }
+    ]
+  },
 
   {
     path: 'pqrs',  

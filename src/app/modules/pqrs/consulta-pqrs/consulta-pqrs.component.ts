@@ -44,8 +44,19 @@ export class ConsultaPqrsComponent {
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
+      const radicado = params.get('radicado');
       const token = params.get('token');
-      if (token) {
+      
+      if (radicado && token) {
+        // URL con formato: /consulta-pqrs/PQRS-2025-07-0011/token
+        this.tokenFromUrl = token;
+        this.consultaForm.patchValue({
+          numeroRadicado: radicado,
+          tokenUuid: token
+        });
+        this.onSubmit();
+      } else if (token) {
+        // URL con formato: /consulta-pqrs/token (formato anterior)
         this.tokenFromUrl = token;
         this.consultarPqrsPorToken(token);
       }

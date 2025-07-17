@@ -42,7 +42,9 @@ export class RouteService {
     '/',
     '/welcome',
     '/pqrs/nuevo-pqrs', 
+    '/consulta-pqrs',             // Consulta pública de PQRS
     '/api/pqrs/publico',          // Endpoint para crear PQRS públicas
+    '/api/pqrs/publico/consulta', // Endpoint para consultar PQRS públicas
     '/files',
     '/api/usuarios/registro',     // Endpoint de registro
     '/usuarios/registro',         // Ruta frontend de registro
@@ -180,7 +182,9 @@ export class RouteService {
     }
 
     // Verificación especial para rutas de PQRS públicas
-    if (path.startsWith('/api/pqrs/publico') || path === '/pqrs/nuevo-pqrs') {
+    if (path.startsWith('/api/pqrs/publico') || 
+        path === '/pqrs/nuevo-pqrs' ||
+        path.startsWith('/consulta-pqrs')) {
       console.log('RouteService - Ruta PQRS pública detectada:', path);
       return true;
     }
