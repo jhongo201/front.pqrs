@@ -201,7 +201,7 @@ textarea.form-control {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
   padding: 3rem 1rem;
-  margin: 4rem 0 3rem 0; /* Aumentado el margen superior */
+  /*margin: 4rem 0 3rem 0; /* Aumentado el margen superior */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   position: relative; /* Para el z-index */
   z-index: 1; /* Asegura que esté por encima del contenido */

@@ -1,36 +1,100 @@
 <app-public-header></app-public-header>
 <main class="welcome-content">
-  <div class="min-h-screen flex items-center justify-center">
-    <div class="text-center">
-      <h1 class="text-4xl font-bold mb-8 text-indigo-600">Sistema de PQRS del Ministerio del Trabajo</h1>
-      <p class="mb-8 text-gray-600 text-lg">Bienvenido a nuestro sistema de Peticiones, Quejas, Reclamos y Sugerencias</p>
+  <div class="min-h-screen flex items-center justify-center px-4 py-8">
+    <div class="max-w-5xl mx-auto text-center">
       
-      <div class="space-x-4">
+      <!-- Header institucional -->
+      <div class="mb-8">
+        <div class="inline-flex items-center justify-center w-24 h-24 mb-6 bg-indigo-100 border-2 border-indigo-200 rounded-full">
+          <svg class="w-12 h-12 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+          </svg>
+        </div>
+        
+        <div class="text-sm uppercase tracking-wider text-indigo-600 font-semibold mb-3">
+          República de Colombia
+        </div>
+      </div>
+      
+      <!-- Título principal estructurado -->
+      <div class="mb-10">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-tight">
+          Módulo de Soporte Técnico
+        </h1>
+        <h2 class="text-2xl md:text-3xl font-semibold text-indigo-600 mb-6">
+          Ministerio del Trabajo
+        </h2>
+        
+        <!-- Línea divisoria decorativa -->
+        <div class="w-24 h-1 bg-indigo-600 mx-auto mb-6 rounded-full"></div>
+        
+        <div class="max-w-3xl mx-auto">
+          <h3 class="text-xl md:text-2xl font-medium text-gray-700 mb-4">
+            Sistema de Peticiones, Quejas, Reclamos y Sugerencias
+          </h3>
+          <p class="text-lg text-gray-600 leading-relaxed">
+            <span class="font-medium text-indigo-600">Dirección de Riesgos Laborales</span> - 
+            Plataforma integral para la gestión eficiente de solicitudes de soporte técnico 
+            y atención ciudadana especializada en sistemas de información laboral
+          </p>
+        </div>
+      </div>
+      
+      <!-- Botones de acción mejorados -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
         <button 
           mat-raised-button 
           color="primary"
+          class="enhanced-button"
           (click)="goToLogin()">
+          <mat-icon class="mr-2">login</mat-icon>
           Iniciar Sesión
         </button>
+        
         <button 
           mat-raised-button 
           color="accent"
+          class="enhanced-button"
           (click)="goToRegister()">
+          <mat-icon class="mr-2">person_add</mat-icon>
           Registrarse
         </button>
+        
         <button 
           mat-raised-button 
           color="secondary"
+          class="enhanced-button"
           (click)="goToActivateToken()">
+          <mat-icon class="mr-2">verified_user</mat-icon>
           Activar Token
         </button>
+        
         <button 
-            mat-raised-button
-            class="yellow-button"
-            (click)="goToCretaPqrs()">
-            Crear PQRS
-            </button>
+          mat-raised-button
+          class="yellow-button enhanced-button"
+          (click)="goToCretaPqrs()">
+          <mat-icon class="mr-2">assignment</mat-icon>
+          Crear PQRS
+        </button>
       </div>
+      
+      <!-- Información de contacto adicional -->
+      <div class="mt-10 pt-8 border-t border-gray-200">
+        <p class="text-sm text-gray-500 mb-2">
+          ¿Necesita ayuda? Contáctenos
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm">
+          <span class="flex items-center text-gray-600">
+            <mat-icon class="mr-1 text-base">phone</mat-icon>
+            01-8000-123456
+          </span>
+          <span class="flex items-center text-gray-600">
+            <mat-icon class="mr-1 text-base">email</mat-icon>
+            soporte&#64;mintrabajo.gov.co
+          </span>
+        </div>
+      </div>
+      
     </div>
   </div>
 </main>

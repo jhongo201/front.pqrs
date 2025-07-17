@@ -1,22 +1,133 @@
 .welcome-content {
-    padding-top: 64px; /* Altura del header */
-    min-height: calc(100vh - 64px);
-    background-color: #f8fafc;
-  }
+  padding-top: 64px; /* Altura del header */
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
 
-  .yellow-button {
-    background-color: #FDD835 !important; /* Amarillo */
-    color: #000000 !important; /* Texto negro para contraste */
+/* Botón amarillo mejorado */
+.yellow-button {
+  background-color: #FDD835 !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.yellow-button:hover {
+  background-color: #FBC02D !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 15px rgba(253, 216, 53, 0.3) !important;
+}
+
+.yellow-button:active {
+  background-color: #F9A825 !important;
+  transform: translateY(0) !important;
+}
+
+.yellow-button .mat-ripple-element {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para todos los botones mejorados */
+.enhanced-button {
+  min-height: 56px !important;
+  padding: 0 24px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.enhanced-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15) !important;
+}
+
+.enhanced-button:active {
+  transform: translateY(0) !important;
+}
+
+/* Botón primario personalizado */
+.mat-raised-button.mat-primary.enhanced-button:hover {
+  box-shadow: 0 8px 15px rgba(63, 81, 181, 0.3) !important;
+}
+
+/* Botón accent personalizado */
+.mat-raised-button.mat-accent.enhanced-button:hover {
+  box-shadow: 0 8px 15px rgba(255, 64, 129, 0.3) !important;
+}
+
+/* Botón secondary personalizado */
+.mat-raised-button.mat-warn.enhanced-button:hover {
+  box-shadow: 0 8px 15px rgba(244, 67, 54, 0.3) !important;
+}
+
+/* Iconos en botones */
+.enhanced-button mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Animaciones suaves */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-content > div {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Responsive design mejorado */
+@media (max-width: 768px) {
+  .enhanced-button {
+    min-height: 48px !important;
+    padding: 0 16px !important;
+    font-size: 14px !important;
   }
   
-  .yellow-button:hover {
-    background-color: #FBC02D !important; /* Amarillo ligeramente más oscuro al pasar el mouse */
+  .enhanced-button mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
   }
-  
-  .yellow-button:active {
-    background-color: #F9A825 !important; /* Amarillo aún más oscuro al hacer clic */
+}
+
+/* Estilos para el ícono institucional */
+.institutional-icon {
+  background: rgba(63, 81, 181, 0.1);
+  border: 2px solid rgba(63, 81, 181, 0.2);
+  transition: all 0.3s ease;
+}
+
+.institutional-icon:hover {
+  background: rgba(63, 81, 181, 0.15);
+  transform: scale(1.05);
+}
+
+/* Línea divisoria animada */
+.divider-line {
+  background: linear-gradient(90deg, transparent, #4f46e5, transparent);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(79, 70, 229, 0.3);
   }
-  
-  .yellow-button .mat-ripple-element {
-    background-color: rgba(0, 0, 0, 0.1); /* Color del efecto ripple */
+  to {
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.6);
   }
+}

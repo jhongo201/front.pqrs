@@ -2,13 +2,20 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { PublicHeaderComponent } from "../../shared/public-header/public-header.component";
 import { PublicFooterComponent } from "../../shared/public-footer/public-footer.component";
 
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, PublicHeaderComponent, PublicFooterComponent],
+  imports: [
+    CommonModule, 
+    MatButtonModule, 
+    MatIconModule, 
+    PublicHeaderComponent, 
+    PublicFooterComponent
+  ],
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.css']
 })
@@ -30,5 +37,4 @@ export class WelcomeComponent {
   goToCretaPqrs() {
     this.router.navigate(['/pqrs/nuevo-pqrs']);
   }
-
 }
