@@ -1,210 +1,448 @@
-<!-- Header público -->
 <app-public-header></app-public-header>
 
-<!-- Contenedor principal -->
-<div class="external-page-container">
-  <!-- Header de la página -->
-  <div class="page-header">
-    <div class="header-content">
-      <div class="title-section">
+<!-- Hero Header Mejorado -->
+<div class="hero-header">
+  <div class="hero-content">
+    <div class="hero-main">
+      <div class="icon-badge">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="hero-text">
         <h1>Consulta de PQRS</h1>
-        <p>{{ tokenFromUrl ? 'Información de su PQRS' : 'Consulte el estado de su PQRS ingresando el número de radicado y token' }}</p>
+        <p>{{ tokenFromUrl ? 'Información detallada de su PQRS' : 'Consulte el estado y seguimiento de su solicitud' }}</p>
       </div>
     </div>
-  </div>
-
-  <!-- Contenedor del formulario -->
-  <div class="form-container">
-    <div class="card">
-      <!-- Header de la tarjeta -->
-      <div class="card-header">
-        <h2>{{ tokenFromUrl ? 'Información de PQRS' : 'Consultar PQRS' }}</h2>
-        <p class="description">
-          {{ tokenFromUrl ? 'A continuación se muestra la información de su PQRS.' : 'Ingrese los datos para consultar el estado de su PQRS.' }}
-        </p>
+    
+    <!-- Progress Steps -->
+    <div class="progress-steps" *ngIf="!tokenFromUrl">
+      <div class="step active">
+        <div class="step-number">1</div>
+        <span>Ingrese Datos</span>
       </div>
-
-      <!-- Cuerpo de la tarjeta -->
-      <div class="card-body">
-        <!-- Mensajes de error -->
-        <div *ngIf="error" class="alert alert-error">
-          <i class="fas fa-exclamation-circle"></i>
-          <div class="alert-content">
-            <h4>Error</h4>
-            <p>{{ error }}</p>
-          </div>
-        </div>
-
-        <!-- Formulario de consulta (solo si no hay token en URL) -->
-        <ng-container *ngIf="!tokenFromUrl">
-          <!-- Selector de tipo de consulta -->
-          <div class="form-section">
-            <h3><i class="fas fa-cog"></i> Tipo de Consulta</h3>
-            <div class="toggle-container">
-              <button type="button" class="toggle-option" [class.active]="!esConsultaPublica" (click)="toggleTipoConsulta()">
-                <i class="fas fa-hashtag"></i>
-                Solo Radicado
-                <small>Consulta básica con número de radicado</small>
-              </button>
-              <button type="button" class="toggle-option" [class.active]="esConsultaPublica" (click)="toggleTipoConsulta()">
-                <i class="fas fa-key"></i>
-                Radicado + Token
-                <small>Consulta completa con radicado y token de seguridad</small>
-              </button>
-            </div>
-          </div>
-
-          <!-- Formulario -->
-          <form [formGroup]="consultaForm" (ngSubmit)="onSubmit()" class="form-section">
-            <h3><i class="fas fa-search"></i> Datos de Consulta</h3>
-            
-            <div class="form-group">
-              <label for="numeroRadicado">Número de Radicado *</label>
-              <input type="text" id="numeroRadicado" class="form-control" formControlName="numeroRadicado" 
-                     placeholder="Ejemplo: PQRS-2025-01-0001"
-                     [class.error]="consultaForm.get('numeroRadicado')?.invalid && consultaForm.get('numeroRadicado')?.touched">
-              <div *ngIf="consultaForm.get('numeroRadicado')?.invalid && consultaForm.get('numeroRadicado')?.touched" class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                El número de radicado es requerido
-              </div>
-            </div>
-
-            <div *ngIf="esConsultaPublica" class="form-group">
-              <label for="tokenUuid">Token de Consulta *</label>
-              <input type="text" id="tokenUuid" class="form-control" formControlName="tokenUuid" 
-                     placeholder="Ingrese el token de consulta"
-                     [class.error]="consultaForm.get('tokenUuid')?.invalid && consultaForm.get('tokenUuid')?.touched">
-              <div *ngIf="consultaForm.get('tokenUuid')?.invalid && consultaForm.get('tokenUuid')?.touched" class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                El token es requerido
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary" [disabled]="consultaForm.invalid || loading">
-                <i class="fas fa-search" *ngIf="!loading"></i>
-                <span class="spinner" *ngIf="loading"></span>
-                {{ loading ? 'Consultando...' : 'Consultar PQRS' }}
-              </button>
-            </div>
-          </form>
-        </ng-container>
-
-        <!-- Resultados -->
-        <div *ngIf="pqrsEncontrado" class="pqrs-resultados">
-          <!-- Información del PQRS -->
-          <div class="form-section">
-            <h3><i class="fas fa-info-circle"></i> Información del PQRS</h3>
-            
-            <div class="info-grid">
-              <div class="info-item">
-                <label>RADICADO:</label>
-                <div class="value">{{ pqrsEncontrado.numeroRadicado || pqrsEncontrado.radicado }}</div>
-              </div>
-              <div class="info-item">
-                <label>ESTADO:</label>
-                <div class="value">
-                  <span class="badge" [ngClass]="{
-                    'badge-warning': pqrsEncontrado.estadoPqrs === 'PENDIENTE',
-                    'badge-success': pqrsEncontrado.estadoPqrs === 'RESUELTO',
-                    'badge-info': pqrsEncontrado.estadoPqrs === 'EN_PROCESO'
-                  }">{{ pqrsEncontrado.estadoPqrs }}</span>
-                </div>
-              </div>
-              <div class="info-item">
-                <label>PRIORIDAD:</label>
-                <div class="value">
-                  <span class="badge" [ngClass]="{
-                    'badge-warning': pqrsEncontrado.prioridad === 'MEDIA',
-                    'badge-success': pqrsEncontrado.prioridad === 'BAJA',
-                    'badge-info': pqrsEncontrado.prioridad === 'ALTA'
-                  }">{{ pqrsEncontrado.prioridad }}</span>
-                </div>
-              </div>
-              <div class="info-item">
-                <label>FECHA DE CREACIÓN:</label>
-                <div class="value">{{ pqrsEncontrado.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</div>
-              </div>
-              <div class="info-item">
-                <label>ÚLTIMA ACTUALIZACIÓN:</label>
-                <div class="value">{{ pqrsEncontrado.fechaUltimaActualizacion | date:'dd/MM/yyyy HH:mm' }}</div>
-              </div>
-              <div class="info-item">
-                <label>ÁREA:</label>
-                <div class="value">{{ pqrsEncontrado.tema?.area?.nombre }}</div>
-              </div>
-              <div class="info-item">
-                <label>Módulo:</label>
-                <div class="value">{{ pqrsEncontrado.tema?.nombre }}</div>
-              </div>
-              <div class="info-item">
-                <label>TÍTULO:</label>
-                <div class="value">{{ pqrsEncontrado.titulo }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Descripción -->
-          <div class="form-section">
-            <div class="descripcion-section">
-              <h4>Descripción:</h4>
-              <p>{{ pqrsEncontrado.descripcion }}</p>
-            </div>
-          </div>
-
-          <!-- Archivo inicial -->
-          <div *ngIf="pqrsEncontrado.archivoInicial" class="form-section">
-            <div class="archivo-inicial">
-              <h4><i class="fas fa-file"></i> Archivo Inicial</h4>
-              <a [href]="getFileUrl(pqrsEncontrado.archivoInicial)" target="_blank" class="btn-download">
-                <i class="fas fa-download"></i>
-                Descargar archivo
-              </a>
-            </div>
-          </div>
-
-          <!-- Seguimientos -->
-          <div *ngIf="pqrsEncontrado?.seguimientos?.length > 0" class="form-section">
-            
-            <div class="seguimientos-lista">
-              <h3><i class="fas fa-history"></i> Seguimientos</h3>
-              <button type="button" (click)="toggleSeguimientos()" class="btn-toggle">
-                <i class="fas" [class.fa-chevron-down]="!mostrarSeguimientos" [class.fa-chevron-up]="mostrarSeguimientos"></i>
-                {{ mostrarSeguimientos ? 'Ocultar' : 'Ver' }} Seguimientos
-              </button>
-            </div>
-            
-            <div *ngIf="mostrarSeguimientos" class="seguimientos-lista">
-              <div *ngFor="let seguimiento of pqrsEncontrado.seguimientos" class="seguimiento-item">
-                <div class="seguimiento-header">
-                  <div class="seguimiento-info">
-                    <span class="fecha">
-                      <i class="fas fa-calendar"></i>
-                      {{ seguimiento.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
-                    </span>
-                    <span class="tipo">
-                      <i class="fas fa-tag"></i>
-                      {{ seguimiento.tipoSeguimiento }}
-                    </span>
-                  </div>
-                </div>
-                <div class="seguimiento-body">
-                  <p>{{ seguimiento.comentario }}</p>
-                  <div *ngIf="seguimiento.archivoAdjunto" class="seguimiento-archivo">
-                    <a [href]="getFileUrl(seguimiento.archivoAdjunto)" target="_blank" class="btn-download-small">
-                      <i class="fas fa-file"></i>
-                      Archivo adjunto
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="step-line"></div>
+      <div class="step" [class.active]="pqrsEncontrado">
+        <div class="step-number">2</div>
+        <span>Ver Información</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" [class.active]="pqrsEncontrado && mostrarSeguimientos">
+        <div class="step-number">3</div>
+        <span>Seguimientos</span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Footer público -->
+<div class="consulta-pqrs-container">
+  <!-- Alert Messages -->
+  <div *ngIf="error" class="alert alert-error">
+    <div class="alert-icon">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+    <div class="alert-content">
+      <h4>Error en la consulta</h4>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Formulario de consulta (solo si no hay token en URL) -->
+  <ng-container *ngIf="!tokenFromUrl">
+    <div class="form-card">
+      <form [formGroup]="consultaForm" (ngSubmit)="onSubmit()" class="consulta-form">
+        
+        <!-- Sección: Tipo de Consulta -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="section-title">
+              <h3>Tipo de Consulta</h3>
+              <p>Seleccione el método de consulta que desee utilizar</p>
+            </div>
+          </div>
+
+          <div class="consultation-types">
+            <div class="consultation-option" [class.selected]="!esConsultaPublica" (click)="toggleTipoConsulta()">
+              <div class="option-icon">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div class="option-content">
+                <h4>Solo Radicado</h4>
+                <p>Consulta básica con número de radicado únicamente</p>
+                <div class="option-features">
+                  <span>• Información general</span>
+                  <span>• Estado actual</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="consultation-option" [class.selected]="esConsultaPublica" (click)="toggleTipoConsulta()">
+              <div class="option-icon">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div class="option-content">
+                <h4>Radicado + Token</h4>
+                <p>Consulta completa con acceso a información detallada</p>
+                <div class="option-features">
+                  <span>• Información completa</span>
+                  <span>• Seguimientos detallados</span>
+                  <span>• Archivos adjuntos</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección: Datos de Consulta -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="section-title">
+              <h3>Datos de Consulta</h3>
+              <p>Ingrese la información necesaria para consultar su PQRS</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label for="numeroRadicado" class="form-label">
+                <span>Número de Radicado</span>
+                <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <div class="input-icon">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  id="numeroRadicado" 
+                  formControlName="numeroRadicado"
+                  class="form-input"
+                  placeholder="Ejemplo: PQRS-2025-01-0001"
+                  [class.error]="consultaForm.get('numeroRadicado')?.invalid && consultaForm.get('numeroRadicado')?.touched">
+              </div>
+              <div class="input-help">
+                Formato: PQRS-YYYY-MM-NNNN
+              </div>
+              <div class="error-message" *ngIf="consultaForm.get('numeroRadicado')?.touched && consultaForm.get('numeroRadicado')?.invalid">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                El número de radicado es requerido
+              </div>
+            </div>
+
+            <div class="form-group span-2" *ngIf="esConsultaPublica">
+              <label for="tokenUuid" class="form-label">
+                <span>Token de Consulta</span>
+                <span class="required">*</span>
+              </label>
+              <div class="input-wrapper">
+                <div class="input-icon">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  id="tokenUuid" 
+                  formControlName="tokenUuid"
+                  class="form-input"
+                  placeholder="Ingrese el token de consulta"
+                  [class.error]="consultaForm.get('tokenUuid')?.invalid && consultaForm.get('tokenUuid')?.touched">
+              </div>
+              <div class="input-help">
+                Token enviado a su correo electrónico
+              </div>
+              <div class="error-message" *ngIf="consultaForm.get('tokenUuid')?.touched && consultaForm.get('tokenUuid')?.invalid">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                El token es requerido para consulta completa
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <div class="action-buttons">
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="consultaForm.invalid || loading"
+              [class.loading]="loading">
+              <svg *ngIf="!loading" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+              </svg>
+              <svg *ngIf="loading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ loading ? 'Consultando...' : 'Consultar PQRS' }}
+            </button>
+          </div>
+          
+          <div class="form-info">
+            <div class="info-item">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+              </svg>
+              <span>El radicado es enviado por correo al crear la PQRS</span>
+            </div>
+            <div class="info-item">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+              </svg>
+              <span>El token permite acceso completo a la información</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </ng-container>
+
+  <!-- Resultados PQRS -->
+  <div *ngIf="pqrsEncontrado" class="results-card">
+    <!-- Información General -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="section-title">
+          <h3>Información de la PQRS</h3>
+          <p>Detalles generales de su solicitud</p>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="info-content">
+            <label>Radicado</label>
+            <div class="value highlight">{{ pqrsEncontrado.numeroRadicado || pqrsEncontrado.radicado }}</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon status-icon">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="info-content">
+            <label>Estado</label>
+            <div class="value">
+              <span class="status-badge" [ngClass]="{
+                'status-pending': pqrsEncontrado.estadoPqrs === 'PENDIENTE',
+                'status-resolved': pqrsEncontrado.estadoPqrs === 'RESUELTO',
+                'status-in-progress': pqrsEncontrado.estadoPqrs === 'EN_PROCESO'
+              }">{{ pqrsEncontrado.estadoPqrs }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon priority-icon">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="info-content">
+            <label>Prioridad</label>
+            <div class="value">
+              <span class="priority-badge" [ngClass]="{
+                'priority-low': pqrsEncontrado.prioridad === 'BAJA',
+                'priority-medium': pqrsEncontrado.prioridad === 'MEDIA',
+                'priority-high': pqrsEncontrado.prioridad === 'ALTA'
+              }">{{ pqrsEncontrado.prioridad }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="info-content">
+            <label>Fecha de Creación</label>
+            <div class="value">{{ pqrsEncontrado.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="info-content">
+            <label>Última Actualización</label>
+            <div class="value">{{ pqrsEncontrado.fechaUltimaActualizacion | date:'dd/MM/yyyy HH:mm' }}</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2v4h12V6H4zm12 6H4v2h12v-2z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="info-content">
+            <label>Área</label>
+            <div class="value">{{ pqrsEncontrado.tema?.area?.nombre }}</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="info-content">
+            <label>Módulo</label>
+            <div class="value">{{ pqrsEncontrado.tema?.nombre }}</div>
+          </div>
+        </div>
+
+        <div class="info-card span-2">
+          <div class="info-icon">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="info-content">
+            <label>Título</label>
+            <div class="value">{{ pqrsEncontrado.titulo }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-section">
+      <div class="description-card">
+        <div class="description-header">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+          </svg>
+          <h4>Descripción Detallada</h4>
+        </div>
+        <div class="description-content">
+          <p>{{ pqrsEncontrado.descripcion }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archivo inicial -->
+    <div *ngIf="pqrsEncontrado.archivoInicial" class="form-section">
+      <div class="file-card">
+        <div class="file-header">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+          <h4>Archivo Adjunto Inicial</h4>
+        </div>
+        <div class="file-content">
+          <a [href]="getFileUrl(pqrsEncontrado.archivoInicial)" target="_blank" class="btn-download">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+           </svg>
+           Descargar archivo
+         </a>
+       </div>
+     </div>
+   </div>
+
+   <!-- Seguimientos -->
+   <div *ngIf="pqrsEncontrado?.seguimientos?.length > 0" class="form-section">
+     <div class="section-header">
+       <div class="section-icon">
+         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+         </svg>
+       </div>
+       <div class="section-title">
+         <h3>Seguimientos de la PQRS</h3>
+         <p>Historial de actualizaciones y respuestas</p>
+       </div>
+       <button type="button" class="toggle-seguimientos" (click)="toggleSeguimientos()">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                 [attr.d]="mostrarSeguimientos ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'"/>
+         </svg>
+         {{ mostrarSeguimientos ? 'Ocultar' : 'Ver' }} Seguimientos ({{ pqrsEncontrado.seguimientos.length }})
+       </button>
+     </div>
+     
+     <div *ngIf="mostrarSeguimientos" class="seguimientos-timeline">
+       <div *ngFor="let seguimiento of pqrsEncontrado.seguimientos; let i = index" 
+            class="timeline-item" [class.last]="i === pqrsEncontrado.seguimientos.length - 1">
+         <div class="timeline-marker">
+           <div class="timeline-dot"></div>
+         </div>
+         <div class="timeline-content">
+           <div class="seguimiento-card">
+             <div class="seguimiento-header">
+               <div class="seguimiento-meta">
+                 <div class="meta-item">
+                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                   </svg>
+                   <span>{{ seguimiento.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+                 </div>
+                 <div class="meta-item">
+                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                     <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                   </svg>
+                   <span class="tipo-badge">{{ seguimiento.tipoSeguimiento }}</span>
+                 </div>
+               </div>
+             </div>
+             <div class="seguimiento-body">
+               <p>{{ seguimiento.comentario }}</p>
+               <div *ngIf="seguimiento.archivoAdjunto" class="seguimiento-file">
+                 <a [href]="getFileUrl(seguimiento.archivoAdjunto)" target="_blank" class="file-link">
+                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                   </svg>
+                   <span>Archivo adjunto</span>
+                 </a>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+</div>
+
 <app-public-footer></app-public-footer>

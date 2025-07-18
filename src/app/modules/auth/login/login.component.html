@@ -1,64 +1,262 @@
 <app-public-header></app-public-header>
-<!-- login.component.html -->
+
+<!-- Hero Header Especial para Login -->
+<div class="login-hero-header">
+  <div class="hero-content">
+    <div class="hero-main">
+      <div class="login-icon-badge">
+        <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <h1>Bienvenido de nuevo</h1>
+        <p>Acceda a su cuenta del Sistema PQRS del Ministerio del Trabajo</p>
+      </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="login-stats">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <h4>Acceso Seguro</h4>
+          <p>Protección de datos garantizada</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <h4>Disponible 24/7</h4>
+          <p>Acceso en cualquier momento</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="login-container">
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-error">
+    <div class="alert-icon">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+    <div class="alert-content">
+      <h4>Error de autenticación</h4>
+      <p>{{ error }}</p>
+    </div>
+  </div>
+
+  <!-- Main Login Card -->
   <div class="login-card">
     <div class="card-header">
-      <i class="fas fa-user-circle header-icon"></i>
+      <div class="header-badge">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+        </svg>
+      </div>
       <h2>Iniciar Sesión</h2>
       <p class="header-description">
-        Ingrese sus credenciales para acceder al sistema
+        Ingrese sus credenciales para acceder al panel de administración
       </p>
     </div>
 
     <form (ngSubmit)="onSubmit()" class="login-form">
-      <div class="form-group">
-        <label for="username">Usuario</label>
-        <div class="input-container">
-          <i class="fas fa-user input-icon"></i>
-          <input
-            type="text"
-            id="username"
-            [(ngModel)]="credentials.username"
-            name="username"
-            placeholder="Ingrese su usuario"
-            required
-          >
+      <!-- Campo Usuario -->
+      <div class="form-section">
+        <div class="form-group">
+          <label for="username" class="form-label">
+            <span>Usuario</span>
+            <span class="required">*</span>
+          </label>
+          <div class="input-wrapper">
+            <div class="input-icon">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              id="username"
+              [(ngModel)]="credentials.username"
+              name="username"
+              class="form-input"
+              placeholder="Ingrese su nombre de usuario"
+              [class.error]="usernameError"
+              (blur)="validateUsername()"
+              autocomplete="username"
+              required>
+          </div>
+          <div class="error-message" *ngIf="usernameError">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            {{ usernameError }}
+          </div>
+        </div>
+
+        <!-- Campo Contraseña -->
+        <div class="form-group">
+          <label for="password" class="form-label">
+            <span>Contraseña</span>
+            <span class="required">*</span>
+          </label>
+          <div class="input-wrapper">
+            <div class="input-icon">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              [(ngModel)]="credentials.password"
+              name="password"
+              class="form-input"
+              placeholder="Ingrese su contraseña"
+              [class.error]="passwordError"
+              (blur)="validatePassword()"
+              autocomplete="current-password"
+              required>
+            <button 
+              type="button" 
+              class="password-toggle"
+              (click)="togglePasswordVisibility()">
+              <svg *ngIf="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <svg *ngIf="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L12 12m0 0l3.12 3.12m0 0l3 3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="error-message" *ngIf="passwordError">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            {{ passwordError }}
+          </div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <div class="input-container">
-          <i class="fas fa-lock input-icon"></i>
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            id="password"
-            [(ngModel)]="credentials.password"
-            name="password"
-            placeholder="Ingrese su contraseña"
-            required
-          >
-          <button 
-            type="button" 
-            class="password-toggle"
-            (click)="togglePasswordVisibility()">
-            <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
-          </button>
-        </div>
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn btn-primary btn-login"
+          [disabled]="!isFormValid() || isLoading"
+          [class.loading]="isLoading">
+          <svg *ngIf="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+          </svg>
+          <svg *ngIf="isLoading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+        </button>
       </div>
-
-      <button type="submit" class="btn-login" [disabled]="!credentials.username || !credentials.password">
-        <span *ngIf="!isLoading">Iniciar Sesión</span>
-        <div *ngIf="isLoading" class="spinner"></div>
-      </button>
     </form>
 
-    <!-- Enlaces adicionales -->
+    <!-- Footer Links -->
     <div class="login-footer">
-      <a href="/registro-externo" class="footer-link">Registrarse</a>
-      <span class="separator">|</span>
-      <a href="/activate-user" class="footer-link">Activar cuenta</a>
+      <div class="footer-links">
+        <button type="button" class="link-button primary" (click)="goToRegister()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+          </svg>
+          ¿No tiene cuenta? Regístrese
+        </button>
+        
+        <button type="button" class="link-button secondary" (click)="goToActivateUser()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2v2a2 2 0 01-2 2m-2-2a2 2 0 00-2 2v2a2 2 0 002 2zm6-6V3a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h8"/>
+          </svg>
+          Activar cuenta
+        </button>
+        
+        <button type="button" class="link-button secondary" (click)="goToConsultaPqrs()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          Consultar PQRS
+        </button>
+      </div>
+      
+      <div class="security-info">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+        </svg>
+        <span>Conexión segura SSL</span>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Loading Overlay Especial para Login -->
+<div *ngIf="isLoading && showLoadingSteps" class="loading-overlay">
+  <div class="loading-content">
+    <div class="loading-spinner">
+      <div class="spinner-circle"></div>
+    </div>
+    
+    <h3>Iniciando sesión</h3>
+    <p>Verificando sus credenciales...</p>
+    
+    <div class="loading-steps">
+      <div class="loading-step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+        <div class="step-icon">
+          <svg *ngIf="currentStep > 1" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <div *ngIf="currentStep <= 1" class="step-dot"></div>
+        </div>
+        <span>Verificando usuario</span>
+      </div>
+      
+      <div class="loading-step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+        <div class="step-icon">
+          <svg *ngIf="currentStep > 2" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <div *ngIf="currentStep <= 2" class="step-dot"></div>
+        </div>
+        <span>Validando contraseña</span>
+      </div>
+      
+      <div class="loading-step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+        <div class="step-icon">
+          <svg *ngIf="currentStep > 3" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <div *ngIf="currentStep <= 3" class="step-dot"></div>
+        </div>
+        <span>Configurando sesión</span>
+      </div>
+      
+      <div class="loading-step" [class.active]="currentStep >= 4" [class.completed]="currentStep > 4">
+        <div class="step-icon">
+          <svg *ngIf="currentStep > 4" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <div *ngIf="currentStep <= 4" class="step-dot"></div>
+        </div>
+        <span>Redirigiendo</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <app-public-footer></app-public-footer>

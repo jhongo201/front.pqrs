@@ -1,50 +1,221 @@
 <app-public-header></app-public-header>
-<!-- activate-user.component.html -->
-<div class="activation-container">
-  <div class="activation-card">
-    <div class="card-header">
-      <i class="fas fa-key header-icon"></i>
-      <h2>Activación de Usuario</h2>
-      <p class="header-description">
-        Ingrese el token que recibió en su correo electrónico para activar su cuenta
-      </p>
-    </div>
 
-    <form [formGroup]="activationForm" (ngSubmit)="onSubmit()" class="activation-form">
-      <div class="form-group">
-        <label for="token">Token de Activación</label>
-        <div class="input-container">
-          <i class="fas fa-lock input-icon"></i>
-          <input
-            type="text"
-            id="token"
-            formControlName="token"
-            placeholder="Ingrese su token"
-            [class.is-invalid]="activationForm.get('token')?.invalid && activationForm.get('token')?.touched"
-          />
-        </div>
-        <div class="error-message" *ngIf="activationForm.get('token')?.invalid && activationForm.get('token')?.touched">
-          {{ getTokenError() }}
-        </div>
+<!-- Hero Header -->
+<div class="hero-header">
+  <div class="hero-content">
+    <div class="hero-main">
+      <div class="icon-badge">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+        </svg>
       </div>
-
-      <button 
-        type="submit" 
-        class="btn-activate"
-        [disabled]="activationForm.invalid || loading"
-      >
-        <span *ngIf="!loading">Activar Usuario</span>
-        <div *ngIf="loading" class="spinner"></div>
-      </button>
-    </form>
-
-    <!-- Mensaje de respuesta -->
-    <div class="response-message" *ngIf="showResponse" [@fadeInOut]>
-      <div class="message-content" [class.success]="isSuccess" [class.error]="!isSuccess">
-        <i class="fas" [class.fa-check-circle]="isSuccess" [class.fa-times-circle]="!isSuccess"></i>
-        <span>{{ responseMessage }}</span>
+      <div class="hero-text">
+        <h1>Activación de Cuenta</h1>
+        <p>Active su cuenta con el token enviado a su correo electrónico</p>
+      </div>
+    </div>
+    
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+      <div class="step active">
+        <div class="step-number">1</div>
+        <span>Ingrese Token</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" [class.active]="isSuccess">
+        <div class="step-number">2</div>
+        <span>Activación</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" [class.active]="isSuccess">
+        <div class="step-number">3</div>
+        <span>Acceso</span>
       </div>
     </div>
   </div>
 </div>
+
+<div class="activate-user-container">
+  <!-- Mensaje de respuesta exitosa -->
+  <div *ngIf="showResponse && isSuccess" class="success-card">
+    <div class="success-animation">
+      <div class="success-checkmark">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+          <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark-check" fill="none" d="m14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="success-content">
+      <h3>¡Cuenta Activada Exitosamente!</h3>
+      <p>{{ responseMessage }}</p>
+      
+      <div class="success-actions">
+        <button class="btn btn-primary" (click)="goToLogin()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+          </svg>
+          Iniciar Sesión
+        </button>
+      </div>
+      
+      <div class="redirect-notice">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+        </svg>
+        <span>Será redirigido automáticamente en unos segundos...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="showResponse && !isSuccess" class="alert alert-error">
+    <div class="alert-icon">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+    <div class="alert-content">
+      <h4>Error en la activación</h4>
+      <p>{{ responseMessage }}</p>
+    </div>
+  </div>
+
+  <!-- Formulario de activación (solo si no hay respuesta exitosa) -->
+  <div *ngIf="!showResponse || !isSuccess" class="form-card">
+    <form [formGroup]="activationForm" (ngSubmit)="onSubmit()" class="activation-form">
+      
+      <!-- Sección: Token de Activación -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="section-title">
+            <h3>Token de Activación</h3>
+            <p>Ingrese el código de activación enviado a su correo electrónico</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group span-2">
+            <label for="token" class="form-label">
+              <span>Código de Activación</span>
+              <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <div class="input-icon">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="token" 
+                formControlName="token"
+                class="form-input"
+                placeholder="Ejemplo: ABC123DEF456"
+                [class.error]="isFieldInvalid('token')">
+            </div>
+            <div class="input-help">
+              El token fue enviado a su dirección de correo electrónico
+            </div>
+            <div class="error-message" *ngIf="isFieldInvalid('token')">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              {{ getTokenError() }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <div class="action-buttons">
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="activationForm.invalid || loading"
+            [class.loading]="loading">
+            <svg *ngIf="!loading" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"/>
+            </svg>
+            <svg *ngIf="loading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ loading ? 'Activando...' : 'Activar Cuenta' }}
+          </button>
+        </div>
+        
+        <div class="form-info">
+          <div class="info-item">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+            </svg>
+            <span>¿No recibió el token? Revise su bandeja de spam</span>
+          </div>
+          <div class="help-actions">
+            <button type="button" class="link-button" (click)="goToRegister()">
+              ¿Necesita registrarse?
+            </button>
+            <button type="button" class="link-button" (click)="goToLogin()">
+              ¿Ya tiene cuenta activa?
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div *ngIf="loading && showLoadingSteps" class="loading-overlay">
+  <div class="loading-content">
+    <div class="loading-spinner">
+      <div class="spinner-circle"></div>
+    </div>
+    
+    <h3>Activando su cuenta</h3>
+    <p>Por favor espere mientras verificamos su token...</p>
+    
+    <div class="loading-steps">
+      <div class="loading-step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+        <div class="step-icon">
+          <svg *ngIf="currentStep > 1" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <div *ngIf="currentStep <= 1" class="step-dot"></div>
+        </div>
+        <span>Verificando token</span>
+      </div>
+      
+      <div class="loading-step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+        <div class="step-icon">
+          <svg *ngIf="currentStep > 2" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <div *ngIf="currentStep <= 2" class="step-dot"></div>
+        </div>
+        <span>Activando cuenta</span>
+      </div>
+      
+      <div class="loading-step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+        <div class="step-icon">
+          <svg *ngIf="currentStep > 3" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <div *ngIf="currentStep <= 3" class="step-dot"></div>
+        </div>
+        <span>Finalizando</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <app-public-footer></app-public-footer>

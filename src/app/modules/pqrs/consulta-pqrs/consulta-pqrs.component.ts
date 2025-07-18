@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PqrsService } from '../../../core/services/pqrs.service';
@@ -17,7 +17,8 @@ interface ConsultaReciente {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule, PublicHeaderComponent, PublicFooterComponent],
   templateUrl: './consulta-pqrs.component.html',
-  styleUrls: ['./consulta-pqrs.component.css']
+  styleUrls: ['./consulta-pqrs.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ConsultaPqrsComponent {
   consultaForm!: FormGroup;
