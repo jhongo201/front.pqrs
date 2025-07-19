@@ -37,6 +37,7 @@
     </div>
   </div>
 
+  <!-- formulario de registro -->
   <div class="create-user-container">
     <!-- Alert Messages -->
     <div *ngIf="errorMessage" class="alert alert-error">
@@ -83,8 +84,8 @@
 
           <div class="form-grid">
             <div class="form-group">
-              <label for="nombres" class="form-label">
-                <span>Nombres</span>
+              <label for="primerNombre" class="form-label">
+                <span>Primer Nombre</span>
                 <span class="required">*</span>
               </label>
               <div class="input-wrapper">
@@ -95,23 +96,49 @@
                 </div>
                 <input 
                   type="text" 
-                  id="nombres" 
-                  formControlName="nombres"
+                  id="primerNombre" 
+                  formControlName="primerNombre"
                   class="form-input"
-                  placeholder="Ingrese sus nombres"
-                  [class.error]="isFieldInvalid('nombres')">
+                  placeholder="Ingrese su primer nombre"
+                  [class.error]="isFieldInvalid('primerNombre')">
               </div>
-              <div class="error-message" *ngIf="isFieldInvalid('nombres')">
+              <div class="error-message" *ngIf="isFieldInvalid('primerNombre')">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                {{ getErrorMessage('nombres') }}
+                {{ getErrorMessage('primerNombre') }}
               </div>
             </div>
 
             <div class="form-group">
-              <label for="apellidos" class="form-label">
-                <span>Apellidos</span>
+              <label for="otrosNombres" class="form-label">
+                <span>Otros Nombres</span>
+              </label>
+              <div class="input-wrapper">
+                <div class="input-icon">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  id="otrosNombres" 
+                  formControlName="otrosNombres"
+                  class="form-input"
+                  placeholder="Ingrese otros nombres (opcional)"
+                  [class.error]="isFieldInvalid('otrosNombres')">
+              </div>
+              <div class="error-message" *ngIf="isFieldInvalid('otrosNombres')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                {{ getErrorMessage('otrosNombres') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="primerApellido" class="form-label">
+                <span>Primer Apellido</span>
                 <span class="required">*</span>
               </label>
               <div class="input-wrapper">
@@ -122,17 +149,43 @@
                 </div>
                 <input 
                   type="text" 
-                  id="apellidos" 
-                  formControlName="apellidos"
+                  id="primerApellido" 
+                  formControlName="primerApellido"
                   class="form-input"
-                  placeholder="Ingrese sus apellidos"
-                  [class.error]="isFieldInvalid('apellidos')">
+                  placeholder="Ingrese su primer apellido"
+                  [class.error]="isFieldInvalid('primerApellido')">
               </div>
-              <div class="error-message" *ngIf="isFieldInvalid('apellidos')">
+              <div class="error-message" *ngIf="isFieldInvalid('primerApellido')">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-                {{ getErrorMessage('apellidos') }}
+                {{ getErrorMessage('primerApellido') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="segundoApellido" class="form-label">
+                <span>Segundo Apellido</span>
+              </label>
+              <div class="input-wrapper">
+                <div class="input-icon">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  id="segundoApellido" 
+                  formControlName="segundoApellido"
+                  class="form-input"
+                  placeholder="Ingrese su segundo apellido (opcional)"
+                  [class.error]="isFieldInvalid('segundoApellido')">
+              </div>
+              <div class="error-message" *ngIf="isFieldInvalid('segundoApellido')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                {{ getErrorMessage('segundoApellido') }}
               </div>
             </div>
 
@@ -148,10 +201,9 @@
                   class="form-select"
                   [class.error]="isFieldInvalid('tipoDocumento')">
                   <option value="">Seleccione tipo de documento</option>
-                  <option value="CC">Cédula de Ciudadanía</option>
-                  <option value="CE">Cédula de Extranjería</option>
-                  <option value="PA">Pasaporte</option>
-                  <option value="NIT">NIT</option>
+                  <option *ngFor="let tipo of tiposDocumento" [value]="tipo.codigo">
+                    {{ tipo.nombre }}
+                  </option>
                 </select>
                 <div class="select-icon">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -191,6 +243,69 @@
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
                 {{ getErrorMessage('numeroDocumento') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="departamento" class="form-label">
+                <span>Departamento</span>
+                <span class="required">*</span>
+              </label>
+              <div class="select-wrapper">
+                <select 
+                  id="departamento" 
+                  formControlName="departamento"
+                  class="form-select"
+                  (change)="onDepartamentoChange($event)"
+                  [class.error]="isFieldInvalid('departamento')">
+                  <option value="">Seleccione departamento</option>
+                  <option *ngFor="let depto of departamentos" [value]="depto.codigoDane">
+                    {{ depto.nombre }}
+                  </option>
+                </select>
+                <div class="select-icon">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="error-message" *ngIf="isFieldInvalid('departamento')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                {{ getErrorMessage('departamento') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="idMunicipio" class="form-label">
+                <span>Municipio</span>
+                <span class="required">*</span>
+              </label>
+              <div class="select-wrapper">
+                <select 
+                  id="idMunicipio" 
+                  formControlName="idMunicipio"
+                  class="form-select"
+                  [disabled]="!municipios.length"
+                  [class.error]="isFieldInvalid('idMunicipio')"
+                  (change)="onMunicipioChange($event)">
+                  <option value="">{{ municipios.length ? 'Seleccione municipio' : 'Primero seleccione un departamento' }}</option>
+                  <option *ngFor="let municipio of municipios" [value]="municipio.id">
+                    {{ municipio.nombre }}
+                  </option>
+                </select>
+                <div class="select-icon">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="error-message" *ngIf="isFieldInvalid('idMunicipio')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                {{ getErrorMessage('idMunicipio') }}
               </div>
             </div>
           </div>

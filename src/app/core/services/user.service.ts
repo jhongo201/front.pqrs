@@ -120,6 +120,21 @@ export class UserService extends BasePaginatedService<User>  {
     });
   }
 
+  // Obtener lista de departamentos
+  getDepartamentos(): Observable<any> {
+    return this.http.get(`${this.apiUrlBase}/departamentos`);
+  }
+
+  // Obtener municipios por código de departamento
+  getMunicipiosByDepartamento(codigoDepartamento: string): Observable<any> {
+    return this.http.get(`${this.apiUrlBase}/municipios/departamento/${codigoDepartamento}`);
+  }
+
+  // Obtener tipos de documento
+  getTiposDocumento(): Observable<any> {
+    return this.http.get(`${this.apiUrlBase}/tipodocumentos`);
+  }
+
   // Crear usuario
  /*createUser(userData: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/registro`, userData);

@@ -254,63 +254,10 @@ currentStep = 0;
   onDepartamentoChange(event: Event): void {
     console.log('onDepartamentoChange - Evento disparado:', event);
     const codigoDepartamento = (event.target as HTMLSelectElement).value;
-    
-    if (codigoDepartamento) {
-      console.log('Cargando municipios para departamento:', codigoDepartamento);
-      this.userService.getMunicipiosByDepartamento(codigoDepartamento).subscribe({
-        next: (data: any) => {
-          console.log('🔥🔥🔥 DEBUG onDepartamentoChange - DATOS RAW 🔥🔥🔥');
-          console.log('Datos originales de la API:', data);
-          console.log('Primer municipio raw:', data[0]);
-          
-          // Mapear municipios usando codigoDane como id
-          this.municipios = data
-            .filter((municipio: any) => municipio.activo)
-            .map((municipio: any) => ({
-              id: municipio.codigoDane, // Usar codigoDane como identificador
-              nombre: municipio.nombre,
-              codigoDane: municipio.codigoDane,
-              codigoDepartamento: municipio.codigoDepartamento,
-              activo: municipio.activo
-            }));
-          
-          console.log('🔥🔥🔥 DEBUG onDepartamentoChange - DESPUÉS DEL MAPEO 🔥🔥🔥');
-          console.log('Municipios mapeados:', this.municipios);
-          console.log('Municipios con IDs y tipos:');
-          this.municipios.forEach(municipio => {
-            console.log(`- ${municipio.nombre}: ID=${municipio.id} (tipo: ${typeof municipio.id})`);
-          });
-          this.userForm.patchValue({ idMunicipio: '' }); // Limpiar selección anterior
-        },
-        error: (err) => {
-          console.error('Error al cargar municipios:', err);
-          this.municipios = [];
-        }
       });
     } else {
       this.municipios = [];
       this.userForm.patchValue({ idMunicipio: '' });
-    }
-  }
-
-  // Debug: Capturar cambios en el select de municipios
-  onMunicipioChange(event: Event): void {
-    const selectedValue = (event.target as HTMLSelectElement).value;
-    console.log('🔥🔥🔥 DEBUG onMunicipioChange 🔥🔥🔥');
-    console.log('Valor seleccionado del select:', selectedValue);
-    console.log('Tipo del valor:', typeof selectedValue);
-    console.log('Valor del form control después del cambio:', this.userForm.get('idMunicipio')?.value);
-    console.log('Municipios disponibles para verificar:', this.municipios);
-    
-    // Buscar el municipio seleccionado en la lista (por codigoDane)
-    const municipioSeleccionado = this.municipios.find(m => m.id === selectedValue);
-    console.log('Municipio encontrado:', municipioSeleccionado);
-    
-    if (municipioSeleccionado) {
-      console.log('✅ Municipio válido seleccionado:', municipioSeleccionado.nombre);
-      console.log('✅ Código DANE que se enviará:', municipioSeleccionado.id);
-    } else {
-      console.log('❌ No se encontró municipio con código:', selectedValue);
     }
   }
 
@@ -347,22 +294,9 @@ currentStep = 0;
       // DEBUG: Verificar valores del formulario antes de enviar
       console.log('=== DEBUG onSubmit ===');
       console.log('Valores del formulario:', this.userForm.value);
-      
-      const idMunicipioValue = this.userForm.get('idMunicipio')?.value;
-      console.log('idMunicipio específico:', idMunicipioValue);
-      console.log('Tipo de idMunicipio:', typeof idMunicipioValue);
-      
-      // Buscar el municipio seleccionado para mostrar información completa
-      const municipioSeleccionado = this.municipios.find(m => m.id === idMunicipioValue);
-      if (municipioSeleccionado) {
-        console.log('✅ Municipio que se enviará:', municipioSeleccionado);
-        console.log('✅ Código DANE:', municipioSeleccionado.codigoDane);
-        console.log('✅ Nombre:', municipioSeleccionado.nombre);
-      } else {
-        console.log('❌ No se encontró municipio con ID:', idMunicipioValue);
-        console.log('❌ Municipios disponibles:', this.municipios.map(m => ({ id: m.id, nombre: m.nombre })));
-      }
-      
+      console.log('idMunicipio específico:', this.userForm.get('idMunicipio')?.value);
+      console.log('Tipo de idMunicipio:', typeof this.userForm.get('idMunicipio')?.value);
+      console.log('Municipios disponibles:', this.municipios);
       console.log('Departamento seleccionado:', this.userForm.get('departamento')?.value);
 
       const userData = this.isExternalUser ? 

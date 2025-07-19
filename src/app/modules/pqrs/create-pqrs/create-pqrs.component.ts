@@ -195,8 +195,44 @@ export class CreatePqrsComponent implements OnInit {
   }
 
   private handleSuccess(response: any) {
-    // Extraer información de la respuesta
-    this.pqrsRadicado = response?.radicado || this.generateRadicado();
+    // Debug: Ver qué devuelve el backend
+    console.log('=== RESPUESTA DEL BACKEND AL CREAR PQRS ===');
+    console.log('Respuesta completa:', response);
+    console.log('Radicado del backend (numeroRadicado):', response?.numeroRadicado);
+    console.log('Tipo de radicado:', typeof response?.numeroRadicado);
+    console.log('Token/UUID opciones:', {
+      tokenUuid: response?.tokenUuid,
+      token: response?.token,
+      uuid: response?.uuid,
+      tokenConsulta: response?.tokenConsulta,
+      tokenPublico: response?.tokenPublico
+    });
+    console.log('Todas las propiedades:', Object.keys(response || {}));
+    
+    // Extraer información de la respuesta con logs detallados
+    const radicadoBackend = response?.numeroRadicado;
+    if (radicadoBackend) {
+      console.log('✅ Usando radicado del backend:', radicadoBackend);
+      this.pqrsRadicado = radicadoBackend;
+    } else {
+      console.log('❌ Backend no devolvió radicado, generando uno temporal');
+      this.pqrsRadicado = this.generateRadicado();
+      console.log('📝 Radicado temporal generado:', this.pqrsRadicado);
+    }
+    
+    console.log('🎯 Radicado final que se mostrará en modal:', this.pqrsRadicado);
+    const tokenConsulta = response?.tokenUuid || response?.token || response?.uuid || response?.tokenConsulta || response?.tokenPublico;
+    
+    if (tokenConsulta && this.pqrsRadicado) {
+      const urlConsulta = `/consulta-pqrs/${this.pqrsRadicado}/${tokenConsulta}`;
+      console.log('✅ URL de consulta generada:', urlConsulta);
+      console.log('✅ URL completa:', window.location.origin + urlConsulta);
+    } else {
+      console.log('❌ No se pudo generar URL de consulta');
+      console.log('❌ Radicado:', this.pqrsRadicado);
+      console.log('❌ Token:', tokenConsulta);
+    }
+    
     this.successMessage = '¡PQRS creada exitosamente!';
     this.showSuccessModal = true;
     
