@@ -25,7 +25,7 @@ export class ConsultaPqrsComponent {
   loading = false;
   error = '';
   pqrsEncontrado: any = null;
-  esConsultaPublica = true; // Toggle entre consulta pública y por radicado
+  esConsultaPublica = false; // Toggle entre consulta pública y por radicado - Por defecto solo radicado
   mostrarSeguimientos = false;
   consultasRecientes: ConsultaReciente[] = [];
   tokenFromUrl: string | null = null;

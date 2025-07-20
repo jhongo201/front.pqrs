@@ -179,5 +179,64 @@
         </tbody>
       </table>
     </div>
+    
+    <!-- Controles de Paginación -->
+    <div class="pagination-container" *ngIf="totalElements > 0">
+      <!-- Información de registros -->
+      <div class="pagination-info">
+        <span>Mostrando {{ (currentPage * pageSize) + 1 }} - {{ Math.min((currentPage + 1) * pageSize, totalElements) }} de {{ totalElements }} registros</span>
+        
+        <!-- Selector de tamaño de página -->
+        <div class="page-size-selector">
+          <label for="pageSize">Elementos por página:</label>
+          <select id="pageSize" [(ngModel)]="pageSize" (change)="cambiarTamanoPagina(pageSize)">
+            <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Navegación de páginas -->
+      <div class="pagination-nav" *ngIf="totalPages > 1">
+        <!-- Botón Primera -->
+        <button class="pagination-btn" 
+                [disabled]="isFirst" 
+                (click)="irAPagina(0)"
+                title="Primera página">
+          <i class="fas fa-angle-double-left"></i>
+        </button>
+        
+        <!-- Botón Anterior -->
+        <button class="pagination-btn" 
+                [disabled]="isFirst" 
+                (click)="paginaAnterior()"
+                title="Página anterior">
+          <i class="fas fa-angle-left"></i>
+        </button>
+        
+        <!-- Números de página -->
+        <button *ngFor="let page of getPaginasArray()" 
+                class="pagination-btn"
+                [class.active]="page === currentPage"
+                (click)="irAPagina(page)">
+          {{ page + 1 }}
+        </button>
+        
+        <!-- Botón Siguiente -->
+        <button class="pagination-btn" 
+                [disabled]="isLast" 
+                (click)="paginaSiguiente()"
+                title="Página siguiente">
+          <i class="fas fa-angle-right"></i>
+        </button>
+        
+        <!-- Botón Última -->
+        <button class="pagination-btn" 
+                [disabled]="isLast" 
+                (click)="irAPagina(totalPages - 1)"
+                title="Última página">
+          <i class="fas fa-angle-double-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 </div>

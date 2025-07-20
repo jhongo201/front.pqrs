@@ -148,6 +148,11 @@ crearPQRS(formData: FormData): Observable<HttpEvent<any>> {
     return this.http.put(`${this.apiUrl}/${idPqrs}/estado/${estado}`, {});
   }
 
+  // Cambiar estado (alias de actualizarEstado para compatibilidad)
+  cambiarEstado(idPqrs: number, estado: string): Observable<any> {
+    return this.actualizarEstado(idPqrs, estado);
+  }
+
   // Consultar por radicado
   consultarPorRadicado(radicado: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/radicado/${radicado}`).pipe(
@@ -158,9 +163,86 @@ crearPQRS(formData: FormData): Observable<HttpEvent<any>> {
     );
   }
 
-  // Listar PQRS del usuario actual
+  // Listar PQRS del usuario actual (sin paginación) - Endpoint específico para dashboard
   listarMisPQRS(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/mis-pqrs`);
+    console.log('Cargando todos los PQRS para dashboard:', `${this.apiUrl}/mis-pqrs-todos`);
+    
+    // Usar el nuevo endpoint específico que trae todos los PQRS sin paginación
+    return this.http.get<any[]>(`${this.apiUrl}/mis-pqrs-todos`).pipe(
+      map((response: any) => {
+        console.log('Respuesta del backend para dashboard:', response);
+        // El nuevo endpoint debería devolver directamente un array
+        return Array.isArray(response) ? response : [];
+      }),
+      catchError(error => {
+        console.error('Error al cargar PQRS para dashboard:', error);
+        console.error('Detalles del error:', error.error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Listar PQRS del usuario actual con paginación y filtros
+  listarMisPQRSPaginado(
+    page?: number, 
+    size?: number, 
+    sort?: string, 
+    filtros?: {
+      estado?: string;
+      prioridad?: string;
+      search?: string;
+    }
+  ): Observable<any> {
+    let params = new HttpParams();
+    
+    // Parámetros de paginación
+    if (page !== undefined && page !== null) {
+      params = params.set('page', page.toString());
+    }
+    if (size !== undefined && size !== null) {
+      params = params.set('size', size.toString());
+    }
+    if (sort && sort.trim() !== '') {
+      params = params.set('sort', sort);
+    }
+    
+    // TEMPORAL: Comentar filtros adicionales hasta confirmar soporte del backend
+  // Parámetros de filtro
+  /*
+  if (filtros) {
+    if (filtros.estado && filtros.estado.trim() !== '') {
+      params = params.set('estado', filtros.estado);
+    }
+    if (filtros.prioridad && filtros.prioridad.trim() !== '') {
+      params = params.set('prioridad', filtros.prioridad);
+    }
+    if (filtros.search && filtros.search.trim() !== '') {
+      params = params.set('search', filtros.search);
+    }
+  }
+  */
+    console.log('Parámetros enviados al backend:', { 
+    paginacion: { page, size, sort },
+    filtros: 'DESHABILITADOS TEMPORALMENTE'
+  });
+    console.log('URL completa:', `${this.apiUrl}/mis-pqrs?${params.toString()}`);
+    
+    return this.http.get<any>(`${this.apiUrl}/mis-pqrs`, { params }).pipe(
+      catchError(error => {
+        console.error('=== ERROR EN BACKEND ===');
+        console.error('Status:', error.status);
+        console.error('Error completo:', error);
+        console.error('Detalles del error:', error.error);
+        console.error('URL que causó el error:', `${this.apiUrl}/mis-pqrs?${params.toString()}`);
+        
+        // Si es error 400, puede ser que el backend no soporte estos parámetros
+        if (error.status === 400) {
+          console.warn('Error 400: El backend puede no soportar los parámetros de filtro enviados');
+        }
+        
+        return throwError(() => error);
+      })
+    );
   }
 
   // Listar PQRS sin asignar

@@ -46,7 +46,22 @@ export class MenuComponent implements OnInit {
     this.isLoading = true;
     this.menuService.loadMenuOptions().subscribe({
       next: (response) => {
-        this.menuModules = response.modulos;
+        // Filtrar rutas que no deben aparecer en el menú
+        const modulosConRutasFiltradas = response.modulos.map(modulo => ({
+          ...modulo,
+          rutas: modulo.rutas.filter(ruta => this.shouldShowInMenu(ruta.ruta))
+        }));
+        
+        // Filtrar módulos que quedaron sin rutas visibles
+        this.menuModules = modulosConRutasFiltradas.filter(modulo => {
+          const tieneRutasVisibles = modulo.rutas.length > 0;
+          if (!tieneRutasVisibles) {
+            console.log(`🚫 Módulo '${modulo.nombre}' oculto - no tiene rutas visibles en el menú`);
+          }
+          return tieneRutasVisibles;
+        });
+        
+        console.log('📋 Módulos finales en menú:', this.menuModules.map(m => `${m.nombre} (${m.rutas.length} rutas)`));
         this.isLoading = false;
         // Inicializar todos los módulos como cerrados
         this.menuModules.forEach(modulo => {
@@ -128,6 +143,28 @@ export class MenuComponent implements OnInit {
         }
       }
     }
+  }
+
+  /**
+   * Determina si una ruta debe mostrarse en el menú
+   * @param ruta Ruta a evaluar
+   * @returns true si la ruta debe aparecer en el menú
+   */
+  private shouldShowInMenu(ruta: string): boolean {
+    // Filtrar rutas con parámetros dinámicos
+    if (ruta.includes('{') && ruta.includes('}')) {
+      return false;
+    }
+    
+    // Filtrar rutas específicas que no deben aparecer en el menú
+    const excludedRoutes = [
+      '/api/pqrs/nuevo',           // Ruta de creación (se accede desde botón)
+      '/api/pqrs/seguimiento',     // Ruta de seguimiento (se accede desde detalle)
+      '/api/usuarios/perfil',      // Ruta de perfil (se accede desde header)
+      '/api/auth/logout'           // Ruta de logout (se accede desde header)
+    ];
+    
+    return !excludedRoutes.includes(ruta);
   }
 
   /**
