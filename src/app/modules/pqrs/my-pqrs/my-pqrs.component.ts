@@ -110,7 +110,7 @@ export class MyPqrsComponent implements OnInit, OnDestroy {
     };
     
     console.log('Objeto filtros construido:', filtros);
-    console.log('Cargando PQRS - Página:', this.currentPage, 'Tamaño:', this.pageSize);
+    console.log('Cargando Solicitudes - Página:', this.currentPage, 'Tamaño:', this.pageSize);
     
     // Llamar al servicio con paginación y filtros
     this.pqrsService.listarMisPQRSPaginado(
@@ -161,8 +161,8 @@ export class MyPqrsComponent implements OnInit, OnDestroy {
           });
         },
         error: (error) => {
-          console.error('=== ERROR AL CARGAR PQRS ===');
-          console.error('Error al cargar PQRS:', error);
+          console.error('=== ERROR AL CARGAR SOLICITUDES ===');
+          console.error('Error al cargar Solicitudes:', error);
           
           // Si hay filtros y falla, intentar sin filtros como respaldo
           const hayFiltros = this.filtroEstado || this.filtroPrioridad || this.searchTerm;
@@ -171,7 +171,7 @@ export class MyPqrsComponent implements OnInit, OnDestroy {
             this.cargarSinFiltros();
           } else {
             this.isLoading = false;
-            this.error = 'Error al cargar los PQRS asignados';
+            this.error = 'Error al cargar los Solicitudes asignados';
             
             // Manejo de errores específicos
             if (error.status === 400) {
@@ -206,7 +206,7 @@ export class MyPqrsComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error incluso sin filtros:', error);
           this.isLoading = false;
-          this.error = 'Error al cargar los PQRS. Contacta al administrador.';
+          this.error = 'Error al cargar los Solicitudes. Contacta al administrador.';
         }
       });
   }

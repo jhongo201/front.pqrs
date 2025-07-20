@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { PqrsService } from '../../../core/services/pqrs.service';
 import { AreaService } from '../../../core/services/area.service';
 import { UserService } from '../../../core/services/user.service';
@@ -51,7 +52,7 @@ interface PQRS {
 @Component({
   selector: 'app-unassigned-pqrs',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule],
   templateUrl: './unassigned-pqrs.component.html',
   styleUrls: ['./unassigned-pqrs.component.css']
 })
@@ -70,6 +71,14 @@ export class UnassignedPqrsComponent implements OnInit {
   showConfirmModal = false;
   successMessage = '';
   
+  // Propiedades de paginación
+  currentPage: number = 0;
+  pageSize: number = 15;
+  totalElements: number = 0;
+  totalPages: number = 0;
+  pageSizeOptions: number[] = [5, 10, 15, 20, 50];
+  sortField: string = 'idPqrs';
+  sortDirection: string = 'desc';
   
 
   constructor(
@@ -167,15 +176,37 @@ export class UnassignedPqrsComponent implements OnInit {
 
   cargarPQRSSinAsignar() {
     this.isLoading = true;
-    this.pqrsService.listarPQRSSinAsignar().subscribe({
-      next: (data) => {
-        this.pqrsList = data;
+    this.error = '';
+    
+    console.log('Cargando PQRS sin asignar - Página:', this.currentPage, 'Tamaño:', this.pageSize);
+    
+    // Usar el nuevo método paginado
+    this.pqrsService.listarPQRSSinAsignarPaginado(
+      this.currentPage,
+      this.pageSize
+      // Omitir sort temporalmente para evitar error SQL
+    ).subscribe({
+      next: (response) => {
+        console.log('Respuesta paginada recibida:', response);
+        
+        // Extraer datos de la respuesta paginada
+        this.pqrsList = response.content || [];
+        this.totalElements = response.totalElements || 0;
+        this.totalPages = response.totalPages || 0;
+        
+        console.log('PQRS sin asignar cargadas:', {
+          total: this.totalElements,
+          páginas: this.totalPages,
+          página_actual: this.currentPage,
+          elementos_en_página: this.pqrsList.length
+        });
+        
         this.isLoading = false;
       },
       error: (error) => {
-        this.error = 'Error al cargar las PQRS sin asignar';
+        console.error('Error al cargar PQRS sin asignar paginadas:', error);
+        this.error = 'Error al cargar las Solicitudes sin asignar';
         this.isLoading = false;
-        console.error('Error:', error);
       }
     });
   }
@@ -223,5 +254,46 @@ export class UnassignedPqrsComponent implements OnInit {
       case 'BAJA': return 'prioridad-baja';
       default: return '';
     }
+  }
+
+  // Métodos de paginación
+  onPageChange(page: number) {
+    console.log('Cambiando a página:', page);
+    this.currentPage = page;
+    this.cargarPQRSSinAsignar();
+  }
+
+  onPageSizeChange() {
+    console.log('Cambiando tamaño de página a:', this.pageSize);
+    this.currentPage = 0; // Resetear a la primera página
+    this.cargarPQRSSinAsignar();
+  }
+
+  // Método para generar números de página visibles (máximo 5)
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(0, this.currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(this.totalPages - 1, startPage + maxPagesToShow - 1);
+    
+    // Ajustar startPage si estamos cerca del final
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(0, endPage - maxPagesToShow + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }
+
+  // Métodos para mostrar información de paginación
+  getStartIndex(): number {
+    return this.currentPage * this.pageSize + 1;
+  }
+
+  getEndIndex(): number {
+    return Math.min((this.currentPage + 1) * this.pageSize, this.totalElements);
   }
 }

@@ -136,7 +136,7 @@ export class AssignedPqrsComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        this.error = 'Error al cargar las PQRS sin asignar';
+        this.error = 'Error al cargar las Solicitudes sin asignar';
         this.isLoading = false;
         console.error('Error:', error);
       }
@@ -211,7 +211,7 @@ export class AssignedPqrsComponent implements OnInit {
       
       // Convertir IDs a número para comparar
       if (pqrsActual?.usuarioAsignado?.idUsuario === Number(nuevoUsuarioId)) {
-        this.modalError = 'El usuario seleccionado ya está asignado a este PQRS';
+        this.modalError = 'El usuario seleccionado ya está asignado a esta Solicitud';
         return;
       }
   
@@ -239,7 +239,7 @@ export class AssignedPqrsComponent implements OnInit {
         }, 2000);
   
       } catch (error) {
-        console.error('Error al asignar PQRS:', error);
+        console.error('Error al asignar Solicitud:', error);
         this.modalError = 'Error al realizar la asignación';
       } finally {
         this.isLoading = false;
@@ -271,7 +271,7 @@ export class AssignedPqrsComponent implements OnInit {
     });
   
     if (pqrsActual?.usuarioAsignado && nuevoUsuarioIdNum === usuarioActualIdNum) {
-      this.modalError = 'El usuario seleccionado ya está asignado a este PQRS';
+      this.modalError = 'El usuario seleccionado ya está asignado a esta Solicitud';
       this.asignacionForm.get('usuario')?.setErrors({ 'usuarioRepetido': true });
     } else {
       this.modalError = '';
@@ -302,7 +302,7 @@ export class AssignedPqrsComponent implements OnInit {
           this.selectedPqrs = null;
         },
         error: (error) => {
-          this.error = 'Error al asignar la PQRS';
+          this.error = 'Error al asignar la Solicitud';
           this.isLoading = false;
           console.error('Error:', error);
         }
@@ -312,16 +312,29 @@ export class AssignedPqrsComponent implements OnInit {
   async cargarAsignaciones() {
     try {
       this.isLoading = true;
-      const pqrsList = await this.pqrsService.listarPQRS().toPromise();
+      console.log('🔍 Iniciando carga de asignaciones...');
       
-      if (pqrsList) {
+      const pqrsList = await this.pqrsService.listarPQRS().toPromise();
+      console.log('📋 Respuesta del backend:', pqrsList);
+      console.log('📊 Total de Solicitudes recibidas:', pqrsList ? pqrsList.length : 0);
+      
+      if (pqrsList && pqrsList.length > 0) {
+        // Verificar cuántas PQRS tienen usuario asignado
+        const conAsignacion = pqrsList.filter(pqrs => pqrs.usuarioAsignado);
+        const sinAsignacion = pqrsList.filter(pqrs => !pqrs.usuarioAsignado);
+        
+        console.log('👥 PQRS con asignación:', conAsignacion.length);
+        console.log('❌ PQRS sin asignación:', sinAsignacion.length);
+        
         this.asignaciones = this.agruparPqrsPorUsuario(pqrsList);
+        console.log('📦 Asignaciones agrupadas:', this.asignaciones);
       } else {
+        console.log('⚠️ No se recibieron Solicitudes del backend');
         this.asignaciones = [];
       }
     } catch (error) {
-      console.error('Error al cargar asignaciones:', error);
-      this.error = 'Error al cargar asignaciones';
+      console.error('❌ Error al cargar asignaciones:', error);
+      this.error = 'Error al cargar asignaciones: ' + (error instanceof Error ? error.message : String(error));
       this.asignaciones = [];
     } finally {
       this.isLoading = false;
@@ -345,7 +358,7 @@ export class AssignedPqrsComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error al reasignar:', error);
-          this.error = 'Error al reasignar PQRS';
+          this.error = 'Error al reasignar Solicitud';
           this.isLoading = false;
         }
       });

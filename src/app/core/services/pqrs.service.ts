@@ -67,6 +67,8 @@ export class PqrsService {
 
   // Listar PQRS con filtros opcionales
 listarPQRS(estado?: string, usuarioAsignado?: number): Observable<any[]> {
+  console.log('🔍 Cargando todos los PQRS para asignaciones:', `${this.apiUrl}/todos`);
+  
   let params = new HttpParams();
   if (estado) {
     params = params.set('estado', estado);
@@ -75,11 +77,18 @@ listarPQRS(estado?: string, usuarioAsignado?: number): Observable<any[]> {
     params = params.set('usuarioAsignado', usuarioAsignado.toString());
   }
 
-  return this.http.get<any[]>(this.apiUrl, { params }).pipe(
+  // Usar el endpoint específico /todos que devuelve todos los PQRS sin paginación
+  return this.http.get<any[]>(`${this.apiUrl}/todos`, { params }).pipe(
     map(response => {
+      console.log('📋 Respuesta del backend /todos:', response);
+      console.log('📊 Total de PQRS recibidas:', response ? response.length : 0);
+      
+      // El endpoint /todos debería devolver directamente un array
       if (Array.isArray(response)) {
         return response;
       }
+      
+      console.error('❌ Formato de respuesta no reconocido en /todos:', response);
       throw new Error('Formato de respuesta inválido');
     }),
     catchError(error => {
@@ -313,9 +322,46 @@ crearPQRS(formData: FormData): Observable<HttpEvent<any>> {
     );
   }
 
-  // Listar PQRS sin asignar
+  // Listar PQRS sin asignar (sin paginación)
   listarPQRSSinAsignar(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/sin-asignar`);
+    return this.http.get<any[]>(`${this.apiUrl}/sin-asignar-todos`);
+  }
+
+  // Listar PQRS sin asignar con paginación
+  listarPQRSSinAsignarPaginado(
+    page?: number, 
+    size?: number, 
+    sort?: string
+  ): Observable<any> {
+    console.log('Cargando PQRS sin asignar con paginación - Parámetros:', { page, size, sort });
+    
+    let params = new HttpParams();
+    
+    // Parámetros de paginación
+    if (page !== undefined) {
+      params = params.set('page', page.toString());
+    }
+    if (size !== undefined) {
+      params = params.set('size', size.toString());
+    }
+    // Temporalmente omitir sort para evitar error SQL como en el listado general
+    // if (sort) {
+    //   params = params.set('sort', sort);
+    // }
+    
+    const url = `${this.apiUrl}/sin-asignar?${params.toString()}`;
+    console.log('URL completa para PQRS sin asignar paginadas:', url);
+    
+    return this.http.get<any>(`${this.apiUrl}/sin-asignar`, { params }).pipe(
+      tap(response => {
+        console.log('Respuesta paginada PQRS sin asignar del backend:', response);
+      }),
+      catchError(error => {
+        console.error('Error al cargar PQRS sin asignar paginadas:', error);
+        console.error('Detalles del error:', error.error);
+        return throwError(() => error);
+      })
+    );
   }
 
   // Consultar PQRS como solicitante público

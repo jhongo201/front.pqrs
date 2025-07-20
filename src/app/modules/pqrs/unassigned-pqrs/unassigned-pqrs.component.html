@@ -14,7 +14,7 @@
   <!-- Loading y Error messages -->
   <div *ngIf="isLoading" class="loading-container">
     <div class="spinner"></div>
-    <p>Cargando PQRS sin asignar...</p>
+    <p>Cargando Solicitudes sin asignar...</p>
   </div>
 
   <div *ngIf="error" class="alert alert-error">
@@ -75,20 +75,85 @@
                 </button>
                 <button (click)="selectedPqrs = pqrs.idPqrs" 
                         class="btn-icon" 
-                        title="Asignar PQRS">
+                        title="Asignar Solicitud">
                   <i class="fas fa-user-plus"></i>
                 </button>
               </div>
             </td>
           </tr>
-          <tr *ngIf="pqrsList.length === 0">
+          <tr *ngIf="pqrsList.length === 0 && !isLoading">
             <td colspan="9" class="no-data">
               <i class="fas fa-info-circle"></i>
-              No hay PQRS sin asignar
+              No hay Solicitudes sin asignar
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Controles de Paginación -->
+    <div *ngIf="totalElements > 0" class="pagination-container">
+      <!-- Información de resultados -->
+      <div class="pagination-info">
+        <span>Mostrando {{ getStartIndex() }} - {{ getEndIndex() }} de {{ totalElements }} Solicitudes</span>
+      </div>
+
+      <!-- Selector de tamaño de página -->
+      <div class="page-size-selector">
+        <label for="pageSize">Mostrar:</label>
+        <select id="pageSize" [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="form-select">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+        </select>
+        <span>por página</span>
+      </div>
+
+      <!-- Controles de navegación -->
+      <div class="pagination-controls">
+        <!-- Botón Primera página -->
+        <button 
+          class="pagination-btn" 
+          [disabled]="currentPage === 0" 
+          (click)="onPageChange(0)"
+          title="Primera página">
+          <i class="fas fa-angle-double-left"></i>
+        </button>
+
+        <!-- Botón Página anterior -->
+        <button 
+          class="pagination-btn" 
+          [disabled]="currentPage === 0" 
+          (click)="onPageChange(currentPage - 1)"
+          title="Página anterior">
+          <i class="fas fa-angle-left"></i>
+        </button>
+
+        <!-- Números de página -->
+        <button 
+          *ngFor="let page of getPageNumbers()" 
+          class="pagination-btn" 
+          [class.active]="page === currentPage"
+          (click)="onPageChange(page)">
+          {{ page + 1 }}
+        </button>
+
+        <!-- Botón Página siguiente -->
+        <button 
+          class="pagination-btn" 
+          [disabled]="currentPage >= totalPages - 1" 
+          (click)="onPageChange(currentPage + 1)"
+          title="Página siguiente">
+          <i class="fas fa-angle-right"></i>
+        </button>
+
+        <!-- Botón Última página -->
+        <button 
+          class="pagination-btn" 
+          [disabled]="currentPage >= totalPages - 1" 
+          (click)="onPageChange(totalPages - 1)"
+          title="Última página">
+          <i class="fas fa-angle-double-right"></i>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -103,7 +168,7 @@
                [class.fa-user-plus]="!isLoading"
                [class.fa-spinner]="isLoading"
                [class.fa-spin]="isLoading"></i>
-            {{ isLoading ? 'Procesando asignación...' : 'Asignar PQRS' }}
+            {{ isLoading ? 'Procesando asignación...' : 'Asignar Solicitud' }}
           </h3>
           <button (click)="cerrarModal()" class="btn-close" [disabled]="isLoading">
             <i class="fas fa-times"></i>
