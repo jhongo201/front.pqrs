@@ -168,7 +168,16 @@ export const routes: Routes = [
   },
   {
     path: 'activate-user',
-    component: ActivateUserComponent
+    children: [
+      {
+        path: '',
+        component: ActivateUserComponent
+      },
+      {
+        path: ':token',
+        component: ActivateUserComponent
+      }
+    ]
   },  
   {
     path: '',

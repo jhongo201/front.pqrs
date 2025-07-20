@@ -1,8 +1,8 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { PublicHeaderComponent } from '../../shared/public-header/public-header.component';
 import { PublicFooterComponent } from '../../shared/public-footer/public-footer.component';
@@ -15,7 +15,7 @@ import { PublicFooterComponent } from '../../shared/public-footer/public-footer.
   styleUrls: ['./activate-user.component.css'],
   encapsulation: ViewEncapsulation.None  // ← AGREGAR ESTA LÍNEA
 })
-export class ActivateUserComponent {
+export class ActivateUserComponent implements OnInit {
   activationForm: FormGroup;
   loading = false;
   responseMessage: string = '';
@@ -28,10 +28,74 @@ export class ActivateUserComponent {
   constructor(
     private fb: FormBuilder, 
     private http: HttpClient,
-    private router: Router  // Agregar Router
+    private router: Router,
+    private activatedRoute: ActivatedRoute
   ) {
     this.activationForm = this.fb.group({
       token: ['', [Validators.required, Validators.minLength(6)]],
+    });
+  }
+
+  ngOnInit(): void {
+    // Verificar si hay un token en la URL
+    this.activatedRoute.params.subscribe(params => {
+      const tokenFromUrl = params['token'];
+      if (tokenFromUrl) {
+        console.log('🔗 Token detectado en URL:', tokenFromUrl);
+        // Llenar el formulario con el token de la URL
+        this.activationForm.patchValue({ token: tokenFromUrl });
+        // Activar automáticamente la cuenta
+        this.activateAccountAutomatically(tokenFromUrl);
+      } else {
+        console.log('📝 No hay token en URL, esperando entrada manual');
+      }
+    });
+  }
+
+  private activateAccountAutomatically(token: string): void {
+    console.log('🚀 Activando cuenta automáticamente con token:', token);
+    this.loading = true;
+    this.showLoadingSteps = true;
+    this.currentStep = 1;
+    
+    const apiUrl = `${environment.apiUrl}/usuarios/activar/${token}`;
+
+    // Simular pasos del proceso
+    setTimeout(() => this.currentStep = 2, 500);
+
+    this.http.get(apiUrl).subscribe({
+      next: (response: any) => {
+        setTimeout(() => {
+          this.currentStep = 3;
+          setTimeout(() => {
+            this.loading = false;
+            this.showLoadingSteps = false;
+            this.currentStep = 0;
+            
+            this.responseMessage = response.message || '¡Cuenta activada exitosamente!';
+            this.isSuccess = true;
+            this.showResponse = true;
+            
+            console.log('✅ Cuenta activada exitosamente desde URL');
+            
+            // Redirigir al login después de 3 segundos
+            setTimeout(() => {
+              this.router.navigate(['/login']);
+            }, 3000);
+          }, 800);
+        }, 500);
+      },
+      error: (error) => {
+        this.loading = false;
+        this.showLoadingSteps = false;
+        this.currentStep = 0;
+        
+        this.responseMessage = error.error?.message || 'Error al activar la cuenta. Verifique el token e intente nuevamente.';
+        this.isSuccess = false;
+        this.showResponse = true;
+        
+        console.log('❌ Error al activar cuenta desde URL:', error);
+      },
     });
   }
 
