@@ -94,7 +94,75 @@ listarPQRS(estado?: string, usuarioAsignado?: number): Observable<any[]> {
   );
 }
 
+  // Listar todas las PQRS del sistema (sin paginación) - Endpoint específico
+  listarTodasPQRS(): Observable<any[]> {
+    console.log('Cargando todas las PQRS del sistema:', `${this.apiUrl}/todos`);
+    
+    return this.http.get<any[]>(`${this.apiUrl}/todos`).pipe(
+      map((response: any) => {
+        console.log('Respuesta del backend para listado completo:', response);
+        return Array.isArray(response) ? response : [];
+      }),
+      catchError(error => {
+        console.error('Error al cargar todas las PQRS:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 
+  // Listar PQRS con paginación (para administración general)
+  listarPQRSPaginado(
+    page?: number, 
+    size?: number, 
+    sort?: string, 
+    filtros?: {
+      estado?: string;
+      prioridad?: string;
+      search?: string;
+    }
+  ): Observable<any> {
+    console.log('Cargando PQRS con paginación - Parámetros:', { page, size, sort, filtros });
+    
+    let params = new HttpParams();
+    
+    // Parámetros de paginación
+    if (page !== undefined) {
+      params = params.set('page', page.toString());
+    }
+    if (size !== undefined) {
+      params = params.set('size', size.toString());
+    }
+    if (sort) {
+      params = params.set('sort', sort);
+    }
+    
+    // Filtros opcionales
+    if (filtros) {
+      if (filtros.estado) {
+        params = params.set('estado', filtros.estado);
+      }
+      if (filtros.prioridad) {
+        params = params.set('prioridad', filtros.prioridad);
+      }
+      if (filtros.search) {
+        params = params.set('search', filtros.search);
+      }
+    }
+    
+    const url = `${this.apiUrl}?${params.toString()}`;
+    console.log('URL completa para paginación:', url);
+    
+    return this.http.get<any>(this.apiUrl, { params }).pipe(
+      tap(response => {
+        console.log('Respuesta paginada del backend:', response);
+      }),
+      catchError(error => {
+        console.error('Error al cargar PQRS paginadas:', error);
+        console.error('Detalles del error:', error.error);
+        return throwError(() => error);
+      })
+    );
+  }
 
   // Obtener una PQRS específica
   obtenerPQRS(id: number): Observable<any> {

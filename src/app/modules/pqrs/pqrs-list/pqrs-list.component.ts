@@ -83,6 +83,20 @@ export class PqrsListComponent implements OnInit {
   successMessage = '';
   areas: any[] = [];
 
+  // Propiedades de paginación
+  currentPage: number = 0;
+  pageSize: number = 15;
+  totalElements: number = 0;
+  totalPages: number = 0;
+  pageSizeOptions: number[] = [5, 10, 15, 20, 50];
+  sortField: string = 'idPqrs';
+  sortDirection: string = 'desc';
+  
+  // Filtros adicionales
+  filtroPrioridad: string = '';
+  searchTerm: string = '';
+  prioridades: string[] = ['ALTA', 'MEDIA', 'BAJA'];
+
   constructor(
     private pqrsService: PqrsService,
     private areaService: AreaService,
@@ -99,7 +113,7 @@ export class PqrsListComponent implements OnInit {
   ngOnInit() {
     this.cargarPQRS();
     this.cargarAreas();
-    this.cargarPQRSSinAsignar();
+    // Eliminado cargarPQRSSinAsignar() - usar solo paginación backend
   }
 
   cargarAreas() {
@@ -130,31 +144,145 @@ export class PqrsListComponent implements OnInit {
     });
   }
 
-  // En pqrs-list.component.ts
+  // Cargar PQRS con paginación backend
   cargarPQRS() {
     this.isLoading = true;
     this.error = '';
-  
-    this.pqrsService.listarPQRS(this.filtroEstado).subscribe({
-      next: (data) => {
-        if (Array.isArray(data)) {
-          this.pqrsList = data;
+
+    // SOLUCIÓN TEMPORAL: Eliminar parámetro sort para evitar error SQL "order by list must be unique"
+    // const sort = `${this.sortField},${this.sortDirection}`;
+    
+    // Construir filtros
+    const filtros = {
+      estado: this.filtroEstado || undefined,
+      prioridad: this.filtroPrioridad || undefined,
+      search: this.searchTerm || undefined
+    };
+
+    console.log('Cargando PQRS con parámetros (SIN SORT para evitar error SQL):', {
+      page: this.currentPage,
+      size: this.pageSize,
+      // sort: 'DESHABILITADO por error SQL backend',
+      filtros
+    });
+
+    // Llamar sin parámetro sort para evitar error SQL del backend
+    this.pqrsService.listarPQRSPaginado(this.currentPage, this.pageSize, undefined, filtros).subscribe({
+      next: (response) => {
+        console.log('Respuesta paginada recibida:', response);
+        
+        if (response && response.content && Array.isArray(response.content)) {
+          this.pqrsList = response.content;
+          this.totalElements = response.totalElements || 0;
+          this.totalPages = response.totalPages || 0;
+          
+          console.log('Datos de paginación actualizados:', {
+            currentPage: this.currentPage,
+            totalElements: this.totalElements,
+            totalPages: this.totalPages,
+            itemsInPage: this.pqrsList.length
+          });
         } else {
-          console.error('Respuesta no válida:', data);
+          console.error('Respuesta no válida:', response);
           this.error = 'Error en el formato de datos';
+          this.pqrsList = [];
+          this.totalElements = 0;
+          this.totalPages = 0;
         }
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al cargar PQRS:', error);
+        console.error('Error al cargar PQRS paginadas:', error);
         this.error = error.message || 'Error al cargar las PQRS';
+        this.pqrsList = [];
+        this.totalElements = 0;
+        this.totalPages = 0;
         this.isLoading = false;
       }
     });
   }
 
+  // Manejo de cambios de filtros
   onFiltroChange() {
+    this.currentPage = 0; // Resetear a la primera página
     this.cargarPQRS();
+  }
+
+  onFiltroPrioridadChange() {
+    this.currentPage = 0;
+    this.cargarPQRS();
+  }
+
+  onSearchChange() {
+    this.currentPage = 0;
+    this.cargarPQRS();
+  }
+
+  limpiarFiltros() {
+    this.filtroEstado = '';
+    this.filtroPrioridad = '';
+    this.searchTerm = '';
+    this.currentPage = 0;
+    this.cargarPQRS();
+  }
+
+  // Métodos de paginación
+  onPageChange(page: number) {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.cargarPQRS();
+    }
+  }
+
+  onPageSizeChange() {
+    this.currentPage = 0; // Resetear a la primera página
+    this.cargarPQRS();
+  }
+
+  // Métodos de ordenamiento
+  onSort(field: string) {
+    if (this.sortField === field) {
+      // Cambiar dirección si es el mismo campo
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Nuevo campo, empezar con descendente
+      this.sortField = field;
+      this.sortDirection = 'desc';
+    }
+    this.currentPage = 0;
+    this.cargarPQRS();
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortField !== field) {
+      return 'fas fa-sort';
+    }
+    return this.sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+  }
+
+  // Utilidades de paginación
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(0, this.currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(this.totalPages, start + maxVisible);
+    
+    if (end - start < maxVisible) {
+      start = Math.max(0, end - maxVisible);
+    }
+    
+    for (let i = start; i < end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  getStartIndex(): number {
+    return this.currentPage * this.pageSize + 1;
+  }
+
+  getEndIndex(): number {
+    return Math.min((this.currentPage + 1) * this.pageSize, this.totalElements);
   }
 
   getPrioridadClass(prioridad: string): string {

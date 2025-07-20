@@ -2,12 +2,13 @@
   <!-- Header Section -->
   <div class="dashboard-header">
     <div class="header-title">
-      <h2><i class="fas fa-list-alt"></i> Gestión de PQRS</h2>
+      <h2><i class="fas fa-list-alt"></i> Gestión de Solicitudes</h2>
       <p class="subtitle">Administración general de solicitudes</p>
     </div>
     <div class="header-actions">
-      <!-- Filtro -->
+      <!-- Filtros -->
       <div class="filter-wrapper">
+        <!-- Filtro Estado -->
         <div class="filter-group">
           <label for="estadoFilter">Estado:</label>
           <div class="select-wrapper">
@@ -24,11 +25,54 @@
             <i class="fas fa-chevron-down select-icon"></i>
           </div>
         </div>
+
+        <!-- Filtro Prioridad -->
+        <div class="filter-group">
+          <label for="prioridadFilter">Prioridad:</label>
+          <div class="select-wrapper">
+            <select 
+              id="prioridadFilter" 
+              [(ngModel)]="filtroPrioridad" 
+              (change)="onFiltroPrioridadChange()"
+              class="form-control">
+              <option value="">Todas las prioridades</option>
+              <option *ngFor="let prioridad of prioridades" [value]="prioridad">
+                {{prioridad}}
+              </option>
+            </select>
+            <i class="fas fa-chevron-down select-icon"></i>
+          </div>
+        </div>
+
+        <!-- Búsqueda -->
+        <div class="filter-group search-group">
+          <label for="searchInput">Buscar:</label>
+          <div class="search-wrapper">
+            <input 
+              id="searchInput"
+              type="text" 
+              [(ngModel)]="searchTerm" 
+              (input)="onSearchChange()"
+              placeholder="Radicado, título, solicitante..."
+              class="form-control search-input">
+            <i class="fas fa-search search-icon"></i>
+          </div>
+        </div>
+
+        <!-- Botón Limpiar Filtros -->
+        <button 
+          *ngIf="filtroEstado || filtroPrioridad || searchTerm"
+          (click)="limpiarFiltros()" 
+          class="btn-secondary btn-clear">
+          <i class="fas fa-times"></i>
+          Limpiar
+        </button>
       </div>
+      
       <!-- Botón Crear -->
       <button [routerLink]="['/pqrs/nuevo']" class="btn-primary">
         <i class="fas fa-plus"></i>
-        Nueva PQRS
+        Nueva Solicitud
       </button>
     </div>
   </div>
@@ -36,7 +80,7 @@
   <!-- Loading y Error messages -->
   <div *ngIf="isLoading" class="loading-container">
     <div class="spinner"></div>
-    <p>Cargando PQRS...</p>
+    <p>Cargando Solicitudes...</p>
   </div>
 
   <div *ngIf="error" class="alert alert-error">
@@ -133,11 +177,85 @@
           <tr *ngIf="pqrsList.length === 0">
             <td colspan="10" class="no-data">
               <i class="fas fa-inbox"></i>
-              <span>No se encontraron PQRS</span>
+              <span>No se encontraron Solicitudes</span>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+    
+    <!-- Controles de Paginación -->
+    <div class="pagination-container" *ngIf="totalElements > 0">
+      <!-- Información de registros -->
+      <div class="pagination-info">
+        <span>Mostrando {{ getStartIndex() }} - {{ getEndIndex() }} de {{ totalElements }} registros</span>
+      </div>
+      
+      <!-- Controles de paginación -->
+      <div class="pagination-controls">
+        <!-- Tamaño de página -->
+        <div class="page-size-selector">
+          <label for="pageSize">Mostrar:</label>
+          <select 
+            id="pageSize"
+            [(ngModel)]="pageSize" 
+            (change)="onPageSizeChange()"
+            class="form-control page-size-select">
+            <option *ngFor="let size of pageSizeOptions" [value]="size">
+              {{ size }}
+            </option>
+          </select>
+          <span>por página</span>
+        </div>
+        
+        <!-- Navegación de páginas -->
+        <div class="page-navigation">
+          <!-- Botón Primera página -->
+          <button 
+            class="btn-page" 
+            [disabled]="currentPage === 0"
+            (click)="onPageChange(0)"
+            title="Primera página">
+            <i class="fas fa-angle-double-left"></i>
+          </button>
+          
+          <!-- Botón Página anterior -->
+          <button 
+            class="btn-page" 
+            [disabled]="currentPage === 0"
+            (click)="onPageChange(currentPage - 1)"
+            title="Página anterior">
+            <i class="fas fa-angle-left"></i>
+          </button>
+          
+          <!-- Números de página -->
+          <button 
+            *ngFor="let page of getPageNumbers()"
+            class="btn-page"
+            [class.active]="page === currentPage"
+            (click)="onPageChange(page)">
+            {{ page + 1 }}
+          </button>
+          
+          <!-- Botón Página siguiente -->
+          <button 
+            class="btn-page" 
+            [disabled]="currentPage >= totalPages - 1"
+            (click)="onPageChange(currentPage + 1)"
+            title="Página siguiente">
+            <i class="fas fa-angle-right"></i>
+          </button>
+          
+          <!-- Botón Última página -->
+          <button 
+            class="btn-page" 
+            [disabled]="currentPage >= totalPages - 1"
+            (click)="onPageChange(totalPages - 1)"
+            title="Última página">
+            <i class="fas fa-angle-double-right"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -153,7 +271,7 @@
              [class.fa-user-plus]="!isLoading"
              [class.fa-spinner]="isLoading"
              [class.fa-spin]="isLoading"></i>
-          {{ isLoading ? 'Procesando asignación...' : 'Asignar PQRS' }}
+          {{ isLoading ? 'Procesando asignación...' : 'Asignar Solicitud' }}
         </h3>
         <button (click)="cerrarModal()" class="btn-close" [disabled]="isLoading">
           <i class="fas fa-times"></i>
@@ -230,7 +348,7 @@
             <div *ngIf="asignacionForm.get('usuario')?.errors?.['usuarioRepetido']" 
                 class="form-error">
               <i class="fas fa-exclamation-circle"></i>
-              Este usuario ya está asignado al PQRS
+              Este usuario ya está asignado a la Solicitud
             </div>
           </div>
 
