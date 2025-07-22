@@ -234,7 +234,7 @@ export class MyAssignedPqrsComponent implements OnInit, OnDestroy {
       
     } catch (error) {
       console.error('Error:', error);
-      this.error = 'Error al cargar los PQRS asignados';
+      this.error = 'Error al cargar las Solicitudes asignadas';
     } finally {
       this.isLoading = false;
     }

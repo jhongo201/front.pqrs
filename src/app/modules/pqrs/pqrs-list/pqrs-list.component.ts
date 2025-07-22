@@ -137,7 +137,7 @@ export class PqrsListComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        this.error = 'Error al cargar las PQRS sin asignar';
+        this.error = 'Error al cargar las Solicitudes sin asignar';
         this.isLoading = false;
         console.error('Error:', error);
       }
@@ -159,7 +159,7 @@ export class PqrsListComponent implements OnInit {
       search: this.searchTerm || undefined
     };
 
-    console.log('Cargando PQRS con parámetros (SIN SORT para evitar error SQL):', {
+    console.log('Cargando Solicitudes con parámetros (SIN SORT para evitar error SQL):', {
       page: this.currentPage,
       size: this.pageSize,
       // sort: 'DESHABILITADO por error SQL backend',
@@ -192,8 +192,8 @@ export class PqrsListComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al cargar PQRS paginadas:', error);
-        this.error = error.message || 'Error al cargar las PQRS';
+        console.error('Error al cargar Solicitudes paginadas:', error);
+        this.error = error.message || 'Error al cargar las Solicitudes';
         this.pqrsList = [];
         this.totalElements = 0;
         this.totalPages = 0;
@@ -366,7 +366,7 @@ export class PqrsListComponent implements OnInit {
       const pqrsActual = this.pqrsList.find(p => p.idPqrs === this.selectedPqrs);
       
       if (pqrsActual?.usuarioAsignado?.idUsuario === nuevoUsuarioId) {
-        this.modalError = 'El usuario seleccionado ya está asignado a este PQRS';
+        this.modalError = 'El usuario seleccionado ya está asignado a esta Solicitud';
         return;
       }
   
@@ -394,7 +394,7 @@ export class PqrsListComponent implements OnInit {
         }, 2000);
   
       } catch (error) {
-        console.error('Error al asignar PQRS:', error);
+        console.error('Error al asignar Solicitud:', error);
         this.modalError = 'Error al realizar la asignación';
       } finally {
         this.isLoading = false;
@@ -408,7 +408,7 @@ export class PqrsListComponent implements OnInit {
     const pqrsActual = this.pqrsList.find(p => p.idPqrs === this.selectedPqrs);
     
     if (pqrsActual?.usuarioAsignado?.idUsuario === nuevoUsuarioId) {
-      this.modalError = 'El usuario seleccionado ya está asignado a este PQRS';
+      this.modalError = 'El usuario seleccionado ya está asignado a esta Solicitud';
       this.asignacionForm.get('usuario')?.setErrors({ 'usuarioRepetido': true });
     } else {
       this.modalError = '';

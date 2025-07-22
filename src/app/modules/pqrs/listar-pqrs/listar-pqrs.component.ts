@@ -25,7 +25,7 @@ export class ListarPqrsComponent implements OnInit {
         this.listaPqrs = data;
       },
       error: (error) => {
-        console.error('Error al cargar PQRS:', error);
+        console.error('Error al cargar Solicitud Interna:', error);
       }
     });
   }

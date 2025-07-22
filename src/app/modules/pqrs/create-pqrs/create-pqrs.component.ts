@@ -233,7 +233,7 @@ export class CreatePqrsComponent implements OnInit {
       console.log('❌ Token:', tokenConsulta);
     }
     
-    this.successMessage = '¡PQRS creada exitosamente!';
+    this.successMessage = '¡Solicitud creada exitosamente!';
     this.showSuccessModal = true;
     
     // Limpiar el formulario
@@ -244,7 +244,7 @@ export class CreatePqrsComponent implements OnInit {
   }
 
   private handleError(error: any) {
-    console.error('Error al crear PQRS:', error);
+    console.error('Error al crear Solicitud:', error);
     
     if (error.status === 400) {
       this.error = 'Los datos proporcionados no son válidos. Por favor, revise la información.';
@@ -253,7 +253,7 @@ export class CreatePqrsComponent implements OnInit {
     } else if (error.status === 0) {
       this.error = 'Error de conexión. Por favor, verifique su conexión a internet.';
     } else {
-      this.error = 'Error al crear la PQRS. Por favor, intente nuevamente.';
+      this.error = 'Error al crear la Solicitud. Por favor, intente nuevamente.';
     }
     
     this.scrollToTop();
@@ -264,7 +264,7 @@ export class CreatePqrsComponent implements OnInit {
     const date = new Date();
     const year = date.getFullYear();
     const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    return `PQRS-${year}-${random}`;
+    return `AMIRL-${year}-${random}`;
   }
 
   private resetForm() {

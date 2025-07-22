@@ -178,7 +178,7 @@ export class PqrsDetailComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        this.error = 'Error al cargar la PQRS';
+        this.error = 'Error al cargar la Solicitud';
         this.isLoading = false;
         console.error('Error:', error);
       }
@@ -498,11 +498,11 @@ async enviarRespuesta() {
 
   cargarHistorialAsignaciones(idPqrs: number) {
     if (!idPqrs) {
-      console.error('ID de PQRS no válido');
+      console.error('ID de Solicitud no válido');
       return;
     }
     
-    console.log('Cargando historial para PQRS:', idPqrs);
+    console.log('Cargando historial para Solicitud:', idPqrs);
     this.pqrsService.obtenerHistorialAsignaciones(idPqrs).subscribe({
       next: (historial) => {
         console.log('Historial recibido:', historial);

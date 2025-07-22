@@ -166,7 +166,7 @@ export class UnassignedPqrsComponent implements OnInit {
         }, 2000);
   
       } catch (error) {
-        console.error('Error al asignar PQRS:', error);
+        console.error('Error al asignar solicitud:', error);
         this.modalError = 'Error al realizar la asignación';
       } finally {
         this.isLoading = false;
@@ -178,7 +178,7 @@ export class UnassignedPqrsComponent implements OnInit {
     this.isLoading = true;
     this.error = '';
     
-    console.log('Cargando PQRS sin asignar - Página:', this.currentPage, 'Tamaño:', this.pageSize);
+    console.log('Cargando Solicitudes sin asignar - Página:', this.currentPage, 'Tamaño:', this.pageSize);
     
     // Usar el nuevo método paginado
     this.pqrsService.listarPQRSSinAsignarPaginado(
@@ -204,7 +204,7 @@ export class UnassignedPqrsComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al cargar PQRS sin asignar paginadas:', error);
+        console.error('Error al cargar Solicitudes sin asignar paginadas:', error);
         this.error = 'Error al cargar las Solicitudes sin asignar';
         this.isLoading = false;
       }
@@ -230,7 +230,7 @@ export class UnassignedPqrsComponent implements OnInit {
           this.selectedPqrs = null;
         },
         error: (error) => {
-          this.error = 'Error al asignar la PQRS';
+          this.error = 'Error al asignar la Solicitud';
           this.isLoading = false;
           console.error('Error:', error);
         }

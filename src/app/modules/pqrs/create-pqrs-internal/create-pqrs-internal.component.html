@@ -2,7 +2,7 @@
   <!-- Header Section -->
   <div class="dashboard-header">
     <div class="header-title">
-      <h2><i class="fas fa-file-alt"></i> Crear Nueva PQRS Interna</h2>
+      <h2><i class="fas fa-file-alt"></i> Crear Nueva Solicitud Interna</h2>
       <p class="subtitle">Complete el formulario para crear una nueva solicitud interna</p>
     </div>
     <button (click)="router.navigate(['/pqrs'])" class="btn-volver">
@@ -201,7 +201,7 @@
              [class.fa-spinner]="isLoading" 
              [class.fa-spin]="isLoading" 
              [class.fa-save]="!isLoading"></i>
-          {{ isLoading ? 'Creando...' : 'Crear PQRS' }}
+          {{ isLoading ? 'Creando...' : 'Crear Solicitud' }}
         </button>
       </div>
     </form>

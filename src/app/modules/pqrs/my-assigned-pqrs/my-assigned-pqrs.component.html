@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="dashboard-header">
       <div class="header-title">
-        <h2><i class="fas fa-folder-open"></i> Mis PQRS Asignados</h2>
+        <h2><i class="fas fa-folder-open"></i> Mis Solicitudes Asignadas</h2>
         <p class="subtitle">Gestión de solicitudes a mi cargo</p>
       </div>
       <div class="header-actions">
@@ -76,7 +76,7 @@
     <!-- Loading y Error messages -->
     <div *ngIf="isLoading" class="loading-container">
       <div class="spinner"></div>
-      <p>Cargando PQRS asignados...</p>
+      <p>Cargando Solicitudes asignadas...</p>
     </div>
   
     <div *ngIf="error" class="alert alert-error">
@@ -153,7 +153,7 @@
             <tr *ngIf="filteredPqrsList.length === 0">
               <td colspan="8" class="no-data">
                 <i class="fas fa-inbox"></i>
-                <span>No tienes PQRS asignados</span>
+                <span>No tienes Solicitudes asignadas</span>
                 <p *ngIf="searchTerm || filtroEstado || filtroPrioridad">
                   Prueba a eliminar los filtros aplicados
                 </p>

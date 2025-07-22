@@ -190,8 +190,8 @@ export class CreatePqrsInternalComponent implements OnInit {
         ).subscribe({
           next: (response) => {
             if (response instanceof HttpResponse) {
-              console.log('PQRS creada exitosamente:', response);
-              this.successMessage = 'PQRS creada exitosamente';
+              console.log('Solicitud creada exitosamente:', response);
+              this.successMessage = 'Solicitud creada exitosamente';
               // Solo establecer el progreso al 100% si hay archivo
               if (hasFile) {
                 this.uploadProgress = 100;
@@ -214,7 +214,7 @@ export class CreatePqrsInternalComponent implements OnInit {
             } else if (typeof error.error === 'string') {
               this.error = error.error;
             } else {
-              this.error = 'Error al crear la PQRS';
+              this.error = 'Error al crear la Solicitud';
             }
             
             console.log('Mensaje de error final:', this.error);

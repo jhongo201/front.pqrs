@@ -164,7 +164,26 @@ export class MenuComponent implements OnInit {
       '/api/auth/logout'           // Ruta de logout (se accede desde header)
     ];
     
-    return !excludedRoutes.includes(ruta);
+    // Verificar rutas excluidas generales
+    if (excludedRoutes.includes(ruta)) {
+      return false;
+    }
+    
+    // Filtrado basado en roles: Ocultar /usuarios para rol OPERADOR
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.rol) {
+      const userRole = typeof currentUser.rol === 'string' 
+        ? currentUser.rol 
+        : currentUser.rol.nombre;
+      
+      // Si el usuario es OPERADOR, ocultar la ruta /api/usuarios
+      if (userRole === 'OPERADOR' && (ruta === '/api/usuarios' || ruta === '/usuarios')) {
+        console.log('🚫 MenuComponent - Ocultando ruta /usuarios para usuario OPERADOR');
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   /**
