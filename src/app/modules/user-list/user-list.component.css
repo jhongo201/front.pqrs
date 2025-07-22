@@ -234,6 +234,12 @@
   border: 1px solid var(--border-light);
 }
 
+/* Ajustar padding del select en la sección de filtros */
+.filters-section .form-select {
+  padding: var(--spacing-md) 2.5rem var(--spacing-md) 0.75rem !important; 
+  /* Reducir padding izquierdo, mantener espacio derecho para flecha */
+}
+
 .filters-header {
   display: flex;
   justify-content: space-between;
@@ -1368,4 +1374,38 @@
   background: white !important;
   border-radius: var(--radius-lg) !important;
   box-shadow: var(--shadow-xl) !important;
+}
+
+/* ===== CORRECCIÓN FORMULARIO MODAL ===== */
+
+/* Input sin wrapper - ajustar solo el padding */
+.ldap-form .form-input {
+  padding: 0.75rem !important; /* Padding uniforme sin espacio para icono */
+}
+
+/* Select con wrapper - mantener espacio para la flecha */
+.ldap-form .form-select {
+  padding: 0.75rem 2.5rem 0.75rem 0.75rem !important; /* Espacio solo a la derecha para flecha */
+}
+
+/* Posición de la flecha del select */
+.ldap-form .select-icon {
+  position: absolute !important;
+  right: 0.75rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #6b7280 !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+}
+
+/* Asegurar posición relativa del wrapper */
+.ldap-form .select-wrapper {
+  position: relative !important;
+}
+
+/* Estilo para los iconos en los labels */
+.ldap-form .form-label i {
+  color: #4f46e5 !important;
+  margin-right: 0.5rem !important;
 }

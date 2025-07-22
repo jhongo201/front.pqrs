@@ -127,21 +127,59 @@ export class MenuComponent implements OnInit {
    */
   private updateActiveMenuFromUrl(url: string): void {
     // Normalizar la URL para comparación
-    const normalizedUrl = url.split('?')[0]; // Eliminar parámetros de consulta
+    const normalizedUrl = url.split('?')[0].split('#')[0]; // Eliminar parámetros y fragmentos
+    console.log('🔍 MenuComponent - Detectando ruta activa:', normalizedUrl);
+    
+    // Limpiar estado activo anterior
+    this.activeMenuItem = null;
+    this.activeSubmenuItem = null;
+    
+    // Casos especiales para rutas principales
+    if (normalizedUrl === '/dashboard' || normalizedUrl === '/') {
+      this.setActiveMenuItem(0, 0);
+      console.log('✅ MenuComponent - Dashboard marcado como activo');
+      return;
+    }
     
     // Buscar en todos los módulos y rutas
+    let bestMatch: { modulo: ModuloMenu | null, ruta: RutaMenu | null, matchLength: number } = { 
+      modulo: null, 
+      ruta: null, 
+      matchLength: 0 
+    };
+    
     for (const modulo of this.menuModules) {
       for (const ruta of modulo.rutas) {
         // Convertir la ruta del backend a una ruta de frontend
         const frontendRoute = this.backendToFrontendRoute(ruta.ruta);
         
-        // Si la URL actual comienza con la ruta del frontend
-        if (normalizedUrl.startsWith(frontendRoute)) {
-          this.setActiveMenuItem(modulo.id, ruta.id);
-          this.openModules[modulo.id] = true; // Abrir el módulo
-          return;
+        // Verificar coincidencia exacta o por prefijo
+        const isExactMatch = normalizedUrl === frontendRoute;
+        const isPartialMatch = normalizedUrl.startsWith(frontendRoute + '/') || 
+                              (frontendRoute !== '/' && normalizedUrl.startsWith(frontendRoute));
+        
+        if (isExactMatch || isPartialMatch) {
+          const matchLength = frontendRoute.length;
+          
+          // Preferir coincidencias más específicas (rutas más largas)
+          if (matchLength > bestMatch.matchLength) {
+            bestMatch = { modulo, ruta, matchLength };
+          }
         }
       }
+    }
+    
+    // Aplicar la mejor coincidencia encontrada
+    if (bestMatch.modulo && bestMatch.ruta) {
+      this.setActiveMenuItem(bestMatch.modulo.id, bestMatch.ruta.id);
+      this.openModules[bestMatch.modulo.id] = true; // Abrir el módulo
+      console.log('✅ MenuComponent - Ruta activa detectada:', {
+        modulo: bestMatch.modulo.nombre,
+        ruta: bestMatch.ruta.descripcion,
+        url: normalizedUrl
+      });
+    } else {
+      console.log('⚠️ MenuComponent - No se encontró coincidencia para:', normalizedUrl);
     }
   }
 
@@ -196,15 +234,26 @@ export class MenuComponent implements OnInit {
     let frontendRoute = backendRoute.startsWith('/api') ? backendRoute.substring(4) : backendRoute;
     
     // Mapeo específico de rutas (personalizar según tu aplicación)
-    // Ejemplo: /pqrs -> /pqrs-list
     const routeMapping: {[key: string]: string} = {
       '/usuarios': '/usuarios',
-      '/pqrs': '/pqrs'
+      '/pqrs': '/pqrs',
+      '/pqrs/crear': '/pqrs/crear',
+      '/pqrs/mis-pqrs': '/pqrs/mis-pqrs',
+      '/reportes': '/reportes',
+      '/dashboard': '/dashboard',
+      '/estadisticas': '/estadisticas'
       // Agregar más mapeos según sea necesario
     };
     
-    // Aplicar mapeo si existe
-    return routeMapping[frontendRoute] || frontendRoute;
+    // Aplicar mapeo si existe, sino usar la ruta tal como viene
+    const mappedRoute = routeMapping[frontendRoute] || frontendRoute;
+    
+    console.log('🔄 MenuComponent - Mapeo de ruta:', {
+      backend: backendRoute,
+      frontend: mappedRoute
+    });
+    
+    return mappedRoute;
   }
 
 } 
