@@ -64,6 +64,10 @@ export class CreateUserComponent implements OnInit {
 showLoadingSteps = false;
 currentStep = 0;
 
+  // Propiedades para la modal de confirmación
+  showSuccessModal: boolean = false;
+  registeredUserData: any = null;
+
   // Valores predeterminados para usuarios externos
   //territorial => 4
   //Direccion => 5
@@ -332,130 +336,7 @@ currentStep = 0;
     });
   }
 
-  // Enviar formulario
-  onSubmit(): void {
-    console.log('🔥🔥🔥 INICIO onSubmit - FORMULARIO ENVIADO 🔥🔥🔥');
-    console.log('🔥 Formulario válido:', this.userForm.valid);
-    console.log('🔥 isExternalUser:', this.isExternalUser);
-    
-    if (this.userForm.valid) {
-      this.loading = true;
-      this.showLoadingSteps = true;
-      this.currentStep = 1;
-      this.errorMessage = '';
 
-      // DEBUG: Verificar valores del formulario antes de enviar
-      console.log('=== DEBUG onSubmit ===');
-      console.log('Valores del formulario:', this.userForm.value);
-      
-      const idMunicipioValue = this.userForm.get('idMunicipio')?.value;
-      console.log('idMunicipio específico:', idMunicipioValue);
-      console.log('Tipo de idMunicipio:', typeof idMunicipioValue);
-      
-      // Buscar el municipio seleccionado para mostrar información completa
-      const municipioSeleccionado = this.municipios.find(m => m.id === idMunicipioValue);
-      if (municipioSeleccionado) {
-        console.log('✅ Municipio que se enviará:', municipioSeleccionado);
-        console.log('✅ Código DANE:', municipioSeleccionado.codigoDane);
-        console.log('✅ Nombre:', municipioSeleccionado.nombre);
-      } else {
-        console.log('❌ No se encontró municipio con ID:', idMunicipioValue);
-        console.log('❌ Municipios disponibles:', this.municipios.map(m => ({ id: m.id, nombre: m.nombre })));
-      }
-      
-      console.log('Departamento seleccionado:', this.userForm.get('departamento')?.value);
-
-      const userData = this.isExternalUser ? 
-        { ...this.userForm.value, ...this.EXTERNAL_USER_DEFAULTS } : 
-        this.userForm.value;
-      
-      console.log('userData final a enviar:', userData);
-
-      const request = this.isExternalUser ? 
-        this.userService.registerExternalUser(userData) :
-        this.userService.createUser(userData);
-
-      // Simular pasos del proceso
-      setTimeout(() => this.currentStep = 2, 500);
-      setTimeout(() => this.currentStep = 3, 1000);
-  
-      request.subscribe({
-        next: (response) => {
-          setTimeout(() => {
-            this.currentStep = 4;
-            setTimeout(() => {
-              this.loading = false;
-              this.showLoadingSteps = false;
-              this.currentStep = 0;
-              
-              if (this.isExternalUser) {
-                this.showMessage('success', 'Registro exitoso. En breve recibirás un correo para activar tu cuenta.');
-                setTimeout(() => this.router.navigate(['/login']), 3000);
-              } else {
-                this.showMessage('success', 'Usuario creado exitosamente');
-                this.userForm.reset();
-                setTimeout(() => {
-                  this.router.navigate(['/usuarios']);
-                }, 2000);
-              }
-            }, 800);
-          }, 500);
-        },
-        error: (error) => {
-          this.loading = false;
-          this.showLoadingSteps = false;
-          this.currentStep = 0;
-          console.error('Error detallado:', error);
-  
-          // [Mantener el mismo manejo de errores que ya tienes]
-          if (error.error) {
-            switch (error.error.code) {
-              case 'USERNAME_EXISTS':
-                this.showFieldError('username', error.error.message);
-                break;
-              case 'EMAIL_EXISTS':
-                this.showFieldError('email', error.error.message);
-                break;
-              case 'DOCUMENT_EXISTS':
-                this.showFieldError('numeroDocumento', error.error.message);
-                break;
-              case 'USER_ALREADY_EXISTS':
-                this.showFieldError('numeroDocumento', error.error.message);
-                break;
-              case 'ACTIVE_PQRS_EXISTS':
-                this.showFieldError('numeroDocumento', error.error.message);
-                break;
-              case 'PERSON_NOT_FOUND':
-              case 'ROLE_NOT_FOUND':
-              case 'USER_CREATION_ERROR':
-                this.errorMessage = error.error.message;
-                break;
-              default:
-                if (error.error.message) {
-                  this.errorMessage = error.error.message;
-                } else {
-                  this.errorMessage = error.error.mensaje || 'Error al procesar la solicitud';
-                }
-            }
-          } else {
-            this.errorMessage = 'Error de conexión. Por favor, intente nuevamente.';
-          }
-        }
-      });
-    } else {
-    console.log('🔥🔥🔥 FORMULARIO NO VÁLIDO 🔥🔥🔥');
-    console.log('🔥 Errores del formulario:', this.userForm.errors);
-    console.log('🔥 Controles inválidos:');
-    Object.keys(this.userForm.controls).forEach(key => {
-      const control = this.userForm.get(key);
-      if (control && control.invalid) {
-        console.log(`🔥   - ${key}:`, control.errors);
-      }
-    });
-    this.markFormGroupTouched(this.userForm);
-    this.errorMessage = 'Por favor, complete todos los campos requeridos correctamente.';
-  }
-}
   
   private showFieldError(fieldName: string, message: string) {
     const control = this.userForm.get(fieldName);
@@ -677,5 +558,103 @@ currentStep = 0;
     this.passwordHasLower = /[a-z]/.test(password);
     this.passwordHasNumber = /[0-9]/.test(password);
     this.passwordHasSpecial = /[@$!%*?&]/.test(password);
+  }
+
+  // Método para manejar el envío del formulario
+  onSubmit(): void {
+    if (this.userForm.valid && !this.loading) {
+      this.loading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+      
+      // Mostrar pasos de loading
+      this.showLoadingSteps = true;
+      this.currentStep = 1;
+      
+      // Simular progreso de pasos
+      setTimeout(() => {
+        this.currentStep = 2;
+      }, 1000);
+      
+      setTimeout(() => {
+        this.currentStep = 3;
+      }, 2000);
+      
+      // Preparar datos del usuario
+      const userData = { ...this.userForm.value };
+      
+      // Agregar valores predeterminados para usuarios externos
+      if (this.isExternalUser) {
+        userData.idArea = this.EXTERNAL_USER_DEFAULTS.idArea;
+        userData.idEmpresa = this.EXTERNAL_USER_DEFAULTS.idEmpresa;
+        userData.idRol = this.EXTERNAL_USER_DEFAULTS.idRol;
+      }
+      
+      console.log('🚀 Enviando datos del usuario:', userData);
+      
+      // Llamar al servicio para crear el usuario
+      this.userService.createUser(userData).subscribe({
+        next: (response) => {
+          console.log('✅ Usuario creado exitosamente:', response);
+          this.loading = false;
+          this.showLoadingSteps = false;
+          this.currentStep = 0;
+          
+          // Guardar datos del usuario registrado
+          this.registeredUserData = {
+            nombre: `${userData.primerNombre} ${userData.primerApellido}`,
+            email: userData.email,
+            username: userData.username,
+            tipoDocumento: userData.tipoDocumento,
+            numeroDocumento: userData.numeroDocumento
+          };
+          
+          // Esperar un momento para que se cierre la modal de loading antes de mostrar la de confirmación
+          setTimeout(() => {
+            this.showSuccessModal = true;
+          }, 500); // 500ms de delay para una transición suave
+        },
+        error: (error) => {
+          console.error('❌ Error al crear usuario:', error);
+          this.loading = false;
+          this.showLoadingSteps = false;
+          this.currentStep = 0;
+          
+          // Manejar errores específicos
+          if (error.status === 400 && error.error?.message) {
+            this.errorMessage = error.error.message;
+          } else if (error.status === 409) {
+            this.errorMessage = 'Ya existe un usuario con este documento o nombre de usuario';
+          } else {
+            this.errorMessage = 'Error al crear el usuario. Por favor, intente nuevamente.';
+          }
+        }
+      });
+    } else {
+      // Marcar todos los campos como touched para mostrar errores
+      Object.keys(this.userForm.controls).forEach(key => {
+        this.userForm.get(key)?.markAsTouched();
+      });
+      this.errorMessage = 'Por favor, complete todos los campos requeridos correctamente.';
+    }
+  }
+  
+  // Método para cerrar la modal de éxito
+  closeSuccessModal(): void {
+    this.showSuccessModal = false;
+    this.registeredUserData = null;
+    
+    // Redirigir según el tipo de usuario
+    if (this.isExternalUser) {
+      this.router.navigate(['/login']);
+    } else {
+      this.router.navigate(['/usuarios']);
+    }
+  }
+  
+  // Método para ir al login desde la modal
+  goToLogin(): void {
+    this.showSuccessModal = false;
+    this.router.navigate(['/login']);
   }
 }
