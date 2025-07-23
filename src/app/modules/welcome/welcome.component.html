@@ -41,7 +41,7 @@
       </div>
       
       <!-- Botones de acción mejorados -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
         <button 
           mat-raised-button 
           color="primary"
@@ -59,23 +59,32 @@
           <mat-icon class="mr-2">person_add</mat-icon>
           Registrarse
         </button>
-        
+
         <button 
+          mat-raised-button 
+          color="secondary"
+          class="enhanced-button"
+          (click)="goToForgotPassword()">
+          <mat-icon class="mr-2">verified_user</mat-icon>
+          ¿Olvidó su contraseña?
+        </button>
+        
+        <!-- <button 
           mat-raised-button 
           color="secondary"
           class="enhanced-button"
           (click)="goToActivateToken()">
           <mat-icon class="mr-2">verified_user</mat-icon>
           Activar Token
-        </button>
+        </button>-->
         
-        <button 
+        <!-- <button 
           mat-raised-button
           class="yellow-button enhanced-button"
           (click)="goToCretaPqrs()">
           <mat-icon class="mr-2">assignment</mat-icon>
           Crear PQRS
-        </button>
+        </button>-->
       </div>
       
       <!-- Información de contacto adicional -->

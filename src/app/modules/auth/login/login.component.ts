@@ -111,6 +111,10 @@ export class LoginComponent {
     this.router.navigate(['/consulta-pqrs']);
   }
 
+  goToForgotPassword(): void {
+    this.router.navigate(['/forgot-password']);
+  }
+
   // Métodos para validación en tiempo real
   validateUsername(): void {
     if (!this.credentials.username.trim()) {

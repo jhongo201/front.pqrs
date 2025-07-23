@@ -59,4 +59,28 @@ export class AuthService {
     const userData = localStorage.getItem('user');
     return userData ? JSON.parse(userData) : null;
   }
+
+  getCurrentUser(): UserData | null {
+    const userData = localStorage.getItem('user');
+    return userData ? JSON.parse(userData) : null;
+  }
+
+  // Métodos para restablecimiento de contraseña
+  solicitarRestablecimiento(email: string) {
+    return this.http.post<any>(`${environment.apiUrl}/usuarios/solicitar-restablecimiento`, {
+      email: email
+    });
+  }
+
+  validarToken(token: string) {
+    return this.http.get<any>(`${environment.apiUrl}/usuarios/validar-token-restablecimiento/${token}`);
+  }
+
+  restablecerPassword(token: string, nuevaPassword: string, confirmarPassword: string) {
+    return this.http.post<any>(`${environment.apiUrl}/usuarios/restablecer-password`, {
+      token: token,
+      nuevaPassword: nuevaPassword,
+      confirmarPassword: confirmarPassword
+    });
+  }
 }

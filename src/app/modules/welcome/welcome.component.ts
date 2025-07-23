@@ -37,4 +37,8 @@ export class WelcomeComponent {
   goToCretaPqrs() {
     this.router.navigate(['/pqrs/nuevo-pqrs']);
   }
+
+  goToForgotPassword(): void {
+    this.router.navigate(['/forgot-password']);
+  }
 }

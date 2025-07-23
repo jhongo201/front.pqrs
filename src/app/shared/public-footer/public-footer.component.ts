@@ -11,13 +11,13 @@ import { CommonModule } from '@angular/common';
       <div class="footer-content">
         <div class="footer-section">
           <h4>Ministerio del Trabajo</h4>
-          <p>Sistema de Peticiones, Quejas, Reclamos y Sugerencias</p>
+          <p>Módulo de Solicitudes de Soporte Técnico para Sistemas de Información de la Dirección de Riesgos Laborales</p>
         </div>
         <div class="footer-section">
           <h4>Enlaces Útiles</h4>
           <a href="https://www.mintrabajo.gov.co" target="_blank">Sitio Web Oficial</a>
-          <a href="#">Términos y Condiciones</a>
-          <a href="#">Política de Privacidad</a>
+          <!--<a href="#">Términos y Condiciones</a>
+          <a href="#">Política de Privacidad</a>-->
         </div>
         <div class="footer-section">
           <h4>Contacto</h4>

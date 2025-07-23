@@ -24,6 +24,8 @@ import { ConsultaPqrsComponent } from './modules/pqrs/consulta-pqrs/consulta-pqr
 import { RoleManagementComponent } from './modules/role-management/role-management.component';
 import { ModuleManagementComponent } from './modules/module-management/module-management.component';
 import { UserDashboardComponent } from './modules/dashboard/user-dashboard/user-dashboard.component';
+import { ForgotPasswordComponent } from './modules/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './modules/auth/reset-password/reset-password.component';
 
 
 export const routes: Routes = [
@@ -178,7 +180,15 @@ export const routes: Routes = [
         component: ActivateUserComponent
       }
     ]
-  },  
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent
+  },
+  {
+    path: 'reset-password/:token',
+    component: ResetPasswordComponent
+  },
   {
     path: '',
     redirectTo: '/index',
