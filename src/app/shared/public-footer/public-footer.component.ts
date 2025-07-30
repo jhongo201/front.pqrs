@@ -11,18 +11,19 @@ import { CommonModule } from '@angular/common';
       <div class="footer-content">
         <div class="footer-section">
           <h4>Ministerio del Trabajo</h4>
-          <p>Módulo de Solicitudes de Soporte Técnico para Sistemas de Información de la Dirección de Riesgos Laborales</p>
+          <p>Módulo de Solicitudes de Soporte Técnico para el Sistema de Información de la Dirección de Riesgos Laborales</p>
         </div>
         <div class="footer-section">
           <h4>Enlaces Útiles</h4>
-          <a href="https://www.mintrabajo.gov.co" target="_blank">Sitio Web Oficial</a>
+          <a href="https://www.mintrabajo.gov.co" target="_blank">Ministerio del Trabajo</a>
+          <a href="https://www.fondoriesgoslaborales.gov.co/" target="_blank">Fondo de Riesgos Laborales</a>
           <!--<a href="#">Términos y Condiciones</a>
           <a href="#">Política de Privacidad</a>-->
         </div>
         <div class="footer-section">
           <h4>Contacto</h4>
-          <p><i class="fas fa-phone"></i> Línea gratuita nacional: 018000 513100</p>
-          <p><i class="fas fa-envelope"></i> solucionesdocumental</p>
+          <p><i class="fas fa-phone"></i> Línea gratuita nacional: (601)- 5185830</p>
+          
         </div>
       </div>
       <div class="footer-bottom">

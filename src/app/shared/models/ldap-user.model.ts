@@ -7,6 +7,11 @@ export interface LdapUserCreate {
     username: string;
     idRol: number;
     estado: boolean;
+    primerNombre: string;
+    otrosNombres?: string;
+    primerApellido: string;
+    segundoApellido?: string;
+    idArea: number;
   }
   
   export interface LdapUserUpdate {

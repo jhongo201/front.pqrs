@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LdapUser, LdapUserCreate, LdapUserUpdate, Role } from '../../shared/models/ldap-user.model';
 import { UserService } from '../../core/services/user.service';
+import { AreaService } from '../../core/services/area.service';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { ConfirmModalComponent } from '../../shared/confirm-modal/confirm-modal.component';
 import { SuccessModalComponent } from '../../shared/success-modal/success-modal.component';
@@ -17,6 +18,7 @@ import { SuccessModalComponent } from '../../shared/success-modal/success-modal.
 export class LdapUsersComponent implements OnInit {
   users: LdapUser[] = [];
   roles: { id: number; nombre: string }[] = [];
+  areas: { id: number; nombre: string }[] = [];
   showCreateModal = false;
   showEditModal = false;
   showDeleteModal = false;
@@ -32,12 +34,18 @@ export class LdapUsersComponent implements OnInit {
 
   constructor(
     private userService: UserService,
+    private areaService: AreaService,
     private fb: FormBuilder
   ) {
     this.createForm = this.fb.group({
       username: ['', Validators.required],
       idRol: [null, Validators.required],
-      estado: [true]
+      estado: [true],
+      primerNombre: ['', Validators.required],
+      otrosNombres: [''],
+      primerApellido: ['', Validators.required],
+      segundoApellido: [''],
+      idArea: [null, Validators.required]
     });
 
     this.editForm = this.fb.group({
@@ -57,6 +65,7 @@ export class LdapUsersComponent implements OnInit {
     console.log('LdapUsersComponent initialized');
     this.loadUsers();
     this.loadRoles();
+    this.loadAreas();
   }
 
   loadUsers() {
@@ -88,11 +97,30 @@ export class LdapUsersComponent implements OnInit {
           id: rol.idRol,   // Ajuste en las claves
           nombre: rol.nombre
         }));
-        console.log('Areas cargadas:', this.roles); // Verifica los datos cargados
+        console.log('Roles cargados:', this.roles); // Verifica los datos cargados
       },error: (err) => {
         console.error('Error al cargar los roles', err);
         alert('No se pudieron cargar los roles.');
       },
+    });
+  }
+
+  // Cargar áreas
+  loadAreas(): void {
+    this.areaService.listarAreas().subscribe({
+      next: (data: any) => {
+        this.areas = data
+        .filter((area: any) => area.estado)
+        .map((area: any) => ({
+          id: area.idArea,
+          nombre: area.nombre
+        }));
+        console.log('Áreas cargadas:', this.areas);
+      },
+      error: (err) => {
+        console.error('Error al cargar las áreas', err);
+        alert('No se pudieron cargar las áreas.');
+      }
     });
   }
 
@@ -121,7 +149,12 @@ export class LdapUsersComponent implements OnInit {
       const userData: LdapUserCreate = {
         username: this.createForm.get('username')?.value,
         idRol: this.createForm.get('idRol')?.value,
-        estado: this.createForm.get('estado')?.value
+        estado: this.createForm.get('estado')?.value,
+        primerNombre: this.createForm.get('primerNombre')?.value,
+        otrosNombres: this.createForm.get('otrosNombres')?.value || null,
+        primerApellido: this.createForm.get('primerApellido')?.value,
+        segundoApellido: this.createForm.get('segundoApellido')?.value || null,
+        idArea: this.createForm.get('idArea')?.value
       };
 
       console.log('los datos para crear el usuario son:  username ->' + this.createForm.get('username')?.value);

@@ -593,7 +593,11 @@ currentStep = 0;
       console.log('🚀 Enviando datos del usuario:', userData);
       
       // Llamar al servicio para crear el usuario
-      this.userService.createUser(userData).subscribe({
+      const userCreation$ = this.isExternalUser 
+        ? this.userService.registerExternalUser(userData)
+        : this.userService.createUser(userData);
+      
+      userCreation$.subscribe({
         next: (response) => {
           console.log('✅ Usuario creado exitosamente:', response);
           this.loading = false;

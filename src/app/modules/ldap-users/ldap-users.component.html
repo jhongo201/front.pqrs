@@ -19,32 +19,91 @@ confirmButtonClass="btn-success"
 (cancel)="showCreateModal = false">
 <!-- El formulario va dentro del modal -->
 <form [formGroup]="createForm" class="form-container">
-  <div class="form-group">
-    <label for="username">Username</label>
-    <input 
-      type="text" 
-      id="username"
-      formControlName="username" 
-      class="form-control" 
-      placeholder="Ingrese username">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="username">Username *</label>
+      <input 
+        type="text" 
+        id="username"
+        formControlName="username" 
+        class="form-control" 
+        placeholder="Ingrese username">
+    </div>
+    <div class="form-group">
+      <label for="idArea">Área *</label>
+      <select 
+        id="idArea"
+        formControlName="idArea" 
+        class="form-control">
+        <option value="">Seleccione un área</option>
+        <option [value]="area.id" *ngFor="let area of areas">
+          {{ area.nombre }}
+        </option>
+      </select>
+    </div>
   </div>
-  <div class="form-group">
-    <label for="idRol">Rol</label>
-    <select 
-      id="idRol"
-      formControlName="idRol" 
-      class="form-control">
-      <option value="">Seleccione un rol</option>
-      <option [value]="role.id" *ngFor="let role of roles">
-        {{ role.nombre }}
-      </option>
-    </select>
+  
+  <div class="form-row">
+    <div class="form-group">
+      <label for="primerNombre">Primer Nombre *</label>
+      <input 
+        type="text" 
+        id="primerNombre"
+        formControlName="primerNombre" 
+        class="form-control" 
+        placeholder="Ingrese primer nombre">
+    </div>
+    <div class="form-group">
+      <label for="otrosNombres">Otros Nombres</label>
+      <input 
+        type="text" 
+        id="otrosNombres"
+        formControlName="otrosNombres" 
+        class="form-control" 
+        placeholder="Ingrese otros nombres (opcional)">
+    </div>
   </div>
-  <div class="form-group">
-    <label class="checkbox-label">
-      <input type="checkbox" formControlName="estado">
-      <span>Estado activo</span>
-    </label>
+  
+  <div class="form-row">
+    <div class="form-group">
+      <label for="primerApellido">Primer Apellido *</label>
+      <input 
+        type="text" 
+        id="primerApellido"
+        formControlName="primerApellido" 
+        class="form-control" 
+        placeholder="Ingrese primer apellido">
+    </div>
+    <div class="form-group">
+      <label for="segundoApellido">Segundo Apellido</label>
+      <input 
+        type="text" 
+        id="segundoApellido"
+        formControlName="segundoApellido" 
+        class="form-control" 
+        placeholder="Ingrese segundo apellido (opcional)">
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-group">
+      <label for="idRol">Rol *</label>
+      <select 
+        id="idRol"
+        formControlName="idRol" 
+        class="form-control">
+        <option value="">Seleccione un rol</option>
+        <option [value]="role.id" *ngFor="let role of roles">
+          {{ role.nombre }}
+        </option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="estado">
+        <span>Estado activo</span>
+      </label>
+    </div>
   </div>
 </form>
 </app-confirm-modal>

@@ -1,7 +1,74 @@
 .welcome-content {
   padding-top: 64px; /* Altura del header */
   min-height: calc(100vh - 64px);
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.3) 0%, rgba(226, 232, 240, 0.3) 100%), url('../../../assets/images/2.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Optimización para tablets */
+@media (max-width: 1024px) {
+  .welcome-content {
+    background-attachment: scroll; /* Mejor rendimiento en tablets */
+    background-size: cover;
+    background-position: center center;
+  }
+}
+
+/* Optimización para móviles */
+@media (max-width: 768px) {
+  .welcome-content {
+    background-attachment: scroll; /* Evita problemas en móviles */
+    background-size: cover;
+    background-position: center center;
+    /* Gradiente con opacidad reducida para mostrar más la imagen */
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.4) 0%, rgba(226, 232, 240, 0.4) 100%), url('../../../assets/images/2.jpg');
+  }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .welcome-content {
+    padding-top: 56px; /* Header más pequeño en móviles */
+    min-height: calc(100vh - 56px);
+    background-size: cover;
+    background-position: center center;
+    /* Gradiente con opacidad balanceada para legibilidad y visibilidad de imagen */
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.5) 0%, rgba(226, 232, 240, 0.5) 100%), url('../../../assets/images/2.jpg');
+  }
+}
+
+/* Estilos adicionales para la tarjeta principal */
+.welcome-content .bg-white {
+  /* Sombra más suave y elegante */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  /* Efecto de vidrio esmerilado */
+  backdrop-filter: blur(10px);
+  /* Transición suave para hover */
+  transition: all 0.3s ease;
+}
+
+.welcome-content .bg-white:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Responsividad para la tarjeta */
+@media (max-width: 768px) {
+  .welcome-content .bg-white {
+    margin: 16px;
+    padding: 24px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-content .bg-white {
+    margin: 12px;
+    padding: 20px !important;
+    border-radius: 20px !important;
+  }
 }
 
 /* Botón amarillo mejorado */
@@ -102,6 +169,53 @@
     font-size: 18px !important;
     width: 18px !important;
     height: 18px !important;
+  }
+  
+  /* Ajustes adicionales para el contenido en móviles */
+  .welcome-content .max-w-5xl {
+    padding: 0 16px;
+  }
+  
+  .welcome-content h1 {
+    font-size: 2rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  .welcome-content h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  .welcome-content h3 {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Optimizaciones adicionales para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .welcome-content .grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .welcome-content .max-w-5xl {
+    padding: 0 12px;
+  }
+  
+  .welcome-content h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  .welcome-content h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  .welcome-content h3 {
+    font-size: 1.125rem !important;
+  }
+  
+  .welcome-content p {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
   }
 }
 

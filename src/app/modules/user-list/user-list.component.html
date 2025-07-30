@@ -187,7 +187,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let user of displayedUsers; let i = index; trackBy: trackByUserId" 
-                [ngClass]="{'ad-user': !user.persona, 'inactive-user': !user.estado}"
+                [ngClass]="{'ldap-user': user.esLdap, 'inactive-user': !user.estado}"
                 [style.animation-delay.ms]="i * 50">
               
               <!-- Avatar -->
@@ -200,16 +200,17 @@
               <!-- Username -->
               <td class="td-username">
                 <div class="username-cell">
-                  <span class="username">{{ user.username }}</span>
-                  <span class="user-type" *ngIf="!user.persona">LDAP</span>
+                  <span class="username">{{ user.esLdap ? (user.username | removeLdapSuffix) : user.username }}</span>
+                  <span class="user-type" *ngIf="user.esLdap">LDAP</span>
                 </div>
               </td>
 
               <!-- Nombre Completo -->
               <td class="td-name">
                 <div class="name-cell">
-                  <span class="full-name">{{ getUserFullName(user) }}</span>
-                  <span class="name-fallback" *ngIf="!user.persona">Usuario de Directorio Activo</span>
+                  <span class="full-name" *ngIf="!user.esLdap">{{ getUserFullName(user) }}</span>
+                  <span class="full-name" *ngIf="user.esLdap">{{ getUserFullName(user) | removeLdapSuffix | titlecase }}</span>
+                  <span class="name-fallback" *ngIf="user.esLdap">Usuario de Directorio Activo</span>
                 </div>
               </td>
 
@@ -372,7 +373,7 @@ confirmButtonClass="btn-danger"
 (close)="closeSuccessModal()">
 </app-success-modal>
 
-<!-- Modal para Usuario LDAP Mejorado -->
+<!-- Modal para Usuario LDAP Actualizada -->
 <app-confirm-modal
 [show]="showCreateLdapModal"
 title="Crear Usuario LDAP"
@@ -381,65 +382,130 @@ confirmButtonClass="btn-success"
 [loading]="loading"
 (confirm)="createLdapUser()"
 (cancel)="showCreateLdapModal = false">
-
-<div class="ldap-form-container">
-  <form [formGroup]="ldapForm" class="ldap-form">
-    <div class="form-grid">
-      <div class="form-group">
-        <label for="username" class="form-label">
-          <i class="fas fa-user"></i>
-          Username
-        </label>
-        <input 
-          type="text" 
-          id="username"
-          formControlName="username" 
-          class="form-input" 
-          placeholder="Ingrese el nombre de usuario"
-          [class.error]="hasFormError('username')">
-        <div class="input-helper" *ngIf="!hasFormError('username')">
-          El username debe ser único en el sistema
-        </div>
-        <div class="error-message" *ngIf="hasFormError('username')">
-          {{ getFormError('username') }}
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="idRol" class="form-label">
-          <i class="fas fa-user-tag"></i>
-          Rol del Usuario
-        </label>
-        <div class="select-wrapper">
-          <select 
-            id="idRol"
-            formControlName="idRol" 
-            class="form-select"
-            [class.error]="hasFormError('idRol')">
-            <option value="">Seleccione un rol</option>
-            <option [value]="role.id" *ngFor="let role of roles; trackBy: trackByRoleId">
-              {{ role.nombre }}
-            </option>
-          </select>
-          <i class="select-icon fas fa-chevron-down"></i>
-        </div>
-        <div class="error-message" *ngIf="hasFormError('idRol')">
-          {{ getFormError('idRol') }}
-        </div>
-      </div>
-
-      <div class="form-group form-group-full">
-        <div class="checkbox-group">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="estado" class="checkbox-input"><!-- user-list.component.html -->
+  <div class="ldap-form-container">
+    <form [formGroup]="ldapForm" class="ldap-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="username" class="form-label">
+            <i class="fas fa-user"></i>
+            Username *
           </label>
+          <input 
+            type="text" 
+            id="username"
+            formControlName="username" 
+            class="form-input" 
+            placeholder="Ingrese el nombre de usuario">
+          <div class="input-helper">El username debe ser único en el sistema</div>
+        </div>
+
+        <div class="form-group">
+          <label for="idArea" class="form-label">
+            <i class="fas fa-building"></i>
+            Área *
+          </label>
+          <div class="select-wrapper">
+            <select 
+              id="idArea"
+              formControlName="idArea" 
+              class="form-select">
+              <option value="">Seleccione un área</option>
+              <option [value]="area.id" *ngFor="let area of areas">
+                {{ area.nombre }}
+              </option>
+            </select>
+            <i class="select-icon fas fa-chevron-down"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="primerNombre" class="form-label">
+            <i class="fas fa-user-circle"></i>
+            Primer Nombre *
+          </label>
+          <input 
+            type="text" 
+            id="primerNombre"
+            formControlName="primerNombre" 
+            class="form-input" 
+            placeholder="Ingrese el primer nombre">
+        </div>
+
+        <div class="form-group">
+          <label for="otrosNombres" class="form-label">
+            <i class="fas fa-user-circle"></i>
+            Otros Nombres
+          </label>
+          <input 
+            type="text" 
+            id="otrosNombres"
+            formControlName="otrosNombres" 
+            class="form-input" 
+            placeholder="Ingrese otros nombres (opcional)">
+        </div>
+
+        <div class="form-group">
+          <label for="primerApellido" class="form-label">
+            <i class="fas fa-user-circle"></i>
+            Primer Apellido *
+          </label>
+          <input 
+            type="text" 
+            id="primerApellido"
+            formControlName="primerApellido" 
+            class="form-input" 
+            placeholder="Ingrese el primer apellido">
+        </div>
+
+        <div class="form-group">
+          <label for="segundoApellido" class="form-label">
+            <i class="fas fa-user-circle"></i>
+            Segundo Apellido
+          </label>
+          <input 
+            type="text" 
+            id="segundoApellido"
+            formControlName="segundoApellido" 
+            class="form-input" 
+            placeholder="Ingrese el segundo apellido (opcional)">
+        </div>
+
+        <div class="form-group">
+          <label for="idRol" class="form-label">
+            <i class="fas fa-user-tag"></i>
+            Rol del Usuario *
+          </label>
+          <div class="select-wrapper">
+            <select 
+              id="idRol"
+              formControlName="idRol" 
+              class="form-select">
+              <option value="">Seleccione un rol</option>
+              <option [value]="role.id" *ngFor="let role of roles">
+                {{ role.nombre }}
+              </option>
+            </select>
+            <i class="select-icon fas fa-chevron-down"></i>
+          </div>
+        </div>
+
+        <div class="form-group form-group-full">
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="estado" class="checkbox-input">
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">
+                <strong>Estado Activo</strong>
+                <small>El usuario podrá acceder al sistema inmediatamente</small>
+              </span>
+            </label>
+          </div>
         </div>
       </div>
-    </div>
-  </form>
-</div>
+    </form>
+  </div>
+</app-confirm-modal>
 
-<!-- Modales existentes con clases mejoradas -->
 <app-confirm-modal
 [show]="showResendModal"
 title="Reenviar Activación"
@@ -469,66 +535,3 @@ confirmButtonClass="btn-danger"
 [type]="modalType"
 (close)="closeSuccessModal()">
 </app-success-modal>
-
-<!-- Modal para Usuario LDAP Mejorado -->
-<app-confirm-modal
-[show]="showCreateLdapModal"
-title="Crear Usuario LDAP"
-confirmText="Crear Usuario"
-confirmButtonClass="btn-success"
-[loading]="loading"
-(confirm)="createLdapUser()"
-(cancel)="showCreateLdapModal = false">
-
-<div class="ldap-form-container">
-  <form [formGroup]="ldapForm" class="ldap-form">
-    <div class="form-grid">
-      <div class="form-group">
-        <label for="username" class="form-label">
-          <i class="fas fa-user"></i>
-          Username
-        </label>
-        <input 
-          type="text" 
-          id="username"
-          formControlName="username" 
-          class="form-input" 
-          placeholder="Ingrese el nombre de usuario">
-        <div class="input-helper">El username debe ser único en el sistema</div>
-      </div>
-
-      <div class="form-group">
-        <label for="idRol" class="form-label">
-          <i class="fas fa-user-tag"></i>
-          Rol del Usuario
-        </label>
-        <div class="select-wrapper">
-          <select 
-            id="idRol"
-            formControlName="idRol" 
-            class="form-select">
-            <option value="">Seleccione un rol</option>
-            <option [value]="role.id" *ngFor="let role of roles">
-              {{ role.nombre }}
-            </option>
-          </select>
-          <i class="select-icon fas fa-chevron-down"></i>
-        </div>
-      </div>
-
-      <div class="form-group form-group-full">
-        <div class="checkbox-group">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="estado" class="checkbox-input">
-            <span class="checkbox-custom"></span>
-            <span class="checkbox-text">
-              <strong>Estado Activo</strong>
-              <small>El usuario podrá acceder al sistema inmediatamente</small>
-            </span>
-          </label>
-        </div>
-      </div>
-    </div>
-  </form>
-</div>
-</app-confirm-modal>

@@ -48,6 +48,7 @@ export interface User {
   ultimoLogin: string;
   fechaCreacion: string;
   estado: boolean;
+  esLdap?: boolean; // Indica si el usuario es de LDAP (basado en el dominio @mintrabajo.loc)
 }
 
 

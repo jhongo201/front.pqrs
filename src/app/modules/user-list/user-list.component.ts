@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../core/services/user.service';
+import { AreaService } from '../../core/services/area.service';
 import { User } from '../../shared/models/user.model';
 import { Router } from '@angular/router';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
@@ -8,6 +9,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { ConfirmModalComponent } from '../../shared/confirm-modal/confirm-modal.component';
 import { SuccessModalComponent } from '../../shared/success-modal/success-modal.component';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { RemoveLdapSuffixPipe } from '../../shared/pipes/remove-ldap-suffix.pipe';
 
 interface SortConfig {
   field: string;
@@ -20,7 +22,15 @@ interface SortConfig {
   styleUrls: ['./user-list.component.css'],
   encapsulation: ViewEncapsulation.None, // Agregar esta línea
   standalone: true,
-  imports: [CommonModule, PaginationComponent, FormsModule, ReactiveFormsModule, ConfirmModalComponent, SuccessModalComponent]
+  imports: [
+    CommonModule, 
+    PaginationComponent, 
+    FormsModule, 
+    ReactiveFormsModule, 
+    ConfirmModalComponent, 
+    SuccessModalComponent,
+    RemoveLdapSuffixPipe
+  ]
 })
 export class UserListComponent implements OnInit, OnDestroy {
   // Datos principales
@@ -28,6 +38,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   filteredUsers: User[] = [];
   displayedUsers: User[] = [];
   roles: { id: number; nombre: string }[] = [];
+  areas: { id: number; nombre: string }[] = [];
   
   // Estados de carga y error
   loading = false;
@@ -67,6 +78,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   constructor(
     private userService: UserService, 
+    private areaService: AreaService,
     private router: Router, 
     private fb: FormBuilder
   ) {
@@ -76,6 +88,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadUsers();
     this.loadRoles();
+    this.loadAreas();
     this.setupSearchDebounce();
   }
 
@@ -87,6 +100,11 @@ export class UserListComponent implements OnInit, OnDestroy {
   private initLdapForm(): void {
     this.ldapForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
+      primerNombre: ['', Validators.required],
+      otrosNombres: [''],
+      primerApellido: ['', Validators.required],
+      segundoApellido: [''],
+      idArea: ['', Validators.required],
       idRol: ['', Validators.required],
       estado: [true]
     });
@@ -98,6 +116,11 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   // ===== MÉTODOS DE CARGA DE DATOS =====
+  // Método para verificar si un usuario es LDAP basado en su nombre de usuario
+  private isLdapUser(username: string): boolean {
+    return username.endsWith('@mintrabajo.loc');
+  }
+
   loadUsers(): void {
     this.setLoadingState(true);
 
@@ -105,7 +128,11 @@ export class UserListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.allUsers = data;
+          // Asignar la propiedad esLdap a cada usuario basado en su nombre de usuario
+          this.allUsers = data.map(user => ({
+            ...user,
+            esLdap: this.isLdapUser(user.username)
+          }));
           this.filterUsers();
           this.setLoadingState(false);
         },
@@ -132,6 +159,25 @@ export class UserListComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.error('Error al cargar los roles', err);
           this.showErrorMessage('No se pudieron cargar los roles.');
+        }
+      });
+  }
+
+  loadAreas(): void {
+    this.areaService.listarAreas()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: any) => {
+          this.areas = data
+            .filter((area: any) => area.estado)
+            .map((area: any) => ({
+              id: area.idArea,
+              nombre: area.nombre
+            }));
+        },
+        error: (err: any) => {
+          console.error('Error al cargar las áreas', err);
+          this.showErrorMessage('No se pudieron cargar las áreas.');
         }
       });
   }
@@ -381,7 +427,12 @@ export class UserListComponent implements OnInit, OnDestroy {
     const userData = {
       username: this.ldapForm.get('username')?.value,
       idRol: this.ldapForm.get('idRol')?.value,
-      estado: this.ldapForm.get('estado')?.value
+      estado: this.ldapForm.get('estado')?.value,
+      primerNombre: this.ldapForm.get('primerNombre')?.value || '',
+      otrosNombres: this.ldapForm.get('otrosNombres')?.value || null,
+      primerApellido: this.ldapForm.get('primerApellido')?.value || '',
+      segundoApellido: this.ldapForm.get('segundoApellido')?.value || null,
+      idArea: this.ldapForm.get('idArea')?.value || null
     };
 
     this.setLoadingState(true);
