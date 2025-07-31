@@ -107,6 +107,7 @@ export class PqrsDetailComponent implements OnInit {
   
   historialAsignaciones: HistorialAsignacion[] = [];
   isHistorialExpanded = false;
+  historialError: string = ''; // Error específico para el historial
 
   // Atributos para paginación
   pageSize = 5; // Cantidad de items por página
@@ -507,11 +508,17 @@ async enviarRespuesta() {
       next: (historial) => {
         console.log('Historial recibido:', historial);
         this.historialAsignaciones = historial || [];
+        this.historialError = ''; // Limpiar error si la carga es exitosa
       },
       error: (error) => {
         console.error('Error al cargar historial:', error);
-        this.error = error.message || 'Error al cargar el historial de asignaciones';
+        // Usar variable específica para errores del historial
+        this.historialError = 'El historial de asignaciones no está disponible temporalmente';
         this.historialAsignaciones = []; // Inicializar como array vacío en caso de error
+        
+        // Log detallado para debugging en producción
+        console.warn('⚠️ Historial de asignaciones no disponible para PQRS ID:', idPqrs);
+        console.warn('⚠️ Error específico:', error.status, error.message);
       }
     });
   }

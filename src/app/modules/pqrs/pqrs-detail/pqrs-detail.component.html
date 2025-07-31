@@ -133,15 +133,21 @@
       <!-- Detalles de la Solicitud -->
       <div class="info-section">
         <h4><i class="fas fa-info-circle"></i> Detalles de la Solicitud</h4>
-        <div class="info-grid">
-          <div class="info-item">
+        
+        <!-- Fila superior: Tema y Área -->
+        <div class="info-row tema-area-row">
+          <div class="info-item tema-item">
             <label>Tema:</label>
             <span class="tema-badge">{{ pqrs.tema.nombre }}</span>
           </div>
-          <div class="info-item">
+          <div class="info-item area-item">
             <label>Área:</label>
-            <span class="area-badge">{{ pqrs.tema.area.nombre }}</span>
+            <span class="area-badge" [title]="pqrs.tema.area.nombre">{{ pqrs.tema.area.nombre }}</span>
           </div>
+        </div>
+        
+        <!-- Fila inferior: Fechas -->
+        <div class="info-row fechas-row">
           <div class="info-item">
             <label>Fecha de Creación:</label>
             <span>{{ pqrs.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
@@ -202,9 +208,10 @@
         </div>
       </div>
 
-      <!-- Información del usuario asignado -->
-      <div class="info-section historial-section" *ngIf="historialAsignaciones.length > 0">
-        <div class="accordion-header" (click)="toggleHistorial()">
+      <!-- Sección del Historial de Asignaciones -->
+      <div class="info-section historial-section" *ngIf="historialAsignaciones.length > 0 || historialError">
+        <!-- Header del historial -->
+        <div class="accordion-header" (click)="toggleHistorial()" *ngIf="historialAsignaciones.length > 0">
           <div class="header-content">
             <h4>
               <i class="fas fa-history"></i> 
@@ -215,6 +222,18 @@
           <button class="btn-toggle">
             <i class="fas" [class.fa-chevron-down]="!isHistorialExpanded" [class.fa-chevron-up]="isHistorialExpanded"></i>
           </button>
+        </div>
+        
+        <!-- Mensaje de error del historial -->
+        <div class="historial-error-message" *ngIf="historialError && historialAsignaciones.length === 0">
+          <div class="error-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div class="error-text">
+              <h4>Historial de Asignaciones</h4>
+              <p>{{ historialError }}</p>
+              <small>Los demás datos del PQRS están disponibles normalmente.</small>
+            </div>
+          </div>
         </div>
         
         <div class="accordion-content" [class.expanded]="isHistorialExpanded">
